@@ -1,4 +1,4 @@
-const CACHE_NAME = "nova-ai-v1";
+constai-v1 CACHE_NAME = "nova-ai-v2";
 
 const APP_FILES = [
   "./",
