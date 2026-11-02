@@ -1,0 +1,2267 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="theme-color" content="#080B12">
+<meta name="application-name" content="NOVA AI">
+<meta name="description" content="NOVA AI — Ton assistant intelligent.">
+<link rel="manifest" href="./manifest.json">
+<title>NOVA AI</title>
+
+<style>
+:root{
+  --bg:#080B12;
+  --panel:#101725;
+  --bubble:#151D2B;
+  --text:#FFFFFF;
+  --muted:#9AA8BA;
+  --blue:#2563EB;
+  --green:#00C950;
+  --red:#EF4444;
+  --border:#202C40;
+  --input:#111B2B;
+  --app-height:100dvh;
+}
+
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+  overflow:hidden;
+  overscroll-behavior:none;
+}
+
+button,input,textarea{font:inherit}
+button{border:0;cursor:pointer;color:inherit}
+.hidden{display:none!important}
+
+svg{
+  width:24px;
+  height:24px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  flex-shrink:0;
+}
+
+#app{
+  position:relative;
+  width:100%;
+  height:var(--app-height);
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  background:
+    radial-gradient(ellipse at 15% 15%,#14213b55,transparent 42%),
+    radial-gradient(ellipse at 90% 75%,#10284a33,transparent 45%),
+    linear-gradient(145deg,#080B12,#0B101B 55%,#080B12);
+}
+
+#splash{
+  position:absolute;
+  inset:0;
+  z-index:1000;
+  background:#080B12;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  transition:opacity .35s;
+}
+
+.logo{
+  width:68px;
+  height:68px;
+  border-radius:22px;
+  background:linear-gradient(145deg,#347BFF,#1745B8);
+  display:grid;
+  place-items:center;
+  font-size:42px;
+  font-weight:800;
+  color:white;
+  box-shadow:0 8px 30px #2563eb44;
+}
+
+.splash-name{
+  font-size:25px;
+  font-weight:800;
+  letter-spacing:1px;
+}
+
+.splash-sub{font-size:13px;color:var(--muted)}
+
+#mainHeader{
+  height:60px;
+  min-height:60px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 10px;
+  background:#080B12ee;
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(16px);
+}
+
+.header-left{display:flex;align-items:center;gap:8px}
+.header-title{font-weight:750;font-size:19px}
+.header-right{display:flex;align-items:center}
+
+.icon-btn{
+  width:44px;
+  height:44px;
+  background:transparent;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  color:var(--text);
+}
+
+.icon-btn:active{background:#ffffff15}
+
+#content{
+  flex:1;
+  min-height:0;
+  position:relative;
+  overflow:hidden;
+}
+
+.page{
+  position:absolute;
+  inset:0;
+  display:none;
+  flex-direction:column;
+  min-height:0;
+  background:transparent;
+}
+
+.page.active{display:flex}
+
+#homePage{
+  overflow-y:auto;
+  align-items:center;
+  padding:30px 20px 25px;
+}
+
+.home-spacer{flex:1;min-height:25px}
+
+.home-title{
+  font-size:23px;
+  font-weight:700;
+  text-align:center;
+  line-height:1.45;
+  margin:0 0 28px;
+}
+
+.suggestions{
+  width:100%;
+  max-width:430px;
+  display:flex;
+  flex-direction:column;
+  gap:13px;
+}
+
+.suggestion{
+  background:linear-gradient(120deg,#151F30,#111A29);
+  border:1px solid #273750;
+  border-radius:19px;
+  padding:14px 17px;
+  text-align:left;
+  font-size:15px;
+  color:var(--text);
+  min-height:48px;
+  transition:background .2s,transform .2s;
+}
+
+.suggestion:active{transform:scale(.98);background:#1B2A42}
+.home-bottom{flex:1;min-height:20px}
+
+#homeComposer{
+  width:100%;
+  max-width:430px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 0 5px;
+}
+
+#homeMessageInput{
+  flex:1;
+  min-width:0;
+  height:47px;
+  max-height:120px;
+  resize:none;
+  border:1px solid #273750;
+  outline:none;
+  border-radius:25px;
+  background:linear-gradient(120deg,#141F30,#101827);
+  color:white;
+  padding:13px 16px;
+  font-size:15px;
+  line-height:21px;
+}
+
+#homeMessageInput::placeholder{color:#91A1B8}
+
+#homeSendBtn{
+  width:47px;
+  height:47px;
+  flex-shrink:0;
+  border-radius:50%;
+  background:linear-gradient(145deg,#347BFF,#2055D4);
+  display:grid;
+  place-items:center;
+  box-shadow:0 4px 14px #2563eb44;
+}
+
+#homeSendBtn svg{width:25px;height:25px;color:#fff}
+
+#chatPage{overflow:hidden}
+
+#messages{
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  gap:19px;
+  padding:18px 13px 16px;
+  overscroll-behavior:contain;
+  scroll-behavior:smooth;
+}
+
+.message-row{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  animation:messageAppear .22s ease-out;
+}
+
+@keyframes messageAppear{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.message-row.user{align-items:flex-end}
+.message-row.ai{align-items:flex-start}
+
+.bubble{
+  max-width:88%;
+  width:max-content;
+  padding:14px 16px;
+  border-radius:19px;
+  font-size:16px;
+  line-height:1.75;
+  overflow-wrap:anywhere;
+  white-space:normal;
+  letter-spacing:.05px;
+}
+
+.user .bubble{
+  background:linear-gradient(140deg,#2F73F4,#2055D4);
+  color:#fff;
+  border-radius:19px 19px 5px 19px;
+  box-shadow:0 4px 15px #1649b522;
+}
+
+.ai .bubble{
+  background:linear-gradient(145deg,#172235,#111A29);
+  color:#F3F6FC;
+  border:1px solid #26364F;
+  border-radius:19px 19px 19px 5px;
+  box-shadow:0 4px 16px #00000018;
+}
+
+.message-line{
+  display:block;
+  min-height:1.75em;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+}
+
+.message-line.blank{height:.65em;min-height:.65em}
+
+.message-line strong{font-weight:750;color:#fff}
+.message-line em{font-style:italic}
+.message-line code{
+  background:#080D17;
+  color:#9BC2FF;
+  padding:2px 5px;
+  border-radius:5px;
+  font-family:monospace;
+  font-size:.9em;
+}
+
+.message-status{
+  font-size:11px;
+  color:var(--muted);
+  margin:5px 6px 0;
+}
+
+.message-image{
+  display:block;
+  max-width:78%;
+  max-height:360px;
+  object-fit:contain;
+  border-radius:14px;
+  background:var(--bubble);
+  border:1px solid var(--border);
+}
+
+.ai-actions{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:8px 0 0 5px;
+}
+
+.ai-actions button{
+  background:transparent;
+  color:#A8B6CC;
+  padding:5px;
+  display:grid;
+  place-items:center;
+  opacity:.95;
+}
+
+.ai-actions button:active{color:white}
+.ai-actions svg{width:19px;height:19px}
+
+.code-wrap{
+  max-width:88%;
+  width:100%;
+  background:#080D17;
+  border-radius:12px;
+  overflow:hidden;
+  margin-top:8px;
+  border:1px solid #293750;
+}
+
+.code-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:9px 12px;
+  background:#121C2C;
+  font-size:12px;
+  color:#C4D0E2;
+}
+
+.code-head button{background:transparent;color:white;font-size:12px}
+
+pre{
+  margin:0;
+  padding:14px;
+  overflow-x:auto;
+  white-space:pre;
+}
+
+pre code{
+  font-family:monospace;
+  font-size:13px;
+  color:#DCE8FA;
+}
+
+.typing-bubble{
+  background:linear-gradient(145deg,#172235,#111A29);
+  border:1px solid #26364F;
+  border-radius:18px 18px 18px 5px;
+  display:flex;
+  gap:6px;
+  padding:15px 17px;
+  width:max-content;
+}
+
+.typing-bubble span{
+  width:7px;
+  height:7px;
+  background:#A8B9D2;
+  border-radius:50%;
+  animation:bounce 1s infinite ease-in-out;
+}
+
+.typing-bubble span:nth-child(2){animation-delay:.15s}
+.typing-bubble span:nth-child(3){animation-delay:.3s}
+
+@keyframes bounce{
+  0%,60%,100%{transform:translateY(0);opacity:.5}
+  30%{transform:translateY(-5px);opacity:1}
+}
+
+#composer{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:9px 11px calc(10px + env(safe-area-inset-bottom));
+  background:#080B12f5;
+  border-top:1px solid var(--border);
+  backdrop-filter:blur(15px);
+}
+
+#composerTools{display:flex;align-items:center;gap:2px}
+#composerTools button{width:38px;height:43px}
+#composerTools svg{width:24px;height:24px}
+
+#messageInput{
+  flex:1;
+  min-width:0;
+  height:47px;
+  max-height:120px;
+  resize:none;
+  border:1px solid #273750;
+  outline:none;
+  border-radius:25px;
+  background:linear-gradient(120deg,#141F30,#101827);
+  color:white;
+  padding:13px 16px;
+  font-size:15px;
+  line-height:21px;
+}
+
+#messageInput::placeholder{color:#91A1B8}
+
+#sendBtn{
+  width:47px;
+  height:47px;
+  border-radius:50%;
+  background:linear-gradient(145deg,#347BFF,#2055D4);
+  display:grid;
+  place-items:center;
+  box-shadow:0 4px 14px #2563eb44;
+}
+
+#sendBtn svg{width:25px;height:25px;color:#fff}
+
+#settingsPage,#subPage{
+  overflow-y:auto;
+  padding-bottom:25px;
+}
+
+.page-heading{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  height:60px;
+  min-height:60px;
+  padding:0 10px;
+  border-bottom:1px solid var(--border);
+}
+
+.page-heading strong{font-size:19px}
+
+.setting-row{
+  min-height:68px;
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:15px;
+  padding:13px 17px;
+  background:transparent;
+  border-bottom:1px solid var(--border);
+  text-align:left;
+}
+
+.setting-row>svg{width:27px;height:27px}
+.setting-row .setting-label{font-size:15px;font-weight:600}
+.setting-row .setting-desc{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:4px;
+  line-height:1.5;
+}
+.setting-row .row-text{flex:1}
+
+.settings-footer{
+  text-align:center;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.6;
+  padding:25px 22px;
+}
+
+.sub-content{padding:18px}
+
+.sub-description{
+  font-size:14px;
+  line-height:1.7;
+  color:var(--muted);
+}
+
+.choice{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:17px 5px;
+  border-bottom:1px solid var(--border);
+  font-size:15px;
+}
+
+.choice input{accent-color:var(--blue);width:18px;height:18px}
+
+.theme-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:18px;
+}
+
+.theme-card{
+  min-height:92px;
+  border-radius:15px;
+  padding:12px;
+  display:flex;
+  align-items:flex-end;
+  font-size:14px;
+  font-weight:700;
+  border:2px solid transparent;
+}
+
+.theme-card.selected{border-color:white}
+.theme-neon{background:linear-gradient(135deg,#161c4c,#6d28d9,#08a7bd)}
+.theme-sun{background:linear-gradient(135deg,#f97316,#e11d48,#7c2d12)}
+.theme-sky{background:linear-gradient(135deg,#020617,#1d4ed8,#38bdf8)}
+.theme-fluid{background:linear-gradient(135deg,#0f766e,#7c3aed,#db2777)}
+.theme-stars{background:linear-gradient(135deg,#020617,#312e81,#facc15)}
+.theme-ocean{background:linear-gradient(135deg,#082f49,#0369a1,#67e8f9)}
+
+.action-button{
+  width:100%;
+  padding:15px;
+  border-radius:13px;
+  background:var(--blue);
+  color:white;
+  font-weight:700;
+  margin-top:15px;
+}
+
+.danger-button{background:var(--red)}
+
+.info-card{
+  background:var(--panel);
+  padding:18px;
+  border:1px solid var(--border);
+  border-radius:15px;
+  font-size:14px;
+  line-height:1.8;
+  color:var(--text);
+}
+
+.badge{
+  width:15px;
+  height:15px;
+  display:inline-grid;
+  place-items:center;
+  border-radius:50%;
+  background:var(--green);
+  vertical-align:middle;
+}
+
+.badge svg{width:10px;height:10px;stroke:white;stroke-width:3}
+
+#drawerOverlay,#sheetOverlay{
+  position:absolute;
+  inset:0;
+  background:#000a;
+  z-index:50;
+  display:none;
+}
+
+#drawerOverlay.show,#sheetOverlay.show{display:block}
+
+#drawer{
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  width:min(85%,340px);
+  background:#111A29;
+  padding:15px;
+  transform:translateX(-105%);
+  transition:transform .25s;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+#drawerOverlay.show #drawer{transform:translateX(0)}
+.drawer-title{font-size:20px;font-weight:700;padding:10px 5px}
+
+.drawer-search{
+  width:100%;
+  height:44px;
+  border-radius:12px;
+  background:#1A2639;
+  border:1px solid #293750;
+  padding:0 12px;
+  color:white;
+  outline:none;
+}
+
+.new-chat{
+  padding:14px;
+  background:var(--blue);
+  border-radius:12px;
+  text-align:center;
+  font-weight:700;
+}
+
+#conversationList{
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+}
+
+.conversation-item{
+  background:transparent;
+  text-align:left;
+  padding:14px 10px;
+  border-radius:10px;
+  font-size:14px;
+}
+
+.conversation-item:active{background:#ffffff15}
+
+#bottomSheet{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  background:#121C2C;
+  border:1px solid #293750;
+  border-radius:21px 21px 0 0;
+  padding:18px 16px calc(20px + env(safe-area-inset-bottom));
+  transform:translateY(110%);
+  transition:transform .25s;
+}
+
+#sheetOverlay.show #bottomSheet{transform:translateY(0)}
+
+.sheet-handle{
+  width:38px;
+  height:4px;
+  border-radius:5px;
+  background:#73839A;
+  margin:0 auto 18px;
+}
+
+.sheet-title{font-weight:700;font-size:17px;margin-bottom:12px}
+
+.sheet-action{
+  display:flex;
+  align-items:center;
+  gap:13px;
+  width:100%;
+  background:transparent;
+  padding:15px 5px;
+  text-align:left;
+  font-size:15px;
+  border-bottom:1px solid #ffffff12;
+}
+
+.sheet-action svg{width:22px;height:22px}
+
+.sheet-textarea{
+  width:100%;
+  min-height:105px;
+  resize:vertical;
+  background:#080D17;
+  border:1px solid #33445E;
+  border-radius:12px;
+  padding:12px;
+  color:white;
+  outline:none;
+}
+
+#toast{
+  position:absolute;
+  left:50%;
+  bottom:95px;
+  z-index:100;
+  transform:translate(-50%,20px);
+  opacity:0;
+  pointer-events:none;
+  background:#1B2A40;
+  border:1px solid #33445E;
+  color:white;
+  padding:11px 17px;
+  border-radius:25px;
+  font-size:13px;
+  white-space:nowrap;
+  transition:.2s;
+}
+
+#toast.show{opacity:1;transform:translate(-50%,0)}
+
+body.light{
+  --bg:#F4F6FA;
+  --panel:#FFFFFF;
+  --bubble:#E9EDF4;
+  --text:#171D29;
+  --muted:#667085;
+  --border:#D8DFEA;
+  --input:#E9EDF4;
+}
+
+body.light #app{
+  background:linear-gradient(145deg,#F4F6FA,#E9EEF7);
+}
+
+body.light #mainHeader,
+body.light #composer{background:#F4F6FAee}
+
+body.light .ai .bubble{
+  background:#E9EDF4;
+  color:#202938;
+  border-color:#D8DFEA;
+}
+
+body.light .message-line strong{color:#172033}
+body.light .user .bubble{color:white}
+body.light #messageInput{color:#171D29}
+body.light #messageInput::placeholder{color:#667085}
+body.light #homeMessageInput{color:#171D29}
+body.light #homeMessageInput::placeholder{color:#667085}
+body.light .icon-btn{color:#171D29}
+body.light .home-title{color:#171D29}
+body.light .suggestion{color:#171D29;background:#E9EDF4}
+body.light .setting-row{color:#171D29}
+body.light .settings-footer{color:#667085}
+body.light .sub-description{color:#667085}
+body.light .info-card{color:#171D29}
+body.light .choice{color:#171D29}
+body.light .setting-row .setting-desc{color:#667085}
+body.light .ai-actions button{color:#536178}
+body.light .page-heading{border-color:#D8DFEA}
+body.light #splash{background:#F4F6FA}
+body.light .splash-name{color:#171D29}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms!important;
+    transition-duration:.01ms!important;
+  }
+}
+</style>
+</head>
+
+<body>
+<div id="app">
+
+  <div id="splash">
+    <div class="logo">A</div>
+    <div class="splash-name">NOVA AI</div>
+    <div class="splash-sub">Ton assistant intelligent</div>
+  </div>
+
+  <header id="mainHeader">
+    <div class="header-left">
+      <button class="icon-btn" id="menuBtn" aria-label="Menu">
+        <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div class="header-title">NOVA AI</div>
+    </div>
+    <div class="header-right">
+      <button class="icon-btn" id="settingsBtn" aria-label="Paramètres">
+        <svg viewBox="0 0 24 24" style="width:27px;height:27px">
+          <circle cx="12" cy="5" r="1" fill="currentColor"/>
+          <circle cx="12" cy="12" r="1" fill="currentColor"/>
+          <circle cx="12" cy="19" r="1" fill="currentColor"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="content">
+
+    <section class="page active" id="homePage">
+      <div class="home-spacer"></div>
+      <h1 class="home-title">Bonjour, on discute quoi aujourd'hui ?</h1>
+      <div class="suggestions">
+        <button class="suggestion">En savoir plus sur l'AI</button>
+        <button class="suggestion">Planifier un plan d'emploi</button>
+        <button class="suggestion">Génère-moi une image 3D</button>
+        <button class="suggestion">En savoir plus sur les sortes de travails</button>
+        <button class="suggestion">Connaître l'AI et ses capacités</button>
+      </div>
+
+      <div id="homeComposer">
+        <textarea id="homeMessageInput" rows="1" placeholder="Écrivez quelque chose à NOVA AI..."></textarea>
+        <button id="homeSendBtn" aria-label="Envoyer">
+          <svg viewBox="0 0 24 24">
+            <path d="m22 2-7 20-4-9-9-4Z"/>
+            <path d="M22 2 11 13"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="home-bottom"></div>
+    </section>
+
+    <section class="page" id="chatPage">
+      <div id="messages"></div>
+
+      <div id="composer">
+        <div id="composerTools">
+          <button class="icon-btn" id="galleryBtn" aria-label="Galerie">
+            <svg viewBox="0 0 24 24">
+              <rect x="3" y="3" width="18" height="18" rx="3"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <path d="m21 15-5-5L5 21"/>
+            </svg>
+          </button>
+
+          <button class="icon-btn" id="imageBtn" aria-label="Générer une image">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 2v20M2 12h20M4.9 4.9l14.2 14.2M19.1 4.9 4.9 19.1"/>
+            </svg>
+          </button>
+        </div>
+
+        <textarea id="messageInput" rows="1" placeholder="Message à NOVA AI..."></textarea>
+
+        <button id="sendBtn" aria-label="Envoyer">
+          <svg viewBox="0 0 24 24">
+            <path d="m22 2-7 20-4-9-9-4Z"/>
+            <path d="M22 2 11 13"/>
+          </svg>
+        </button>
+      </div>
+    </section>
+
+    <section class="page" id="settingsPage">
+      <div class="page-heading">
+        <button class="icon-btn backSettings" aria-label="Retour">
+          <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <strong>Paramètre</strong>
+      </div>
+
+      <button class="setting-row" data-sub="mode">
+        <svg viewBox="0 0 24 24"><path d="M20.9 13A8.5 8.5 0 0 1 11 3.1 8.5 8.5 0 1 0 20.9 13Z"/></svg>
+        <div class="row-text">
+          <div class="setting-label">Mode clair / sombre / système</div>
+          <div class="setting-desc">Personnalise l'apparence de NOVA AI.</div>
+        </div>
+        <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+
+      <button class="setting-row" data-sub="theme">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 3a9 9 0 1 0 0 18h1.5a2 2 0 0 0 1.4-3.4 1.5 1.5 0 0 1 1.1-2.6H18a3 3 0 0 0 3-3c0-5-4-8-9-8Z"/>
+          <circle cx="7.5" cy="10" r="1"/>
+          <circle cx="11" cy="7" r="1"/>
+          <circle cx="15.5" cy="8.5" r="1"/>
+        </svg>
+        <div class="row-text">
+          <div class="setting-label">Thème</div>
+          <div class="setting-desc">Choisis les couleurs de ton application.</div>
+        </div>
+        <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+
+      <button class="setting-row" data-sub="about">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h5"/></svg>
+        <div class="row-text">
+          <div class="setting-label">
+            À propos de NOVA AI
+            <span class="badge">
+              <svg viewBox="0 0 12 12"><path d="m2 6 2.5 2.5L10 3"/></svg>
+            </span>
+          </div>
+          <div class="setting-desc">Découvre NOVA AI et ses fonctionnalités.</div>
+        </div>
+        <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+
+      <button class="setting-row" data-sub="welcome">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16v13H8l-4 4z"/><path d="M8 9h8M8 13h5"/></svg>
+        <div class="row-text">
+          <div class="setting-label">Message de bienvenue</div>
+          <div class="setting-desc">Découvre le message d'accueil de NOVA AI.</div>
+        </div>
+        <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+
+      <button class="setting-row" data-sub="clear">
+        <svg viewBox="0 0 24 24" style="color:var(--red)">
+          <path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m4 4v6m6-6v6"/>
+        </svg>
+        <div class="row-text">
+          <div class="setting-label" style="color:var(--red)">Effacer discussion</div>
+          <div class="setting-desc">Supprimer l'historique de tes conversations.</div>
+        </div>
+        <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+
+      <div class="settings-footer">
+        Nova AI comme un coach à vous tenir compagnie et donner de bons conseils
+      </div>
+    </section>
+
+    <section class="page" id="subPage">
+      <div class="page-heading">
+        <button class="icon-btn" id="subBackBtn" aria-label="Retour">
+          <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <strong id="subTitle">Paramètre</strong>
+      </div>
+      <div class="sub-content" id="subContent"></div>
+    </section>
+
+  </main>
+
+  <input type="file" id="galerieInput" accept="image/*" hidden>
+
+  <div id="drawerOverlay">
+    <div id="drawer">
+      <div class="drawer-title">NOVA AI</div>
+      <input class="drawer-search" id="searchConversations" placeholder="Rechercher une discussion...">
+      <button class="new-chat" id="newChatBtn">+ Nouvelle discussion</button>
+      <div id="conversationList"></div>
+    </div>
+  </div>
+
+  <div id="sheetOverlay">
+    <div id="bottomSheet">
+      <div class="sheet-handle"></div>
+      <div id="sheetContent"></div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+</div>
+
+<script>
+"use strict";
+
+/* CONFIGURATION SUPABASE */
+const SUPABASE_URL = "https://nqtychmsamftwiwwphis.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_yimnMzvL_cSPd5cDF0SWwg_8YxM8CSG";
+const NOVA_ENDPOINT = SUPABASE_URL + "/functions/v1/nova-ai";
+
+/* STOCKAGE */
+const STORAGE_KEY = "nova_conversations_v4";
+const SETTINGS_KEY = "nova_settings_v4";
+
+const $ = id => document.getElementById(id);
+
+let conversations = [];
+let currentConversationId = null;
+let settings = {mode:"dark",theme:"",welcome:true};
+let previousPage = "homePage";
+let toastTimer = null;
+let sending = false;
+let activeRequest = 0;
+
+function uid(){
+  return Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+}
+
+function currentConversation(){
+  return conversations.find(c=>c.id===currentConversationId);
+}
+
+function saveData(){
+  try{
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(conversations));
+    return true;
+  }catch(e){
+    showToast("Espace de stockage insuffisant");
+    return false;
+  }
+}
+
+function saveSettings(){
+  try{
+    localStorage.setItem(SETTINGS_KEY,JSON.stringify(settings));
+  }catch(e){
+    showToast("Impossible d'enregistrer les paramètres");
+  }
+}
+
+function loadData(){
+  try{
+    conversations=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");
+    settings={...settings,...JSON.parse(localStorage.getItem(SETTINGS_KEY)||"{}")};
+  }catch(e){
+    conversations=[];
+  }
+
+  if(!Array.isArray(conversations)) conversations=[];
+
+  const now=Date.now();
+
+  conversations.forEach(c=>{
+    (c.messages||[]).forEach(m=>{
+      if(m.status==="Envoi" && now-(m.timestamp||now)>=60000){
+        m.status="Message non envoyé";
+      }
+    });
+  });
+
+  if(!conversations.length){
+    createConversation(false);
+  }else{
+    currentConversationId=conversations[0].id;
+  }
+
+  saveData();
+  applySettings();
+}
+
+function createConversation(openChat=true){
+  const c={
+    id:uid(),
+    title:"Nouvelle discussion",
+    messages:[],
+    createdAt:Date.now()
+  };
+
+  conversations.unshift(c);
+  currentConversationId=c.id;
+  saveData();
+  renderConversationList();
+
+  if(openChat) showPage("chatPage");
+
+  renderMessages();
+  return c;
+}
+
+function showPage(id){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  $(id).classList.add("active");
+
+  const chat=id==="chatPage";
+  $("composer").style.display=chat?"flex":"none";
+  $("mainHeader").style.display=
+    id==="subPage"||id==="settingsPage"?"none":"flex";
+
+  if(chat) setTimeout(scrollBottom,60);
+}
+
+function openSettings(){
+  if(!navigator.onLine){
+    showToast("Connexion requise");
+    return;
+  }
+
+  previousPage=$("chatPage").classList.contains("active")
+    ?"chatPage":"homePage";
+
+  showPage("settingsPage");
+}
+
+function openSubpage(name){
+  if(!navigator.onLine){
+    showToast("Connexion requise");
+    return;
+  }
+
+  const titles={
+    mode:"Mode d'affichage",
+    theme:"Thème",
+    about:"À propos de NOVA AI",
+    welcome:"Message de bienvenue",
+    clear:"Effacer discussion"
+  };
+
+  $("subTitle").textContent=titles[name]||"Paramètre";
+  renderSubpage(name);
+  showPage("subPage");
+}
+
+function backFromSettings(){
+  showPage(previousPage);
+}
+
+function applySettings(){
+  const light=settings.mode==="light"||
+    (settings.mode==="system"&&
+    window.matchMedia("(prefers-color-scheme: light)").matches);
+
+  document.body.classList.toggle("light",light);
+  document.body.classList.remove(
+    "theme-neon","theme-sun","theme-sky",
+    "theme-fluid","theme-stars","theme-ocean"
+  );
+
+  if(settings.theme){
+    document.body.classList.add("theme-"+settings.theme);
+  }
+}
+
+function renderSubpage(name){
+  const box=$("subContent");
+
+  if(name==="mode"){
+    box.innerHTML=`
+      <p class="sub-description">Choisis l'apparence de NOVA AI.</p>
+      <label class="choice"><input type="radio" name="mode" value="dark"> Mode sombre</label>
+      <label class="choice"><input type="radio" name="mode" value="light"> Mode clair</label>
+      <label class="choice"><input type="radio" name="mode" value="system"> Mode système</label>`;
+
+    box.querySelectorAll('input[name="mode"]').forEach(r=>{
+      r.checked=settings.mode===r.value;
+      r.addEventListener("change",()=>{
+        settings.mode=r.value;
+        saveSettings();
+        applySettings();
+      });
+    });
+  }
+
+  if(name==="theme"){
+    const themes=[
+      ["neon","Néon"],
+      ["sun","Lever du soleil"],
+      ["sky","Ciel étoilé"],
+      ["fluid","Fluide"],
+      ["stars","Étoiles lumineuses"],
+      ["ocean","Océan"]
+    ];
+
+    box.innerHTML=`
+      <p class="sub-description">Choisis un thème pour personnaliser ton expérience.</p>
+      <div class="theme-grid">
+        ${themes.map(([id,label])=>
+          `<button class="theme-card theme-${id} ${settings.theme===id?"selected":""}" data-theme="${id}">${label}</button>`
+        ).join("")}
+        <button class="theme-card ${settings.theme===""?"selected":""}" data-theme="" style="background:#080B12">Thème par défaut</button>
+      </div>`;
+
+    box.querySelectorAll("[data-theme]").forEach(b=>{
+      b.addEventListener("click",()=>{
+        settings.theme=b.dataset.theme;
+        saveSettings();
+        applySettings();
+        renderSubpage("theme");
+      });
+    });
+  }
+
+  if(name==="about"){
+    box.innerHTML=`
+      <div class="info-card">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:15px">
+          <div class="logo" style="width:48px;height:48px;border-radius:15px;font-size:29px">A</div>
+          <div>
+            <strong style="font-size:19px">NOVA AI</strong><br>
+            <span style="color:var(--green);font-size:12px">Assistant intelligent</span>
+          </div>
+          <span class="badge">
+            <svg viewBox="0 0 12 12"><path d="m2 6 2.5 2.5L10 3"/></svg>
+          </span>
+        </div>
+        NOVA AI est un assistant intelligent conçu pour discuter, expliquer des sujets, aider à réfléchir, accompagner les apprentissages et générer des images. Son objectif est de proposer une expérience simple, utile et agréable.
+      </div>`;
+  }
+
+  if(name==="welcome"){
+    box.innerHTML=`
+      <div class="info-card">
+        <h3 style="margin-top:0">Bienvenue sur NOVA AI !</h3>
+        Heureux de t'accueillir dans ton espace intelligent.<br><br>
+        Tu peux poser des questions, apprendre de nouvelles choses, demander des explications, explorer des idées, préparer des projets ou imaginer des créations.<br><br>
+        NOVA AI est là pour t'accompagner avec des réponses claires et respectueuses. Tu peux commencer une discussion à tout moment en écrivant simplement ton message.<br><br>
+        Prends le temps d'explorer, de poser tes questions et de développer tes idées. Chaque conversation est une occasion d'apprendre et de progresser.
+      </div>`;
+  }
+
+  if(name==="clear"){
+    box.innerHTML=`
+      <div class="info-card">
+        <h3 style="margin-top:0">Effacer les discussions</h3>
+        Cette action supprimera l'historique des conversations enregistré sur cet appareil. Cette opération ne peut pas être annulée.
+        <button class="action-button danger-button" id="clearStart">Effacer toutes les discussions</button>
+      </div>`;
+
+    $("clearStart").addEventListener("click",confirmClear);
+  }
+}
+
+/* NAVIGATION */
+$("settingsBtn").addEventListener("click",openSettings);
+$("menuBtn").addEventListener("click",openDrawer);
+
+document.querySelectorAll(".backSettings").forEach(b=>{
+  b.addEventListener("click",backFromSettings);
+});
+
+$("subBackBtn").addEventListener("click",()=>showPage("settingsPage"));
+
+document.querySelectorAll("[data-sub]").forEach(b=>{
+  b.addEventListener("click",()=>openSubpage(b.dataset.sub));
+});
+
+function openDrawer(){
+  renderConversationList();
+  $("drawerOverlay").classList.add("show");
+}
+
+function closeDrawer(){
+  $("drawerOverlay").classList.remove("show");
+}
+
+$("drawerOverlay").addEventListener("click",e=>{
+  if(e.target===$("drawerOverlay")) closeDrawer();
+});
+
+$("newChatBtn").addEventListener("click",()=>{
+  createConversation(true);
+  closeDrawer();
+});
+
+$("searchConversations").addEventListener("input",renderConversationList);
+
+function renderConversationList(){
+  const q=($("searchConversations").value||"").toLowerCase();
+  $("conversationList").innerHTML="";
+
+  conversations.forEach(c=>{
+    const text=(c.title+" "+c.messages.map(m=>m.text||"").join(" ")).toLowerCase();
+    if(q&&!text.includes(q)) return;
+
+    const b=document.createElement("button");
+    b.className="conversation-item";
+    b.textContent=c.title||"Nouvelle discussion";
+
+    b.addEventListener("click",()=>{
+      currentConversationId=c.id;
+      closeDrawer();
+      renderMessages();
+      showPage("chatPage");
+    });
+
+    $("conversationList").appendChild(b);
+  });
+}
+
+/* ACCUEIL */
+document.querySelectorAll(".suggestion").forEach(b=>{
+  b.addEventListener("click",()=>{
+    if(!currentConversation()) createConversation(false);
+    showPage("chatPage");
+    $("messageInput").value=b.textContent;
+    sendMessage();
+  });
+});
+
+function sendHomeMessage(){
+  const homeInput=$("homeMessageInput");
+  const text=homeInput.value.trim();
+
+  if(!text||sending) return;
+
+  if(!currentConversation()) createConversation(false);
+
+  homeInput.value="";
+  homeInput.style.height="47px";
+
+  $("messageInput").value=text;
+  showPage("chatPage");
+  sendMessage();
+}
+
+$("homeSendBtn").addEventListener("click",sendHomeMessage);
+
+$("homeMessageInput").addEventListener("keydown",e=>{
+  if(e.key==="Enter"&&!e.shiftKey){
+    e.preventDefault();
+    sendHomeMessage();
+  }
+});
+
+$("homeMessageInput").addEventListener("input",()=>{
+  const el=$("homeMessageInput");
+  el.style.height="47px";
+  el.style.height=Math.min(el.scrollHeight,120)+"px";
+});
+
+/* AFFICHAGE DES MESSAGES */
+function scrollBottom(){
+  const el=$("messages");
+  el.scrollTop=el.scrollHeight;
+}
+
+function renderMessages(){
+  const c=currentConversation();
+  $("messages").innerHTML="";
+
+  if(!c) return;
+
+  c.messages.forEach(m=>renderMessage(m,false));
+  scrollBottom();
+}
+
+/* FORMATAGE SÉCURISÉ DU TEXTE */
+function cleanAIText(text){
+  return String(text||"")
+    .normalize("NFC")
+    .replace(/\u0000/g,"")
+    .replace(/[\u200B-\u200D\uFEFF]/g,"")
+    .replace(/\uFFFD/g,"");
+}
+
+function appendInlineFormatted(container,text){
+  const regex=/(\*\*[^*]+\*\*|__[^_]+__|\*[^*]+\*|_[^_]+_|`[^`]+`)/g;
+  let last=0;
+  let match;
+
+  while((match=regex.exec(text))){
+    if(match.index>last){
+      container.appendChild(document.createTextNode(text.slice(last,match.index)));
+    }
+
+    const token=match[0];
+    const el=document.createElement(
+      token.startsWith("**")||token.startsWith("__")?"strong":
+      token.startsWith("`")?"code":"em"
+    );
+
+    el.textContent=token.replace(/^(\*\*|__|\*|_|`)|(\*\*|__|\*|_|`)$/g,"");
+    container.appendChild(el);
+    last=regex.lastIndex;
+  }
+
+  if(last<text.length){
+    container.appendChild(document.createTextNode(text.slice(last)));
+  }
+}
+
+function appendFormattedLine(container,line){
+  const div=document.createElement("div");
+
+  if(!line.trim()){
+    div.className="message-line blank";
+    container.appendChild(div);
+    return;
+  }
+
+  div.className="message-line";
+
+  let text=line.trimEnd();
+
+  if(/^#{1,6}\s/.test(text)){
+    text=text.replace(/^#{1,6}\s+/,"");
+    const strong=document.createElement("strong");
+    appendInlineFormatted(strong,text);
+    div.appendChild(strong);
+  }else if(/^[-*+]\s/.test(text)){
+    div.textContent="• ";
+    appendInlineFormatted(div,text.replace(/^[-*+]\s+/,""));
+  }else if(/^\d+\.\s/.test(text)){
+    const match=text.match(/^(\d+\.)\s/);
+    div.textContent=match[1]+" ";
+    appendInlineFormatted(div,text.slice(match[0].length));
+  }else if(/^---+$/.test(text)){
+    div.textContent=" ";
+  }else{
+    appendInlineFormatted(div,text);
+  }
+
+  container.appendChild(div);
+}
+
+function splitCode(text){
+  const out=[];
+  const regex=/```([a-zA-Z0-9_-]*)\n?([\s\S]*?)```/g;
+  let last=0,match;
+
+  while((match=regex.exec(text))){
+    if(match.index>last){
+      out.push({text:text.slice(last,match.index),code:false});
+    }
+
+    out.push({text:match[2],code:true,lang:match[1]});
+    last=regex.lastIndex;
+  }
+
+  if(last<text.length){
+    out.push({text:text.slice(last),code:false});
+  }
+
+  if(!out.length) out.push({text,code:false});
+  return out;
+}
+
+function renderTextPart(container,text){
+  const lines=text.split("\n");
+  lines.forEach(line=>appendFormattedLine(container,line));
+}
+
+function renderCodePart(row,part){
+  const wrap=document.createElement("div");
+  wrap.className="code-wrap";
+
+  const head=document.createElement("div");
+  head.className="code-head";
+
+  const label=document.createElement("span");
+  label.textContent=part.lang||"Code";
+
+  const copy=document.createElement("button");
+  copy.textContent="Copier";
+  copy.addEventListener("click",()=>copyText(part.text));
+
+  head.append(label,copy);
+
+  const pre=document.createElement("pre");
+  const code=document.createElement("code");
+  code.textContent=part.text;
+
+  pre.appendChild(code);
+  wrap.append(head,pre);
+  row.appendChild(wrap);
+}
+
+function renderMessage(m,scroll=true){
+  const row=document.createElement("div");
+  row.className="message-row "+(m.role==="user"?"user":"ai");
+  row.dataset.messageId=m.id;
+
+  if(m.image){
+    const img=document.createElement("img");
+    img.className="message-image";
+    img.src=m.image;
+    img.alt="Image de la conversation";
+    row.appendChild(img);
+  }
+
+  if(m.text){
+    splitCode(m.text).forEach(part=>{
+      if(part.code){
+        renderCodePart(row,part);
+      }else if(part.text.trim()){
+        const bubble=document.createElement("div");
+        bubble.className="bubble";
+        renderTextPart(bubble,part.text);
+        row.appendChild(bubble);
+      }
+    });
+  }
+
+  if(m.role==="user"){
+    const status=document.createElement("div");
+    status.className="message-status";
+    status.textContent=m.status||"Envoyé";
+    row.appendChild(status);
+    addLongPress(row,m);
+  }else if(m.role==="assistant"&&!m.typing){
+    addAIActions(row,m);
+  }
+
+  $("messages").appendChild(row);
+
+  if(scroll) scrollBottom();
+  return row;
+}
+
+function addAIActions(row,m){
+  const actions=document.createElement("div");
+  actions.className="ai-actions";
+
+  actions.innerHTML=`
+    <button aria-label="J'aime">
+      <svg viewBox="0 0 24 24"><path d="M7 10v11H4V10h3Zm0 0 5-7c2 0 3 2 2 4l-1 3h6a2 2 0 0 1 2 2l-2 7a2 2 0 0 1-2 2H7"/></svg>
+    </button>
+    <button aria-label="Je n'aime pas">
+      <svg viewBox="0 0 24 24"><path d="M7 14V3H4v11h3Zm0 0 5 7c2 0 3-2 2-4l-1-3h6a2 2 0 0 0 2-2l-2-7a2 2 0 0 0-2-2H7"/></svg>
+    </button>
+    <button aria-label="Copier">
+      <svg viewBox="0 0 24 24"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>
+    </button>
+    <button aria-label="Partager">
+      <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.7 10.7 6.6-4.4m-6.6 7 6.6 4.4"/></svg>
+    </button>`;
+
+  const buttons=actions.querySelectorAll("button");
+
+  buttons[0].addEventListener("click",()=>showToast("Avis envoyé"));
+  buttons[1].addEventListener("click",()=>showToast("Merci pour ton retour"));
+  buttons[2].addEventListener("click",()=>copyText(m.text||""));
+  buttons[3].addEventListener("click",()=>shareText(m.text||""));
+
+  row.appendChild(actions);
+}
+
+/* IMPRESSION PROGRESSIVE DE LA RÉPONSE */
+function sleep(ms){
+  return new Promise(resolve=>setTimeout(resolve,ms));
+}
+
+async function typeAssistantMessage(text,conversationId){
+  const c=conversations.find(x=>x.id===conversationId);
+  if(!c) return null;
+
+  const clean=cleanAIText(text);
+  const m={
+    id:uid(),
+    role:"assistant",
+    text:clean,
+    timestamp:Date.now()
+  };
+
+  c.messages.push(m);
+  saveData();
+
+  if(currentConversationId!==conversationId){
+    return m;
+  }
+
+  const row=document.createElement("div");
+  row.className="message-row ai";
+  row.dataset.messageId=m.id;
+  $("messages").appendChild(row);
+
+  const parts=splitCode(clean);
+
+  for(const part of parts){
+    if(part.code){
+      renderCodePart(row,part);
+      scrollBottom();
+      await sleep(180);
+      continue;
+    }
+
+    const bubble=document.createElement("div");
+    bubble.className="bubble";
+    row.appendChild(bubble);
+
+    const lines=part.text.split("\n");
+
+    for(let i=0;i<lines.length;i++){
+      appendFormattedLine(bubble,lines[i]);
+      scrollBottom();
+
+      if(lines[i].trim()){
+        await sleep(115);
+      }else{
+        await sleep(65);
+      }
+    }
+
+    await sleep(130);
+  }
+
+  addAIActions(row,m);
+  scrollBottom();
+  saveData();
+
+  return m;
+}
+
+/* APPUI LONG SUR UN MESSAGE */
+function addLongPress(row,m){
+  let timer=null;
+
+  const start=()=>{
+    clearTimeout(timer);
+    timer=setTimeout(()=>openMessageSheet(m),3000);
+  };
+
+  const cancel=()=>clearTimeout(timer);
+
+  row.addEventListener("touchstart",start,{passive:true});
+  row.addEventListener("touchend",cancel);
+  row.addEventListener("touchmove",cancel);
+  row.addEventListener("mousedown",start);
+  row.addEventListener("mouseup",cancel);
+  row.addEventListener("mouseleave",cancel);
+  row.addEventListener("contextmenu",e=>e.preventDefault());
+}
+
+document.addEventListener("contextmenu",e=>e.preventDefault());
+
+function openMessageSheet(m){
+  showSheet(`
+    <div class="sheet-title">Message</div>
+    <button class="sheet-action" id="editMessage">
+      <svg viewBox="0 0 24 24"><path d="m15 5 4 4M4 20l4-.8L19 8a2.8 2.8 0 0 0-4-4L4 15Z"/></svg>
+      Modifier le message
+    </button>
+    <button class="sheet-action" id="copyMessage">
+      <svg viewBox="0 0 24 24"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>
+      Copier
+    </button>
+    <button class="sheet-action" id="shareMessage">
+      <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.7 10.7 6.6-4.4m-6.6 7 6.6 4.4"/></svg>
+      Partager
+    </button>`);
+
+  $("editMessage").onclick=()=>editMessage(m);
+  $("copyMessage").onclick=()=>{
+    copyText(m.text||"");
+    closeSheet();
+  };
+  $("shareMessage").onclick=()=>{
+    shareText(m.text||"");
+    closeSheet();
+  };
+}
+
+function editMessage(m){
+  showSheet(`
+    <div class="sheet-title">Modifier le message</div>
+    <textarea class="sheet-textarea" id="editText"></textarea>
+    <button class="action-button" id="saveEdit">Enregistrer</button>`);
+
+  $("editText").value=m.text||"";
+
+  $("saveEdit").onclick=()=>{
+    m.text=$("editText").value.trim();
+    saveData();
+    renderMessages();
+    closeSheet();
+    showToast("Message modifié");
+  };
+}
+
+/* FEUILLE INTERNE */
+function showSheet(html){
+  $("sheetContent").innerHTML=html;
+  $("sheetOverlay").classList.add("show");
+}
+
+function closeSheet(){
+  $("sheetOverlay").classList.remove("show");
+}
+
+$("sheetOverlay").addEventListener("click",e=>{
+  if(e.target===$("sheetOverlay")) closeSheet();
+});
+
+/* EFFACEMENT */
+function confirmClear(){
+  showSheet(`
+    <div class="sheet-title">Effacer les discussions ?</div>
+    <p class="sub-description">Toutes les conversations enregistrées sur cet appareil seront supprimées.</p>
+    <button class="action-button danger-button" id="confirmClearBtn">Confirmer la suppression</button>
+    <button class="action-button" id="cancelClearBtn" style="background:#334155">Annuler</button>`);
+
+  $("cancelClearBtn").onclick=closeSheet;
+
+  $("confirmClearBtn").onclick=()=>{
+    $("sheetContent").innerHTML=`
+      <div style="text-align:center;padding:22px">
+        <div class="sheet-title">Suppression en cours...</div>
+        <div style="height:5px;background:#334155;border-radius:5px;overflow:hidden;margin-top:20px">
+          <div id="clearProgress" style="height:100%;width:0;background:var(--blue);transition:width 3s linear"></div>
+        </div>
+      </div>`;
+
+    requestAnimationFrame(()=>{
+      $("clearProgress").style.width="100%";
+    });
+
+    setTimeout(()=>{
+      conversations=[];
+      createConversation(false);
+      saveData();
+      renderMessages();
+      renderConversationList();
+      closeSheet();
+      showPage("homePage");
+      showToast("Discussions effacées");
+    },3000);
+  };
+}
+
+/* MESSAGES UTILISATEUR */
+function addUserMessage(text,image){
+  const c=currentConversation();
+
+  const m={
+    id:uid(),
+    role:"user",
+    text:text||"",
+    image:image||null,
+    status:"Envoi",
+    timestamp:Date.now()
+  };
+
+  c.messages.push(m);
+
+  if(c.title==="Nouvelle discussion"&&text){
+    c.title=text.slice(0,35);
+  }
+
+  saveData();
+  renderMessage(m);
+  renderConversationList();
+
+  return m;
+}
+
+function addTypingIndicator(){
+  const row=document.createElement("div");
+  row.className="message-row ai";
+  row.id="typingIndicator";
+  row.innerHTML=`
+    <div class="typing-bubble">
+      <span></span><span></span><span></span>
+    </div>`;
+
+  $("messages").appendChild(row);
+  scrollBottom();
+}
+
+function removeTyping(){
+  const el=$("typingIndicator");
+  if(el) el.remove();
+}
+
+function updateUserStatus(conversationId,messageId,status){
+  const c=conversations.find(x=>x.id===conversationId);
+  const m=c?.messages.find(x=>x.id===messageId);
+
+  if(!m) return;
+
+  m.status=status;
+  saveData();
+
+  if(currentConversationId===conversationId){
+    const row=document.querySelector(
+      `[data-message-id="${messageId}"] .message-status`
+    );
+    if(row) row.textContent=status;
+  }
+}
+
+function removeUserStatus(conversationId,messageId){
+  const c=conversations.find(x=>x.id===conversationId);
+  const m=c?.messages.find(x=>x.id===messageId);
+
+  if(!m) return;
+
+  m.status="";
+  saveData();
+
+  if(currentConversationId===conversationId){
+    const status=document.querySelector(
+      `[data-message-id="${messageId}"] .message-status`
+    );
+    if(status) status.remove();
+  }
+}
+
+/* CONTEXTE ET INSTRUCTIONS DE L'IA */
+const NOVA_SYSTEM_PROMPT =
+`Tu es NOVA AI, un assistant intelligent francophone.
+
+PERSONNALITÉ ET TON ADAPTATIF :
+Adapte naturellement ton ton à ce que l'utilisateur écrit et au contexte de la conversation. Ne garde pas toujours le même ton.
+
+- Si l'utilisateur traverse un moment difficile ou exprime de la tristesse, sois doux, rassurant, patient et respectueux. Écoute sans juger.
+- Dans une discussion quotidienne, sois amical, chaleureux et naturel, comme un ami bienveillant.
+- Pour les sujets importants, les explications techniques ou les demandes professionnelles, sois sérieux, précis et organisé.
+- Lorsque le contexte s'y prête, sois drôle, léger et amusant, sans forcer les blagues.
+- Lorsque l'utilisateur apprend ou ne comprend pas quelque chose, sois pédagogue, patient et encourageant.
+- Lorsque l'utilisateur a besoin de motivation, encourage-le de manière réaliste et positive.
+- Si la situation est sensible, privilégie toujours le respect et la bienveillance plutôt que l'humour.
+- Ne prétends pas être un être humain et ne prétends pas avoir des émotions ou une vie personnelle.
+- Ne transforme pas chaque réponse en plaisanterie et n'utilise pas un ton excessivement familier lorsque le sujet est sérieux.
+- Laisse le contenu du message et les réactions de l'utilisateur guider le ton de tes réponses.
+
+RÈGLES GÉNÉRALES :
+Réponds naturellement, clairement et directement.
+Adapte la longueur de ta réponse à la question :
+- Pour une question très simple, réponds en une ou deux phrases.
+- Pour une question courte, donne une réponse concise.
+- Développe seulement lorsque la question le demande ou que c'est nécessaire.
+- Ne pose pas plusieurs questions inutiles.
+- Évite les répétitions et les longues introductions.
+- Utilise des paragraphes aérés et des listes seulement lorsqu'elles sont utiles.
+- Utilise un Markdown propre : titres, listes et gras correctement formés.
+- N'ajoute pas de caractères décoratifs, de symboles aléatoires ou de séquences illisibles.
+- N'invente pas de faits et indique clairement les incertitudes.
+- Réponds toujours dans la langue utilisée par l'utilisateur, sauf demande contraire.`;
+
+function buildApiMessages(conversation){
+  const history=conversation.messages
+    .filter(m=>(m.role==="user"||m.role==="assistant"))
+    .filter(m=>m.text&&!m.failed)
+    .slice(-24)
+    .map(m=>({
+      role:m.role==="assistant"?"assistant":"user",
+      content:m.text
+    }));
+
+  return [
+    {role:"system",content:NOVA_SYSTEM_PROMPT},
+    ...history
+  ];
+}
+
+/* API SUPABASE */
+async function callNovaAI(messages){
+  const response=await fetch(NOVA_ENDPOINT,{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "apikey":SUPABASE_ANON_KEY
+    },
+    body:JSON.stringify({
+      action:"chat",
+      messages
+    })
+  });
+
+  if(!response.ok){
+    throw new Error("request_failed");
+  }
+
+  const data=await response.json();
+
+  const result=
+    data.choices?.[0]?.message?.content||
+    data.message||
+    data.response||
+    data.text;
+
+  if(typeof result!=="string"||!result.trim()){
+    throw new Error("empty_response");
+  }
+
+  return cleanAIText(result.trim());
+}
+
+async function generateImage(prompt){
+  const response=await fetch(NOVA_ENDPOINT,{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "apikey":SUPABASE_ANON_KEY
+    },
+    body:JSON.stringify({
+      action:"image",
+      prompt,
+      width:512,
+      height:512
+    })
+  });
+
+  if(!response.ok){
+    throw new Error("image_failed");
+  }
+
+  const data=await response.json();
+  const image=data.image_url||data.image;
+
+  if(!image) throw new Error("image_empty");
+
+  return image;
+}
+
+/* ENVOI */
+async function sendMessage(){
+  if(sending) return;
+
+  const input=$("messageInput");
+  const text=input.value.trim();
+
+  if(!text) return;
+
+  if(!currentConversation()) createConversation(false);
+
+  const conversationId=currentConversationId;
+  const conversation=conversations.find(c=>c.id===conversationId);
+
+  input.value="";
+  input.style.height="47px";
+  $("composerTools").classList.remove("hidden");
+
+  const userMessage=addUserMessage(text);
+  const started=Date.now();
+  const requestId=++activeRequest;
+
+  if(!navigator.onLine){
+    setTimeout(()=>{
+      const c=conversations.find(x=>x.id===conversationId);
+      const m=c?.messages.find(x=>x.id===userMessage.id);
+
+      if(m&&m.status==="Envoi"){
+        updateUserStatus(conversationId,userMessage.id,"Message non envoyé");
+      }
+    },60000);
+
+    return;
+  }
+
+  sending=true;
+  addTypingIndicator();
+
+  try{
+    if(text.toLowerCase().startsWith("/image ")){
+      const prompt=text.slice(7).trim();
+
+      if(!prompt) throw new Error("empty_prompt");
+
+      const image=await generateImage(prompt);
+
+      removeTyping();
+
+      const c=conversations.find(x=>x.id===conversationId);
+
+      if(c){
+        const imageMessage={
+          id:uid(),
+          role:"assistant",
+          text:"Voici l'image générée.",
+          image,
+          timestamp:Date.now()
+        };
+
+        c.messages.push(imageMessage);
+        saveData();
+
+        if(currentConversationId===conversationId){
+          renderMessages();
+        }
+      }
+    }else{
+      const messages=buildApiMessages(conversation);
+      const answer=await callNovaAI(messages);
+
+      removeTyping();
+
+      await typeAssistantMessage(answer,conversationId);
+    }
+
+    const c=conversations.find(x=>x.id===conversationId);
+    const sent=c?.messages.find(x=>x.id===userMessage.id);
+
+    if(sent){
+      updateUserStatus(conversationId,userMessage.id,"Envoyé");
+
+      setTimeout(()=>{
+        removeUserStatus(conversationId,userMessage.id);
+      },900);
+    }
+
+  }catch(error){
+    removeTyping();
+
+    const elapsed=Date.now()-started;
+    const wait=Math.max(0,60000-elapsed);
+
+    setTimeout(()=>{
+      const c=conversations.find(x=>x.id===conversationId);
+      const m=c?.messages.find(x=>x.id===userMessage.id);
+
+      if(m&&m.status==="Envoi"){
+        updateUserStatus(
+          conversationId,
+          userMessage.id,
+          "Message non envoyé"
+        );
+      }
+    },wait);
+
+  }finally{
+    sending=false;
+  }
+}
+
+$("sendBtn").addEventListener("click",sendMessage);
+
+$("messageInput").addEventListener("keydown",e=>{
+  if(e.key==="Enter"&&!e.shiftKey){
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+$("messageInput").addEventListener("input",()=>{
+  const el=$("messageInput");
+  el.style.height="47px";
+  el.style.height=Math.min(el.scrollHeight,120)+"px";
+  $("composerTools").classList.toggle("hidden",el.value.length>0);
+});
+
+/* GALERIE */
+$("galleryBtn").addEventListener("click",()=>{
+  $("galerieInput").click();
+});
+
+$("galerieInput").addEventListener("change",async e=>{
+  const file=e.target.files?.[0];
+
+  if(!file) return;
+
+  if(!file.type.startsWith("image/")){
+    showToast("Choisis une image");
+    return;
+  }
+
+  try{
+    const image=await compressImage(file);
+
+    if(!currentConversation()) createConversation(false);
+
+    const m=addUserMessage("",image);
+    m.status="";
+    saveData();
+
+    renderMessages();
+
+  }catch(err){
+    showToast("Impossible de charger cette image");
+  }
+
+  e.target.value="";
+});
+
+function compressImage(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+
+    reader.onerror=reject;
+
+    reader.onload=()=>{
+      const img=new Image();
+
+      img.onerror=reject;
+
+      img.onload=()=>{
+        const max=1200;
+        const ratio=Math.min(1,max/Math.max(img.width,img.height));
+
+        const canvas=document.createElement("canvas");
+        canvas.width=Math.round(img.width*ratio);
+        canvas.height=Math.round(img.height*ratio);
+
+        const ctx=canvas.getContext("2d");
+        ctx.drawImage(img,0,0,canvas.width,canvas.height);
+
+        resolve(canvas.toDataURL("image/jpeg",.78));
+      };
+
+      img.src=reader.result;
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
+/* GÉNÉRATION D'IMAGE */
+$("imageBtn").addEventListener("click",()=>{
+  showSheet(`
+    <div class="sheet-title">Générer une image</div>
+    <p class="sub-description">Décris l'image que tu souhaites créer.</p>
+    <textarea class="sheet-textarea" id="imagePrompt" placeholder="Exemple : une ville futuriste en 3D..."></textarea>
+    <button class="action-button" id="generateImageBtn">Générer l'image</button>`);
+
+  $("generateImageBtn").onclick=()=>{
+    const prompt=$("imagePrompt").value.trim();
+
+    if(!prompt){
+      showToast("Décris ton image");
+      return;
+    }
+
+    closeSheet();
+    $("messageInput").value="/image "+prompt;
+    sendMessage();
+  };
+});
+
+/* COPIER ET PARTAGER */
+async function copyText(text){
+  try{
+    await navigator.clipboard.writeText(text);
+    showToast("Copié");
+  }catch(e){
+    const area=document.createElement("textarea");
+    area.value=text;
+    document.body.appendChild(area);
+    area.select();
+
+    try{
+      document.execCommand("copy");
+      showToast("Copié");
+    }catch(err){
+      showToast("Copie impossible");
+    }
+
+    area.remove();
+  }
+}
+
+async function shareText(text){
+  if(!text){
+    showToast("Aucun texte à partager");
+    return;
+  }
+
+  if(navigator.share){
+    try{
+      await navigator.share({text});
+    }catch(e){}
+  }else{
+    copyText(text);
+    showToast("Texte copié pour le partager");
+  }
+}
+
+/* NOTIFICATIONS */
+function showToast(message){
+  const t=$("toast");
+  t.textContent=message;
+  t.classList.add("show");
+
+  clearTimeout(toastTimer);
+
+  toastTimer=setTimeout(()=>{
+    t.classList.remove("show");
+  },2300);
+}
+
+/* MODE SYSTÈME */
+try{
+  window.matchMedia("(prefers-color-scheme: light)")
+    .addEventListener("change",()=>{
+      if(settings.mode==="system") applySettings();
+    });
+}catch(e){}
+
+/* CLAVIER ANDROID : AJUSTEMENT DE LA HAUTEUR */
+function adjustForAndroidKeyboard(){
+  const root=document.documentElement;
+  const viewport=window.visualViewport;
+
+  const updateViewport=()=>{
+    const height=viewport
+      ?viewport.height
+      :window.innerHeight;
+
+    if(height>0){
+      root.style.setProperty(
+        "--app-height",
+        Math.round(height)+"px"
+      );
+    }
+
+    if(
+      $("chatPage").classList.contains("active") &&
+      document.activeElement===$("messageInput")
+    ){
+      requestAnimationFrame(scrollBottom);
+    }
+
+    if(
+      $("homePage").classList.contains("active") &&
+      document.activeElement===$("homeMessageInput")
+    ){
+      requestAnimationFrame(()=>{
+        $("homeMessageInput").scrollIntoView({
+          block:"nearest",
+          behavior:"auto"
+        });
+      });
+    }
+  };
+
+  updateViewport();
+
+  if(viewport){
+    viewport.addEventListener("resize",updateViewport);
+    viewport.addEventListener("scroll",updateViewport);
+  }
+
+  window.addEventListener("resize",updateViewport);
+
+  window.addEventListener("orientationchange",()=>{
+    setTimeout(updateViewport,300);
+  });
+
+  document.addEventListener("focusin",e=>{
+    if(
+      e.target===$("messageInput") ||
+      e.target===$("homeMessageInput")
+    ){
+      setTimeout(updateViewport,200);
+    }
+  });
+
+  document.addEventListener("focusout",()=>{
+    setTimeout(updateViewport,200);
+  });
+}
+
+adjustForAndroidKeyboard();
+
+/* BOUTON RETOUR ANDROID : NAVIGATION INTERNE */
+function handleAppBack(){
+  if($("sheetOverlay").classList.contains("show")){
+    closeSheet();
+    return true;
+  }
+
+  if($("drawerOverlay").classList.contains("show")){
+    closeDrawer();
+    return true;
+  }
+
+  if($("subPage").classList.contains("active")){
+    showPage("settingsPage");
+    return true;
+  }
+
+  if($("settingsPage").classList.contains("active")){
+    backFromSettings();
+    return true;
+  }
+
+  if($("chatPage").classList.contains("active")){
+    showPage("homePage");
+    return true;
+  }
+
+  return false;
+}
+
+/* Une entrée d'historique permet d'intercepter le retour Android */
+history.pushState({novaAI:true},"","#nova");
+
+window.addEventListener("popstate",()=>{
+  handleAppBack();
+
+  /* Réactive le point d'entrée pour le prochain retour */
+  history.pushState({novaAI:true},"","#nova");
+});
+
+/* INITIALISATION */
+loadData();
+renderMessages();
+renderConversationList();
+showPage("homePage");
+
+setTimeout(()=>{
+  $("splash").style.opacity="0";
+  setTimeout(()=>$("splash").remove(),400);
+},3500);
+
+/* SERVICE WORKER */
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>{
+    navigator.serviceWorker.register("./sw.js").catch(()=>{});
+  });
+}
+</script>
+</body>
+  </html>
