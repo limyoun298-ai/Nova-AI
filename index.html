@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1E1E1E">
+<meta name="application-name" content="NOVA AI">
+<meta name="description" content="NOVA AI — Ton assistant intelligent.">
+<link rel="manifest" href="./manifest.json">
+<title>NOVA AI</title>
+
+<style>
+:root{
+  --bg:#1E1E1E;
+  --panel:#252525;
+  --bubble:#2D2D2D;
+  --text:#FFFFFF;
+  --muted:#A8A8A8;
+  --blue:#0084FF;
+  --green:#00C950;
+  --red:#EF4444;
+  --border:#383838;
+  --input:#2D2D2D;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{
+  margin:0;width:100%;height:100%;
+  background:var(--bg);color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+  overflow:hidden;overscroll-behavior:none;
+}
+button,input,textarea{font:inherit}
+button{border:0;cursor:pointer;color:inherit}
+#app{
+  position:relative;width:100%;height:100dvh;
+  min-height:100%;display:flex;flex-direction:column;
+  overflow:hidden;background:var(--bg);
+}
+.hidden{display:none!important}
+svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.icon-btn{
+  width:44px;height:44px;background:transparent;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:50%;color:var(--text);
+}
+.icon-btn:active,.suggestion:active,.setting-row:active{background:#ffffff12}
+#splash{
+  position:absolute;inset:0;z-index:1000;background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:14px;
+  transition:opacity .35s;
+}
+.logo{
+  width:68px;height:68px;border-radius:22px;
+  background:var(--blue);display:grid;place-items:center;
+  font-size:42px;font-weight:800;color:white;
+}
+.splash-name{font-size:25px;font-weight:800;letter-spacing:1px}
+.splash-sub{font-size:13px;color:var(--muted)}
+#mainHeader{
+  height:58px;min-height:58px;display:flex;align-items:center;
+  justify-content:space-between;padding:0 10px;
+  border-bottom:1px solid #ffffff0d;
+}
+.header-left{display:flex;align-items:center;gap:8px}
+.header-title{font-weight:700;font-size:19px}
+.header-right{display:flex;align-items:center}
+#content{
+  flex:1;min-height:0;position:relative;overflow:hidden;
+}
+.page{
+  position:absolute;inset:0;display:none;
+  flex-direction:column;min-height:0;background:var(--bg);
+}
+.page.active{display:flex}
+#homePage{overflow-y:auto;align-items:center;padding:30px 20px 25px}
+.home-spacer{flex:1;min-height:25px}
+.home-title{
+  font-size:22px;font-weight:700;text-align:center;
+  line-height:1.35;margin:0 0 26px;
+}
+.suggestions{width:100%;max-width:430px;display:flex;flex-direction:column;gap:12px}
+.suggestion{
+  background:var(--bubble);border:1px solid #383838;
+  border-radius:20px;padding:12px 16px;text-align:left;
+  font-size:14px;color:var(--text);min-height:44px;
+}
+.home-bottom{flex:1;min-height:20px}
+#chatPage{overflow:hidden}
+#messages{
+  flex:1;min-height:0;overflow-y:auto;
+  display:flex;flex-direction:column;
+  gap:13px;padding:16px 12px 12px;
+  overscroll-behavior:contain;
+  scroll-behavior:smooth;
+}
+.message-row{width:100%;display:flex;flex-direction:column}
+.message-row.user{align-items:flex-end}
+.message-row.ai{align-items:flex-start}
+.bubble{
+  max-width:75%;width:max-content;
+  padding:10px 14px;border-radius:18px;
+  font-size:15px;line-height:1.48;
+  overflow-wrap:anywhere;white-space:pre-wrap;
+}
+.user .bubble{
+  background:var(--blue);color:#fff;
+  border-radius:18px 18px 4px 18px;
+}
+.ai .bubble{
+  background:var(--bubble);color:#E9EDEF;
+  border-radius:18px 18px 18px 4px;
+}
+.message-status{
+  font-size:11px;color:var(--muted);
+  margin:4px 5px 0;
+}
+.message-image{
+  display:block;max-width:70%;max-height:360px;
+  object-fit:contain;border-radius:12px;
+  background:var(--bubble);
+}
+.ai-actions{
+  display:flex;align-items:center;gap:9px;
+  margin:5px 0 0 5px;
+}
+.ai-actions button{
+  background:transparent;color:#fff;padding:4px;
+  display:grid;place-items:center;opacity:.9;
+}
+.ai-actions svg{width:18px;height:18px}
+.code-wrap{
+  max-width:75%;background:#151515;border-radius:12px;
+  overflow:hidden;margin-top:5px;border:1px solid #444;
+}
+.code-head{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:7px 10px;background:#222;font-size:12px;color:#ccc;
+}
+.code-head button{background:transparent;color:white;font-size:12px}
+pre{margin:0;padding:12px;overflow-x:auto;white-space:pre}
+code{font-family:monospace;font-size:13px;color:#e8e8e8}
+.typing-bubble{
+  background:var(--bubble);border-radius:18px 18px 18px 4px;
+  display:flex;gap:5px;padding:13px 15px;width:max-content;
+}
+.typing-bubble span{
+  width:7px;height:7px;background:#aaa;border-radius:50%;
+  animation:bounce 1s infinite ease-in-out;
+}
+.typing-bubble span:nth-child(2){animation-delay:.15s}
+.typing-bubble span:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-5px);opacity:1}}
+#composer{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 10px calc(9px + env(safe-area-inset-bottom));
+  background:var(--bg);border-top:1px solid #ffffff0d;
+}
+#composerTools{display:flex;align-items:center;gap:3px}
+#composerTools button{width:38px;height:42px}
+#composerTools svg{width:24px;height:24px}
+#messageInput{
+  flex:1;min-width:0;height:45px;max-height:120px;
+  resize:none;border:0;outline:none;
+  border-radius:24px;background:var(--input);
+  color:var(--text);padding:12px 16px;
+  font-size:15px;line-height:21px;
+}
+#sendBtn{
+  width:45px;height:45px;border-radius:50%;
+  background:var(--blue);display:grid;place-items:center;
+}
+#sendBtn svg{width:25px;height:25px;color:#fff}
+#settingsPage,#subPage{
+  overflow-y:auto;padding-bottom:25px;
+}
+.page-heading{
+  display:flex;align-items:center;gap:12px;
+  height:58px;min-height:58px;padding:0 10px;
+  border-bottom:1px solid #ffffff10;
+}
+.page-heading strong{font-size:19px}
+.setting-row{
+  min-height:65px;width:100%;display:flex;align-items:center;
+  gap:15px;padding:12px 17px;background:transparent;
+  border-bottom:1px solid var(--border);text-align:left;
+}
+.setting-row>svg{width:27px;height:27px}
+.setting-row .setting-label{font-size:15px;font-weight:600}
+.setting-row .setting-desc{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4}
+.setting-row .row-text{flex:1}
+.settings-footer{
+  text-align:center;color:var(--muted);font-size:12px;
+  line-height:1.5;padding:25px 22px;
+}
+.sub-content{padding:18px}
+.sub-description{font-size:14px;line-height:1.6;color:var(--muted)}
+.choice{
+  display:flex;align-items:center;gap:12px;
+  padding:16px 5px;border-bottom:1px solid var(--border);
+  font-size:15px;
+}
+.choice input{accent-color:var(--blue);width:18px;height:18px}
+.theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+.theme-card{
+  min-height:92px;border-radius:15px;padding:12px;
+  display:flex;align-items:flex-end;font-size:14px;font-weight:700;
+  border:2px solid transparent;
+}
+.theme-card.selected{border-color:white}
+.theme-neon{background:linear-gradient(135deg,#161c4c,#6d28d9,#08a7bd)}
+.theme-sun{background:linear-gradient(135deg,#f97316,#e11d48,#7c2d12)}
+.theme-sky{background:linear-gradient(135deg,#020617,#1d4ed8,#38bdf8)}
+.theme-fluid{background:linear-gradient(135deg,#0f766e,#7c3aed,#db2777)}
+.theme-stars{background:linear-gradient(135deg,#020617,#312e81,#facc15)}
+.theme-ocean{background:linear-gradient(135deg,#082f49,#0369a1,#67e8f9)}
+.action-button{
+  width:100%;padding:14px;border-radius:13px;
+  background:var(--blue);color:white;font-weight:700;margin-top:15px;
+}
+.danger-button{background:var(--red)}
+.info-card{
+  background:var(--panel);padding:17px;border-radius:14px;
+  font-size:14px;line-height:1.65;color:var(--text);
+}
+.badge{
+  width:15px;height:15px;display:inline-grid;place-items:center;
+  border-radius:50%;background:var(--green);vertical-align:middle;
+}
+.badge svg{width:10px;height:10px;stroke:white;stroke-width:3}
+#drawerOverlay,#sheetOverlay{
+  position:absolute;inset:0;background:#0009;z-index:50;
+  display:none;
+}
+#drawerOverlay.show,#sheetOverlay.show{display:block}
+#drawer{
+  position:absolute;left:0;top:0;bottom:0;width:min(85%,340px);
+  background:var(--panel);padding:15px;
+  transform:translateX(-105%);transition:transform .25s;
+  display:flex;flex-direction:column;gap:12px;
+}
+#drawerOverlay.show #drawer{transform:translateX(0)}
+.drawer-title{font-size:20px;font-weight:700;padding:10px 5px}
+.drawer-search{
+  width:100%;height:43px;border-radius:12px;
+  background:var(--bubble);border:0;outline:0;
+  padding:0 12px;color:white;
+}
+.new-chat{
+  padding:13px;background:var(--blue);border-radius:12px;
+  text-align:center;font-weight:700;
+}
+#conversationList{overflow-y:auto;display:flex;flex-direction:column;gap:5px}
+.conversation-item{
+  background:transparent;text-align:left;padding:13px 10px;
+  border-radius:10px;font-size:14px;
+}
+.conversation-item:active{background:#ffffff15}
+#bottomSheet{
+  position:absolute;left:0;right:0;bottom:0;
+  background:#292929;border-radius:20px 20px 0 0;
+  padding:18px 16px calc(20px + env(safe-area-inset-bottom));
+  transform:translateY(110%);transition:transform .25s;
+}
+#sheetOverlay.show #bottomSheet{transform:translateY(0)}
+.sheet-handle{width:38px;height:4px;border-radius:5px;background:#777;margin:0 auto 18px}
+.sheet-title{font-weight:700;font-size:17px;margin-bottom:12px}
+.sheet-action{
+  display:flex;align-items:center;gap:13px;width:100%;
+  background:transparent;padding:14px 5px;text-align:left;
+  font-size:15px;border-bottom:1px solid #ffffff12;
+}
+.sheet-action svg{width:22px;height:22px}
+.sheet-textarea{
+  width:100%;min-height:105px;resize:vertical;
+  background:#1e1e1e;border:1px solid #444;border-radius:12px;
+  padding:12px;color:white;outline:none;
+}
+#toast{
+  position:absolute;left:50%;bottom:90px;z-index:100;
+  transform:translate(-50%,20px);opacity:0;pointer-events:none;
+  background:#3a3a3a;color:white;padding:11px 17px;
+  border-radius:25px;font-size:13px;white-space:nowrap;
+  transition:.2s;
+}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+body.light{
+  --bg:#F4F5F7;--panel:#FFFFFF;--bubble:#E6E8EC;
+  --text:#171717;--muted:#666;--border:#D7D9DE;--input:#E6E8EC;
+}
+body.light .ai .bubble{color:#222}
+body.light .setting-row{color:#171717}
+body.light .icon-btn{color:#171717}
+body.light #messageInput{color:#171717}
+body.light .sheet-action{color:white}
+body.light .home-title{color:#171717}
+body.light #mainHeader{border-color:#ddd}
+body.light .ai-actions button{color:#333}
+body.light .settings-footer{color:#666}
+body.light .sub-description{color:#555}
+body.light .info-card{color:#171717}
+body.light .choice{color:#171717}
+body.light .setting-row .setting-desc{color:#666}
+body.light .user .bubble{color:white}
+body.light #splash{background:var(--bg)}
+body.light .splash-name{color:var(--text)}
+body.light #composer{border-color:#ddd}
+body.light .suggestion{border-color:#ddd;color:#222}
+body.light .page-heading{border-color:#ddd}
+body.light .message-status{color:#666}
+body.light .theme-card{color:white}
+body.light #drawer{color:#171717}
+body.light .conversation-item{color:#171717}
+body.light .drawer-search{color:#171717}
+body.light .new-chat{color:white}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+
+<body>
+<div id="app">
+
+  <div id="splash">
+    <div class="logo">A</div>
+    <div class="splash-name">NOVA AI</div>
+    <div class="splash-sub">Ton assistant intelligent</div>
+  </div>
+
+  <header id="mainHeader">
+    <div class="header-left">
+      <button class="icon-btn" id="menuBtn" aria-label="Menu">
+        <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div class="header-title">NOVA AI</div>
+    </div>
+    <div class="header-right">
+      <button class="icon-btn" id="settingsBtn" aria-label="Paramètres">
+        <svg viewBox="0 0 24 24" style="width:27px;height:27px"><circle cx="12" cy="5" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="content">
+
+    <section class="page active" id="homePage">
+      <div class="home-spacer"></div>
+      <h1 class="home-title">Bonjour, on discute quoi aujourd'hui ?</h1>
+      <div class="suggestions">
+        <button class="suggestion">En savoir plus sur l'AI</button>
+        <button class="suggestion">Planifier un plan d'emploi</button>
+        <button class="suggestion">Génère-moi une image 3D</button>
+        <button class="suggestion">En savoir plus sur les sortes de travails</button>
+        <button class="suggestion">Connaître l'AI et ses capacités</button>
+      </div>
+      <div class="home-bottom"></div>
+    </section>
+
+    <section class="page" id="chatPage">
+      <div id="messages"></div>
+      <div id="composer">
+        <div id="composerTools">
+          <button class="icon-btn" id="galleryBtn" aria-label="Galerie">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+          </button>
+          <button class="icon-btn" id="imageBtn" aria-label="Générer une image">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M12 7v10M7 12h10"/></svg>
+          </button>
+        </div>
+        <textarea id="messageInput" rows="1" placeholder="Écris un message..."></textarea>
+        <button id="sendBtn" aria-label="Envoyer">
+          <svg viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <section class="page" id="settingsPage">
+      <div class="page-heading">
+        <button class="icon-btn backSettings" aria-label="Retour">
+          <svg viewBox="0 0 24 24" style="width:27px;height:27px"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <strong>Paramètre</strong>
+      </div>
+
+      <button class="setting-row" data-sub="mode">
+        <svg viewBox="0 0 24 24"><path d="M20.9 13A8.5 8.5 0 0 1 11 3.1 8.5 8.5 0 1 0 20.9 13Z"/></svg>
+        <div class="row-text"><div class="setting-label">Mode clair / sombre / système</div><div class="setting-desc">Personnalise l'apparence de NOVA AI.</div></div>
+        <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+
+      <button class="setting-row" data-sub="theme">
+        <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18h1.5a2 2 0 0 0 1.4-3.4 1.5 1.5 0 0 1 1.1-2.6H18a3 3 0 0 0 3-3c0-5-4-8-9-8Z"/><circle cx="7.5" cy="10" r="1"/><circle cx="11" cy="7" r="1"/><circle cx="15.5" cy="8.5" r="1"/></svg>
+        <div class="row-text"><div class="setting-label">Thème</div><div class="setting-desc">Choisis les couleurs de ton application.</div></div>
+        <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+
+      <button class="setting-row" data-sub="about">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h5"/></svg>
+        <div class="row-text">
+          <div class="setting-label">À propos de NOVA AI <span class="badge"><svg viewBox="0 0 12 12"><path d="m2 6 2.5 2.5L10 3"/></svg></span></div>
+          <div class="setting-desc">Découvre NOVA AI et ses fonctionnalités.</div>
+        </div>
+        <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+
+      <button class="setting-row" data-sub="welcome">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16v13H8l-4 4z"/><path d="M8 9h8M8 13h5"/></svg>
+        <div class="row-text"><div class="setting-label">Message de bienvenue</div><div class="setting-desc">Découvre le message d'accueil de NOVA AI.</div></div>
+        <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+
+      <button class="setting-row" data-sub="clear">
+        <svg viewBox="0 0 24 24" style="color:var(--red)"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m4 4v6m6-6v6"/></svg>
+        <div class="row-text"><div class="setting-label" style="color:var(--red)">Effacer discussion</div><div class="setting-desc">Supprimer l'historique de tes conversations.</div></div>
+        <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+
+      <div class="settings-footer">Nova AI comme un coach à vous tenir compagnie et donner de bons conseils</div>
+    </section>
+
+    <section class="page" id="subPage">
+      <div class="page-heading">
+        <button class="icon-btn" id="subBackBtn" aria-label="Retour">
+          <svg viewBox="0 0 24 24" style="width:27px;height:27px"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <strong id="subTitle">Paramètre</strong>
+      </div>
+      <div class="sub-content" id="subContent"></div>
+    </section>
+
+  </main>
+
+  <input type="file" id="galerieInput" accept="image/*" hidden>
+
+  <div id="drawerOverlay">
+    <div id="drawer">
+      <div class="drawer-title">NOVA AI</div>
+      <input class="drawer-search" id="searchConversations" placeholder="Rechercher une discussion...">
+      <button class="new-chat" id="newChatBtn">+ Nouvelle discussion</button>
+      <div id="conversationList"></div>
+    </div>
+  </div>
+
+  <div id="sheetOverlay">
+    <div id="bottomSheet">
+      <div class="sheet-handle"></div>
+      <div id="sheetContent"></div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+</div>
+
+<script>
+"use strict";
+
+/* CONFIGURATION SUPABASE */
+const SUPABASE_URL = "https://nqtychmsamftwiwwphis.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_yimnMzvL_cSPd5cDF0SWwg_8YxM8CSG";
+const NOVA_ENDPOINT = SUPABASE_URL + "/functions/v1/nova-ai";
+
+/* STOCKAGE LOCAL */
+const STORAGE_KEY = "nova_conversations_v4";
+const SETTINGS_KEY = "nova_settings_v4";
+
+const $ = id => document.getElementById(id);
+
+let conversations = [];
+let currentConversationId = null;
+let settings = {mode:"dark",theme:"",welcome:true};
+let activeSubpage = "";
+let sheetCallback = null;
+let toastTimer = null;
+let sending = false;
+let typingElement = null;
+
+function uid(){
+  return Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+}
+
+function currentConversation(){
+  return conversations.find(c => c.id === currentConversationId);
+}
+
+function saveData(){
+  try{
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(conversations));
+    return true;
+  }catch(e){
+    showToast("Espace de stockage insuffisant");
+    return false;
+  }
+}
+
+function saveSettings(){
+  try{
+    localStorage.setItem(SETTINGS_KEY,JSON.stringify(settings));
+  }catch(e){
+    showToast("Impossible d'enregistrer les paramètres");
+  }
+}
+
+function loadData(){
+  try{
+    conversations = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    settings = {...settings,...JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}")};
+  }catch(e){
+    conversations = [];
+  }
+
+  if(!Array.isArray(conversations)) conversations = [];
+
+  /* Récupération des messages restés en attente après fermeture */
+  const now = Date.now();
+  conversations.forEach(c=>{
+    (c.messages || []).forEach(m=>{
+      if(m.status === "Envoi" && now - (m.timestamp || now) >= 60000){
+        m.status = "Message non envoyé";
+      }
+    });
+  });
+
+  if(!conversations.length){
+    createConversation(false);
+  }else{
+    currentConversationId = conversations[0].id;
+  }
+
+  saveData();
+  applySettings();
+}
+
+function createConversation(openChat=true){
+  const c = {id:uid(),title:"Nouvelle discussion",messages:[],createdAt:Date.now()};
+  conversations.unshift(c);
+  currentConversationId = c.id;
+  saveData();
+  renderConversationList();
+  if(openChat) showPage("chatPage");
+  renderMessages();
+  return c;
+}
+
+function showPage(id){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  $(id).classList.add("active");
+  const chat = id === "chatPage";
+  $("composer").style.display = chat ? "flex" : "none";
+  $("mainHeader").style.display = id === "subPage" || id === "settingsPage" ? "none" : "flex";
+  if(chat) setTimeout(scrollBottom,60);
+}
+
+function openSettings(){
+  if(!navigator.onLine){showToast("Connexion requise");return;}
+  showPage("settingsPage");
+}
+
+function openSubpage(name){
+  if(!navigator.onLine){showToast("Connexion requise");return;}
+  activeSubpage = name;
+  const titles = {
+    mode:"Mode d'affichage",theme:"Thème",
+    about:"À propos de NOVA AI",
+    welcome:"Message de bienvenue",
+    clear:"Effacer discussion"
+  };
+  $("subTitle").textContent = titles[name] || "Paramètre";
+  renderSubpage(name);
+  showPage("subPage");
+}
+
+function backFromSub(){
+  showPage("settingsPage");
+}
+
+function applySettings(){
+  const light = settings.mode === "light" ||
+    (settings.mode === "system" && window.matchMedia("(prefers-color-scheme: light)").matches);
+  document.body.classList.toggle("light",light);
+  document.body.classList.remove("theme-neon","theme-sun","theme-sky","theme-fluid","theme-stars","theme-ocean");
+  if(settings.theme){
+    document.body.classList.add("theme-" + settings.theme);
+  }
+}
+
+function renderSubpage(name){
+  const box = $("subContent");
+
+  if(name === "mode"){
+    box.innerHTML = `
+      <p class="sub-description">Choisis l'apparence de NOVA AI.</p>
+      <label class="choice"><input type="radio" name="mode" value="dark"> Mode sombre</label>
+      <label class="choice"><input type="radio" name="mode" value="light"> Mode clair</label>
+      <label class="choice"><input type="radio" name="mode" value="system"> Mode système</label>`;
+    box.querySelectorAll('input[name="mode"]').forEach(r=>{
+      r.checked = settings.mode === r.value;
+      r.addEventListener("change",()=>{
+        settings.mode = r.value;saveSettings();applySettings();
+      });
+    });
+  }
+
+  if(name === "theme"){
+    const themes = [
+      ["neon","Néon"],["sun","Lever du soleil"],
+      ["sky","Ciel étoilé"],["fluid","Fluide"],
+      ["stars","Étoiles lumineuses"],["ocean","Océan"]
+    ];
+    box.innerHTML = `<p class="sub-description">Choisis un thème pour personnaliser ton expérience.</p>
+      <div class="theme-grid">${themes.map(([id,label])=>
+        `<button class="theme-card theme-${id} ${settings.theme===id?"selected":""}" data-theme="${id}">${label}</button>`
+      ).join("")}
+      <button class="theme-card" data-theme="" style="background:#333">Thème par défaut</button>
+      </div>`;
+    box.querySelectorAll("[data-theme]").forEach(b=>{
+      b.addEventListener("click",()=>{
+        settings.theme = b.dataset.theme;
+        saveSettings();applySettings();renderSubpage("theme");
+      });
+    });
+  }
+
+  if(name === "about"){
+    box.innerHTML = `
+      <div class="info-card">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:15px">
+          <div class="logo" style="width:48px;height:48px;border-radius:15px;font-size:29px">A</div>
+          <div><strong style="font-size:19px">NOVA AI</strong><br>
+          <span style="color:var(--green);font-size:12px">Assistant intelligent</span></div>
+          <span class="badge"><svg viewBox="0 0 12 12"><path d="m2 6 2.5 2.5L10 3"/></svg></span>
+        </div>
+        NOVA AI est un assistant intelligent conçu pour discuter, expliquer des sujets, aider à réfléchir, accompagner les apprentissages et générer des images. Son objectif est de proposer une expérience simple, utile et agréable.
+      </div>`;
+  }
+
+  if(name === "welcome"){
+    box.innerHTML = `
+      <div class="info-card">
+        <h3 style="margin-top:0">Bienvenue sur NOVA AI !</h3>
+        Heureux de t'accueillir dans ton espace intelligent.<br><br>
+        Tu peux poser des questions, apprendre de nouvelles choses, demander des explications, explorer des idées, préparer des projets ou imaginer des créations.<br><br>
+        NOVA AI est là pour t'accompagner avec des réponses claires et respectueuses. Tu peux commencer une discussion à tout moment en écrivant simplement ton message.<br><br>
+        Prends le temps d'explorer, de poser tes questions et de développer tes idées. Chaque conversation est une occasion d'apprendre et de progresser.
+      </div>`;
+  }
+
+  if(name === "clear"){
+    box.innerHTML = `
+      <div class="info-card">
+        <h3 style="margin-top:0">Effacer les discussions</h3>
+        Cette action supprimera l'historique des conversations enregistré sur cet appareil. Cette opération ne peut pas être annulée.
+        <button class="action-button danger-button" id="clearStart">Effacer toutes les discussions</button>
+      </div>`;
+    $("clearStart").addEventListener("click",confirmClear);
+  }
+}
+
+/* NAVIGATION ET MENU */
+$("settingsBtn").addEventListener("click",openSettings);
+$("menuBtn").addEventListener("click",()=>openDrawer());
+document.querySelectorAll(".backSettings").forEach(b=>b.addEventListener("click",()=>showPage("homePage")));
+$("subBackBtn").addEventListener("click",backFromSub);
+
+document.querySelectorAll("[data-sub]").forEach(b=>{
+  b.addEventListener("click",()=>openSubpage(b.dataset.sub));
+});
+
+function openDrawer(){
+  renderConversationList();
+  $("drawerOverlay").classList.add("show");
+}
+function closeDrawer(){$("drawerOverlay").classList.remove("show")}
+$("drawerOverlay").addEventListener("click",e=>{
+  if(e.target === $("drawerOverlay")) closeDrawer();
+});
+$("newChatBtn").addEventListener("click",()=>{
+  createConversation(true);closeDrawer();
+});
+$("searchConversations").addEventListener("input",renderConversationList);
+
+function renderConversationList(){
+  const q = ($("searchConversations").value || "").toLowerCase();
+  $("conversationList").innerHTML = "";
+  conversations.forEach(c=>{
+    const text = (c.title + " " + c.messages.map(m=>m.text || "").join(" ")).toLowerCase();
+    if(q && !text.includes(q)) return;
+    const b = document.createElement("button");
+    b.className = "conversation-item";
+    b.textContent = c.title || "Nouvelle discussion";
+    b.addEventListener("click",()=>{
+      currentConversationId = c.id;
+      closeDrawer();renderMessages();showPage("chatPage");
+    });
+    $("conversationList").appendChild(b);
+  });
+}
+
+/* ACCUEIL */
+document.querySelectorAll(".suggestion").forEach(b=>{
+  b.addEventListener("click",()=>{
+    if(!currentConversation()) createConversation(false);
+    showPage("chatPage");
+    $("messageInput").value = b.textContent;
+    sendMessage();
+  });
+});
+
+/* MESSAGES */
+function scrollBottom(){
+  const el = $("messages");
+  el.scrollTop = el.scrollHeight;
+}
+
+function renderMessages(){
+  const c = currentConversation();
+  $("messages").innerHTML = "";
+  if(!c) return;
+  c.messages.forEach(m=>renderMessage(m,false));
+  scrollBottom();
+}
+
+function renderMessage(m,scroll=true){
+  const row = document.createElement("div");
+  row.className = "message-row " + (m.role === "user" ? "user" : "ai");
+  row.dataset.messageId = m.id;
+
+  if(m.image){
+    const img = document.createElement("img");
+    img.className = "message-image";
+    img.src = m.image;
+    img.alt = "Image de la conversation";
+    row.appendChild(img);
+  }
+
+  if(m.text){
+    const parts = splitCode(m.text);
+    parts.forEach(part=>{
+      if(part.code){
+        const wrap = document.createElement("div");
+        wrap.className = "code-wrap";
+        const head = document.createElement("div");
+        head.className = "code-head";
+        const label = document.createElement("span");
+        label.textContent = part.lang || "Code";
+        const copy = document.createElement("button");
+        copy.textContent = "Copier";
+        copy.addEventListener("click",()=>copyText(part.text));
+        head.append(label,copy);
+        const pre = document.createElement("pre");
+        const code = document.createElement("code");
+        code.textContent = part.text;
+        pre.appendChild(code);wrap.append(head,pre);row.appendChild(wrap);
+      }else if(part.text.trim()){
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+        bubble.textContent = part.text;
+        row.appendChild(bubble);
+      }
+    });
+  }
+
+  if(m.role === "user"){
+    const status = document.createElement("div");
+    status.className = "message-status";
+    status.textContent = m.status || "Envoyé";
+    row.appendChild(status);
+    addLongPress(row,m);
+  }else if(m.role === "assistant" && !m.typing){
+    const actions = document.createElement("div");
+    actions.className = "ai-actions";
+    actions.innerHTML = `
+      <button aria-label="J'aime"><svg viewBox="0 0 24 24"><path d="M7 10v11H4V10h3Zm0 0 5-7c2 0 3 2 2 4l-1 3h6a2 2 0 0 1 2 2l-2 7a2 2 0 0 1-2 2H7"/></svg></button>
+      <button aria-label="Je n'aime pas"><svg viewBox="0 0 24 24"><path d="M7 14V3H4v11h3Zm0 0 5 7c2 0 3-2 2-4l-1-3h6a2 2 0 0 0 2-2l-2-7a2 2 0 0 0-2-2H7"/></svg></button>
+      <button aria-label="Copier"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg></button>
+      <button aria-label="Partager"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.7 10.7 6.6-4.4m-6.6 7 6.6 4.4"/></svg></button>`;
+    const buttons = actions.querySelectorAll("button");
+    buttons[0].addEventListener("click",()=>showToast("Avis envoyé"));
+    buttons[1].addEventListener("click",()=>showToast("Merci pour ton retour"));
+    buttons[2].addEventListener("click",()=>copyText(m.text || ""));
+    buttons[3].addEventListener("click",()=>shareText(m.text || ""));
+    row.appendChild(actions);
+  }
+
+  $("messages").appendChild(row);
+  if(scroll) scrollBottom();
+}
+
+function splitCode(text){
+  const out=[];
+  const regex=/```([a-zA-Z0-9_-]*)\n?([\s\S]*?)```/g;
+  let last=0,match;
+  while((match=regex.exec(text))){
+    if(match.index>last) out.push({text:text.slice(last,match.index),code:false});
+    out.push({text:match[2],code:true,lang:match[1]});
+    last=regex.lastIndex;
+  }
+  if(last<text.length) out.push({text:text.slice(last),code:false});
+  if(!out.length) out.push({text,code:false});
+  return out;
+}
+
+function addLongPress(row,m){
+  let timer=null,triggered=false;
+  const start=()=>{
+    triggered=false;
+    timer=setTimeout(()=>{
+      triggered=true;
+      openMessageSheet(m);
+    },3000);
+  };
+  const cancel=()=>{clearTimeout(timer)};
+  row.addEventListener("touchstart",start,{passive:true});
+  row.addEventListener("touchend",cancel);
+  row.addEventListener("touchmove",cancel);
+  row.addEventListener("mousedown",start);
+  row.addEventListener("mouseup",cancel);
+  row.addEventListener("mouseleave",cancel);
+  row.addEventListener("contextmenu",e=>e.preventDefault());
+}
+
+document.addEventListener("contextmenu",e=>e.preventDefault());
+
+function openMessageSheet(m){
+  showSheet(`
+    <div class="sheet-title">Message</div>
+    <button class="sheet-action" id="editMessage">
+      <svg viewBox="0 0 24 24"><path d="m15 5 4 4M4 20l4-.8L19 8a2.8 2.8 0 0 0-4-4L4 15Z"/></svg>Modifier le message
+    </button>
+    <button class="sheet-action" id="copyMessage">
+      <svg viewBox="0 0 24 24"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>Copier
+    </button>
+    <button class="sheet-action" id="shareMessage">
+      <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.7 10.7 6.6-4.4m-6.6 7 6.6 4.4"/></svg>Partager
+    </button>`);
+  $("editMessage").onclick=()=>editMessage(m);
+  $("copyMessage").onclick=()=>{copyText(m.text || "");closeSheet()};
+  $("shareMessage").onclick=()=>{shareText(m.text || "");closeSheet()};
+}
+
+function editMessage(m){
+  showSheet(`
+    <div class="sheet-title">Modifier le message</div>
+    <textarea class="sheet-textarea" id="editText"></textarea>
+    <button class="action-button" id="saveEdit">Enregistrer</button>`);
+  $("editText").value=m.text || "";
+  $("saveEdit").onclick=()=>{
+    m.text=$("editText").value.trim();
+    saveData();renderMessages();closeSheet();
+    showToast("Message modifié");
+  };
+}
+
+/* FEUILLE INTERNE */
+function showSheet(html){
+  $("sheetContent").innerHTML=html;
+  $("sheetOverlay").classList.add("show");
+}
+function closeSheet(){
+  $("sheetOverlay").classList.remove("show");
+  sheetCallback=null;
+}
+$("sheetOverlay").addEventListener("click",e=>{
+  if(e.target === $("sheetOverlay")) closeSheet();
+});
+
+/* EFFACEMENT AVEC CONFIRMATION INTERNE */
+function confirmClear(){
+  showSheet(`
+    <div class="sheet-title">Effacer les discussions ?</div>
+    <p class="sub-description">Toutes les conversations enregistrées sur cet appareil seront supprimées.</p>
+    <button class="action-button danger-button" id="confirmClearBtn">Confirmer la suppression</button>
+    <button class="action-button" id="cancelClearBtn" style="background:#444">Annuler</button>`);
+  $("cancelClearBtn").onclick=closeSheet;
+  $("confirmClearBtn").onclick=()=>{
+    $("sheetContent").innerHTML=`
+      <div style="text-align:center;padding:22px">
+        <div class="sheet-title">Suppression en cours...</div>
+        <div style="height:5px;background:#444;border-radius:5px;overflow:hidden;margin-top:20px">
+          <div id="clearProgress" style="height:100%;width:0;background:var(--blue);transition:width 3s linear"></div>
+        </div>
+      </div>`;
+    requestAnimationFrame(()=>$("clearProgress").style.width="100%");
+    setTimeout(()=>{
+      conversations=[];
+      createConversation(false);
+      saveData();renderMessages();renderConversationList();
+      closeSheet();showPage("homePage");
+      showToast("Discussions effacées");
+    },3000);
+  };
+}
+
+/* ENVOI DE MESSAGE */
+function addUserMessage(text,image){
+  const c=currentConversation();
+  const m={id:uid(),role:"user",text:text || "",image:image || null,status:"Envoi",timestamp:Date.now()};
+  c.messages.push(m);
+  if(c.title==="Nouvelle discussion" && text){
+    c.title=text.slice(0,35);
+  }
+  saveData();renderMessage(m);
+  renderConversationList();
+  return m;
+}
+
+function addAIMessage(text,conversationId){
+  const c=conversations.find(x=>x.id===conversationId);
+  if(!c) return null;
+  const m={id:uid(),role:"assistant",text:text || "",timestamp:Date.now()};
+  c.messages.push(m);saveData();
+  return m;
+}
+
+function updateUserStatus(messageId,status){
+  const c=currentConversation();
+  if(!c) return;
+  const m=c.messages.find(x=>x.id===messageId);
+  if(!m) return;
+  m.status=status;saveData();
+  const row=document.querySelector(`[data-message-id="${messageId}"] .message-status`);
+  if(row) row.textContent=status;
+}
+
+function showTyping(){
+  removeTyping();
+  typingElement=document.createElement("div");
+  typingElement.className="message-row ai";
+  typingElement.id="typingIndicator";
+  typingElement.innerHTML='<div class="typing-bubble"><span></span><span></span><span></span></div>';
+  $("messages").appendChild(typingElement);
+  scrollBottom();
+}
+function removeTyping(){
+  const el=$("typingIndicator");
+  if(el) el.remove();
+  typingElement=null;
+}
+
+function buildApiMessages(conversation){
+  return conversation.messages
+    .filter(m=>m.role==="user" || m.role==="assistant")
+    .filter(m=>m.text && !m.failed)
+    .slice(-24)
+    .map(m=>({role:m.role==="assistant"?"assistant":"user",content:m.text}));
+}
+
+async function callNovaAI(messages){
+  const response=await fetch(NOVA_ENDPOINT,{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "apikey":SUPABASE_ANON_KEY
+    },
+    body:JSON.stringify({action:"chat",messages})
+  });
+  if(!response.ok) throw new Error("request_failed");
+  const data=await response.json();
+  const result=data.choices?.[0]?.message?.content ||
+    data.message || data.response || data.text;
+  if(typeof result!=="string" || !result.trim()) throw new Error("empty_response");
+  return result.trim();
+}
+
+async function generateImage(prompt){
+  const response=await fetch(NOVA_ENDPOINT,{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "apikey":SUPABASE_ANON_KEY
+    },
+    body:JSON.stringify({action:"image",prompt,width:512,height:512})
+  });
+  if(!response.ok) throw new Error("image_failed");
+  const data=await response.json();
+  const image=data.image_url || data.image;
+  if(!image) throw new Error("image_empty");
+  return image;
+}
+
+async function sendMessage(){
+  if(sending) return;
+  const input=$("messageInput");
+  const text=input.value.trim();
+  if(!text) return;
+
+  if(!currentConversation()) createConversation(false);
+  const conversationId=currentConversationId;
+  const conversation=conversations.find(c=>c.id===conversationId);
+  input.value="";input.style.height="45px";
+  $("composerTools").classList.remove("hidden");
+
+  const userMessage=addUserMessage(text);
+  const started=Date.now();
+
+  if(!navigator.onLine){
+    setTimeout(()=>{
+      const c=conversations.find(x=>x.id===conversationId);
+      const m=c?.messages.find(x=>x.id===userMessage.id);
+      if(m && m.status==="Envoi"){
+        m.status="Message non envoyé";saveData();
+        const row=document.querySelector(`[data-message-id="${m.id}"] .message-status`);
+        if(row) row.textContent=m.status;
+      }
+    },60000);
+    return;
+  }
+
+  sending=true;
+  showTyping();
+
+  try{
+    if(text.toLowerCase().startsWith("/image ")){
+      const prompt=text.slice(7).trim();
+      if(!prompt) throw new Error("empty_prompt");
+      const image=await generateImage(prompt);
+      removeTyping();
+      const c=conversations.find(x=>x.id===conversationId);
+      if(c){
+        c.messages.push({id:uid(),role:"assistant",text:"Voici l'image générée.",image,timestamp:Date.now()});
+        saveData();
+        if(currentConversationId===conversationId) renderMessages();
+      }
+    }else{
+      const answer=await callNovaAI(buildApiMessages(conversation));
+      removeTyping();
+      const aiMessage=addAIMessage("",conversationId);
+      if(aiMessage){
+        aiMessage.text=answer;
+        saveData();
+        if(currentConversationId===conversationId){
+          renderMessages();
+        }
+      }
+    }
+
+    const c=conversations.find(x=>x.id===conversationId);
+    const sent=c?.messages.find(x=>x.id===userMessage.id);
+    if(sent){
+      sent.status="Envoyé";saveData();
+      if(currentConversationId===conversationId){
+        const status=document.querySelector(`[data-message-id="${sent.id}"] .message-status`);
+        if(status) status.textContent="Envoyé";
+      }
+    }
+  }catch(error){
+    removeTyping();
+    const elapsed=Date.now()-started;
+    const wait=Math.max(0,60000-elapsed);
+    setTimeout(()=>{
+      const c=conversations.find(x=>x.id===conversationId);
+      const m=c?.messages.find(x=>x.id===userMessage.id);
+      if(m && m.status==="Envoi"){
+        m.status="Message non envoyé";saveData();
+        if(currentConversationId===conversationId){
+          const status=document.querySelector(`[data-message-id="${m.id}"] .message-status`);
+          if(status) status.textContent=m.status;
+        }
+      }
+    },wait);
+  }finally{
+    sending=false;
+  }
+}
+
+$("sendBtn").addEventListener("click",sendMessage);
+$("messageInput").addEventListener("keydown",e=>{
+  if(e.key==="Enter" && !e.shiftKey){
+    e.preventDefault();sendMessage();
+  }
+});
+$("messageInput").addEventListener("input",()=>{
+  const el=$("messageInput");
+  el.style.height="45px";
+  el.style.height=Math.min(el.scrollHeight,120)+"px";
+  $("composerTools").classList.toggle("hidden",el.value.length>0);
+});
+
+/* GALERIE */
+$("galleryBtn").addEventListener("click",()=>$("galerieInput").click());
+$("galerieInput").addEventListener("change",async e=>{
+  const file=e.target.files?.[0];
+  if(!file) return;
+  if(!file.type.startsWith("image/")){
+    showToast("Choisis une image");return;
+  }
+  try{
+    const image=await compressImage(file);
+    if(!currentConversation()) createConversation(false);
+    const m=addUserMessage("",image);
+    m.status="Envoyé";saveData();
+    renderMessages();
+  }catch(err){
+    showToast("Impossible de charger cette image");
+  }
+  e.target.value="";
+});
+
+function compressImage(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onerror=reject;
+    reader.onload=()=>{
+      const img=new Image();
+      img.onerror=reject;
+      img.onload=()=>{
+        const max=1200;
+        const ratio=Math.min(1,max/Math.max(img.width,img.height));
+        const canvas=document.createElement("canvas");
+        canvas.width=Math.round(img.width*ratio);
+        canvas.height=Math.round(img.height*ratio);
+        const ctx=canvas.getContext("2d");
+        ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        resolve(canvas.toDataURL("image/jpeg",.78));
+      };
+      img.src=reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+/* GENERATION D'IMAGE AVEC FEUILLE INTERNE */
+$("imageBtn").addEventListener("click",()=>{
+  showSheet(`
+    <div class="sheet-title">Générer une image</div>
+    <p class="sub-description">Décris l'image que tu souhaites créer.</p>
+    <textarea class="sheet-textarea" id="imagePrompt" placeholder="Exemple : une ville futuriste en 3D..."></textarea>
+    <button class="action-button" id="generateImageBtn">Générer l'image</button>`);
+  $("generateImageBtn").onclick=()=>{
+    const prompt=$("imagePrompt").value.trim();
+    if(!prompt){showToast("Décris ton image");return;}
+    closeSheet();
+    $("messageInput").value="/image "+prompt;
+    sendMessage();
+  };
+});
+
+/* COPIER ET PARTAGER */
+async function copyText(text){
+  try{
+    await navigator.clipboard.writeText(text);
+    showToast("Copié");
+  }catch(e){
+    const area=document.createElement("textarea");
+    area.value=text;document.body.appendChild(area);
+    area.select();
+    try{document.execCommand("copy");showToast("Copié")}
+    catch(err){showToast("Copie impossible")}
+    area.remove();
+  }
+}
+
+async function shareText(text){
+  if(!text){showToast("Aucun texte à partager");return}
+  if(navigator.share){
+    try{await navigator.share({text})}
+    catch(e){}
+  }else{
+    copyText(text);
+    showToast("Texte copié pour le partager");
+  }
+}
+
+/* NOTIFICATIONS INTERNES */
+function showToast(message){
+  const t=$("toast");
+  t.textContent=message;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove("show"),2300);
+}
+
+/* MODE SYSTÈME */
+try{
+  window.matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{
+    if(settings.mode==="system") applySettings();
+  });
+}catch(e){}
+
+/* INITIALISATION */
+loadData();
+renderMessages();
+renderConversationList();
+showPage("homePage");
+
+setTimeout(()=>{
+  $("splash").style.opacity="0";
+  setTimeout(()=>$("splash").remove(),400);
+},3500);
+
+/* SERVICE WORKER EXISTANT */
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>{
+    navigator.serviceWorker.register("./sw.js").catch(()=>{});
+  });
+}
+</script>
+</body>
+  </html>
