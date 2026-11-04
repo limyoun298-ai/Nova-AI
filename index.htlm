@@ -1,0 +1,3268 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="theme-color" content="#111B21">
+<meta name="application-name" content="NOVA AI">
+<meta name="description" content="NOVA AI — Ton assistant intelligent.">
+<link rel="manifest" href="./manifest.json">
+<title>NOVA AI</title>
+
+<style>
+:root{
+  --bg:#111B21;
+  --chat:#1E1E1E;
+  --ai:#2D2D2D;
+  --accent:#0084FF;
+  --text:#E9EDEF;
+  --muted:#8696A0;
+  --border:#333333;
+  --green:#00C950;
+  --red:#EF4444;
+  --kb:0px;
+  --fs:15px;
+}
+
+/* THÈMES (changent vraiment les fonds) */
+body[data-theme="neon"]{--bg:#0A0F2C;--chat:#10163A;--ai:#1B2250;--accent:#00B8D9;--border:#2B3470}
+body[data-theme="sunrise"]{--bg:#2A1220;--chat:#3A1A22;--ai:#4D2430;--accent:#FF7A18;--border:#5A2F3A}
+body[data-theme="sky"]{--bg:#050B1E;--chat:#0A1330;--ai:#16224A;--accent:#4DA3FF;--border:#1F2F5E}
+body[data-theme="forest"]{--bg:#0C1A12;--chat:#122319;--ai:#1E3326;--accent:#2ECC71;--border:#26402F}
+body[data-theme="ocean"]{--bg:#061A2B;--chat:#0A2540;--ai:#123556;--accent:#22B8CF;--border:#1B4468}
+body[data-theme="volcano"]{--bg:#1A0A08;--chat:#2A110D;--ai:#3D1B15;--accent:#FF4D2E;--border:#522A22}
+body[data-theme="ice"]{--bg:#0E1B24;--chat:#14262F;--ai:#1F3844;--accent:#5CC8F0;--border:#2C4A58}
+body[data-theme="desert"]{--bg:#241A0E;--chat:#2F2314;--ai:#42321D;--accent:#E0A458;--border:#5A452B}
+body[data-theme="cyberpunk"]{--bg:#120022;--chat:#1A0733;--ai:#2A0F4D;--accent:#E91EC4;--border:#451A73}
+body[data-theme="minimal"]{--bg:#FFFFFF;--chat:#F5F6F8;--ai:#E9EDF2;--accent:#0084FF;--border:#DADFE6;--text:#111B21;--muted:#667085}
+body[data-theme="oled"]{--bg:#000000;--chat:#000000;--ai:#161616;--accent:#0084FF;--border:#222222}
+
+body.light{
+  --bg:#F4F6FA;
+  --chat:#FFFFFF;
+  --ai:#E9EDF4;
+  --text:#171D29;
+  --muted:#667085;
+  --border:#D8DFEA;
+}
+
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  overscroll-behavior:none;
+}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:"Segoe UI",Roboto,Arial,Helvetica,sans-serif;
+  font-size:15px;
+  -webkit-user-select:none;
+  user-select:none;
+}
+
+textarea,input{-webkit-user-select:text;user-select:text}
+button,input,textarea{font:inherit}
+button{border:0;cursor:pointer;color:inherit;background:transparent}
+.hidden{display:none!important}
+
+svg{
+  width:24px;
+  height:24px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  flex-shrink:0;
+}
+
+#app{
+  position:relative;
+  width:100%;
+  height:100%;
+  height:100dvh;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  background:var(--bg);
+}
+
+/* MARQUE */
+.brand-circle{
+  width:80px;
+  height:80px;
+  border-radius:50%;
+  background:var(--accent);
+  display:grid;
+  place-items:center;
+  color:#fff;
+  box-shadow:0 2px 10px rgba(0,0,0,.35);
+  flex-shrink:0;
+}
+.brand-circle svg.brand{width:46px;height:46px;stroke:none;fill:none}
+.brand-circle.small{width:32px;height:32px;box-shadow:none}
+.brand-circle.small svg.brand{width:20px;height:20px}
+
+#splash{
+  position:absolute;
+  inset:0;
+  z-index:1000;
+  background:var(--bg);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  transition:opacity .35s;
+}
+.splash-name{font-size:25px;font-weight:800;letter-spacing:1px}
+.splash-sub{font-size:13px;color:var(--muted)}
+
+/* HEADER */
+#mainHeader{
+  height:60px;
+  min-height:60px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 10px;
+  background:var(--bg);
+  border-bottom:1px solid var(--border);
+}
+.header-left{display:flex;align-items:center;gap:6px;min-width:0}
+.header-brand{display:flex;align-items:center;gap:8px;margin-left:2px}
+.header-title{font-weight:700;font-size:19px;color:var(--text)}
+#mainHeader.on-home .header-brand{display:none}
+.header-right{display:flex;align-items:center}
+
+.icon-btn{
+  width:44px;
+  height:44px;
+  background:transparent;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  color:var(--text);
+}
+.icon-btn:active{background:rgba(128,128,128,.2)}
+#menuBtn svg{width:28px;height:28px}
+
+#content{
+  flex:1;
+  min-height:0;
+  position:relative;
+  overflow:hidden;
+}
+
+.page{
+  position:absolute;
+  inset:0;
+  display:none;
+  flex-direction:column;
+  min-height:0;
+  background:var(--bg);
+}
+.page.active{display:flex}
+
+/* ACCUEIL */
+#homePage{
+  overflow-y:auto;
+  align-items:center;
+  padding:20px 20px 16px;
+}
+.home-inner{
+  margin-top:auto;
+  width:100%;
+  max-width:430px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.home-name{font-size:20px;font-weight:800;color:#fff;margin-top:12px;text-align:center}
+body.light .home-name,body[data-theme="minimal"] .home-name{color:var(--text)}
+.home-hello{font-size:22px;color:var(--text);margin:6px 0 20px;text-align:center}
+.suggestions{
+  width:90%;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.suggestion{
+  background:var(--ai);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:13px 17px;
+  text-align:left;
+  font-size:15px;
+  color:var(--text);
+  min-height:48px;
+  transition:transform .15s,opacity .15s;
+}
+.suggestion:active{transform:scale(.98);opacity:.85}
+
+/* DISCUSSION */
+#chatPage{overflow:hidden;background:var(--chat)}
+
+#messages{
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  padding:14px 12px 14px;
+  overscroll-behavior:contain;
+  background:var(--chat);
+}
+
+.message-row{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  animation:messageAppear .2s ease-out;
+}
+@keyframes messageAppear{
+  from{opacity:0;transform:translateY(6px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.message-row.user{align-items:flex-end}
+.message-row.ai{align-items:flex-start}
+.message-row.flash .bubble{outline:2px solid var(--accent)}
+
+.msg-body{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  max-width:100%;
+  width:100%;
+}
+.message-row.user .msg-body{align-items:flex-end}
+.message-row.ai .msg-body{align-items:flex-start}
+
+.bubble{
+  width:max-content;
+  padding:10px 14px;
+  font-size:var(--fs);
+  line-height:1.55;
+  overflow-wrap:anywhere;
+  white-space:normal;
+}
+.user .bubble{
+  max-width:75%;
+  background:var(--accent);
+  color:#fff;
+  border-radius:18px 18px 4px 18px;
+  box-shadow:0 1px 2px rgba(0,0,0,.3);
+}
+.ai .bubble{
+  max-width:88%;
+  background:var(--ai);
+  color:var(--text);
+  border-radius:18px 18px 18px 4px;
+  box-shadow:0 1px 2px rgba(0,0,0,.2);
+}
+
+.message-line{
+  display:block;
+  min-height:1.55em;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+}
+.message-line.blank{height:.5em;min-height:.5em}
+.message-line strong{font-weight:700}
+.message-line em{font-style:italic}
+.message-line code{
+  background:rgba(0,0,0,.35);
+  color:#9BC2FF;
+  padding:1px 5px;
+  border-radius:5px;
+  font-family:Consolas,monospace;
+  font-size:.9em;
+}
+
+.quote-block{
+  max-width:75%;
+  background:rgba(128,128,128,.18);
+  border-left:3px solid var(--accent);
+  border-radius:10px;
+  padding:6px 10px;
+  font-size:13px;
+  color:var(--muted);
+  margin-bottom:3px;
+  overflow:hidden;
+  display:-webkit-box;
+  -webkit-line-clamp:3;
+  -webkit-box-orient:vertical;
+}
+
+.message-status{
+  font-size:11px;
+  color:var(--muted);
+  margin:3px 6px 0;
+}
+.message-status.failed{color:#ff7b7b}
+
+.message-image{
+  display:block;
+  max-width:70%;
+  max-height:340px;
+  object-fit:contain;
+  border-radius:12px;
+  background:var(--ai);
+  border:1px solid var(--border);
+}
+.image-actions{
+  display:flex;
+  gap:6px;
+  margin:6px 0 2px;
+}
+.image-actions button{
+  background:var(--ai);
+  border:1px solid var(--border);
+  color:var(--text);
+  font-size:12px;
+  padding:6px 11px;
+  border-radius:14px;
+}
+.image-actions button:active{opacity:.7}
+
+.ai-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:6px 0 0 4px;
+}
+.ai-actions button{
+  color:var(--text);
+  padding:5px;
+  display:grid;
+  place-items:center;
+}
+.ai-actions button.on{color:var(--accent)}
+.ai-actions svg{width:20px;height:20px}
+
+.code-wrap{
+  max-width:92%;
+  width:100%;
+  background:#0D1117;
+  border-radius:12px;
+  overflow:hidden;
+  margin-top:2px;
+  border:1px solid #30363D;
+}
+.code-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:8px 12px;
+  background:#161B22;
+  font-size:12px;
+  color:#C9D1D9;
+}
+.code-head .code-btns{display:flex;gap:14px}
+.code-head button{color:#E6EDF3;font-size:12px}
+pre{
+  margin:0;
+  padding:12px;
+  overflow-x:auto;
+  white-space:pre;
+}
+pre code{
+  font-family:Consolas,"Courier New",monospace;
+  font-size:13px;
+  color:#E6EDF3;
+}
+.hl-c{color:#8B949E}
+.hl-s{color:#A5D6FF}
+.hl-t{color:#7EE787}
+.hl-n{color:#79C0FF}
+.hl-k{color:#FF7B72}
+
+/* Indicateur IA */
+.ai-status{
+  background:var(--ai);
+  color:var(--muted);
+  font-size:13px;
+  padding:9px 14px;
+  border-radius:16px 16px 16px 4px;
+  width:max-content;
+  animation:pulse 1.2s infinite ease-in-out;
+}
+@keyframes pulse{0%,100%{opacity:.45}50%{opacity:1}}
+
+/* COMPOSER */
+#composer{
+  display:flex;
+  flex-direction:column;
+  padding:8px 10px calc(10px + env(safe-area-inset-bottom) + var(--kb));
+  flex-shrink:0;
+  background:var(--bg);
+  border-top:1px solid var(--border);
+}
+.composer-row{display:flex;align-items:center;gap:8px}
+
+#attachBar,#replyBar{
+  display:none;
+  align-items:center;
+  gap:10px;
+  padding:6px 4px 8px;
+}
+#attachBar.show,#replyBar.show{display:flex}
+#attachBar img{width:56px;height:56px;border-radius:10px;object-fit:cover;border:1px solid var(--border)}
+#attachBar .attach-label{flex:1;font-size:13px;color:var(--muted)}
+#replyBar{
+  background:rgba(128,128,128,.14);
+  border-left:3px solid var(--accent);
+  border-radius:10px;
+  margin-bottom:6px;
+  padding:6px 8px 6px 10px;
+}
+#replyBar .reply-text{
+  flex:1;
+  font-size:13px;
+  color:var(--muted);
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.mini-x{width:30px;height:30px;display:grid;place-items:center;border-radius:50%;color:var(--text)}
+.mini-x svg{width:18px;height:18px}
+
+#plusBtn{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  background:var(--ai);
+  display:grid;
+  place-items:center;
+  flex-shrink:0;
+  color:#fff;
+}
+body.light #plusBtn,body[data-theme="minimal"] #plusBtn{color:var(--text)}
+#plusBtn svg{width:24px;height:24px;stroke-width:2.4}
+
+#messageInput{
+  flex:1;
+  min-width:0;
+  height:45px;
+  max-height:120px;
+  resize:none;
+  border:0;
+  outline:none;
+  border-radius:24px;
+  background:var(--ai);
+  color:var(--text);
+  padding:12px 16px;
+  font-size:15px;
+  line-height:21px;
+}
+#messageInput::placeholder{color:var(--muted);opacity:.6}
+
+#sendBtn{
+  width:45px;
+  height:45px;
+  flex-shrink:0;
+  border-radius:50%;
+  background:var(--accent);
+  display:grid;
+  place-items:center;
+  color:#fff;
+}
+#sendBtn svg{width:27px;height:27px;color:#fff}
+
+/* PARAMÈTRES */
+#settingsPage,#subPage,#searchPage,#memoryPage,#toolPage{
+  overflow-y:auto;
+  padding-bottom:25px;
+}
+.page-heading{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  height:60px;
+  min-height:60px;
+  padding:0 10px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.page-heading strong{font-size:19px}
+.page-heading svg{width:27px}
+
+.setting-row{
+  min-height:60px;
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:15px;
+  padding:10px 17px;
+  border-bottom:1px solid var(--ai);
+  text-align:left;
+  color:var(--text);
+}
+.setting-row>svg{width:26px;height:26px}
+.setting-row .setting-label{font-size:15px;font-weight:600}
+.setting-row .setting-desc{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.4}
+.setting-row .row-text{flex:1}
+
+.settings-footer{
+  text-align:center;
+  color:var(--muted);
+  font-size:12px;
+  opacity:.5;
+  line-height:1.6;
+  padding:22px 22px 6px;
+}
+.settings-links{
+  display:flex;
+  justify-content:center;
+  gap:22px;
+  padding:6px 0 10px;
+  font-size:13px;
+  color:var(--muted);
+}
+.settings-links button{color:var(--accent);font-size:13px}
+
+.sub-content{padding:18px}
+.sub-description{font-size:14px;line-height:1.7;color:var(--muted);margin:0 0 6px}
+
+.choice{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:16px 5px;
+  border-bottom:1px solid var(--ai);
+  font-size:15px;
+}
+.choice input{accent-color:var(--accent);width:18px;height:18px}
+
+.theme-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:16px;
+}
+.theme-card{
+  min-height:84px;
+  border-radius:15px;
+  padding:12px;
+  display:flex;
+  align-items:flex-end;
+  font-size:13px;
+  font-weight:700;
+  border:2px solid transparent;
+  color:#fff;
+  text-align:left;
+  text-shadow:0 1px 3px rgba(0,0,0,.6);
+}
+.theme-card.selected{border-color:#fff;outline:2px solid var(--accent)}
+
+.action-button{
+  width:100%;
+  padding:14px;
+  border-radius:13px;
+  background:var(--accent);
+  color:#fff;
+  font-weight:700;
+  margin-top:14px;
+}
+.action-button:disabled{opacity:.5}
+.danger-button{background:var(--red)}
+.grey-button{background:#334155}
+
+.info-card{
+  background:var(--ai);
+  padding:18px;
+  border:1px solid var(--border);
+  border-radius:15px;
+  font-size:14px;
+  line-height:1.8;
+  color:var(--text);
+}
+
+.badge{
+  width:15px;
+  height:15px;
+  display:inline-grid;
+  place-items:center;
+  border-radius:50%;
+  background:var(--green);
+  vertical-align:middle;
+}
+.badge svg{width:10px;height:10px;stroke:#fff;stroke-width:3}
+
+.toggle-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 4px;
+  border-bottom:1px solid var(--ai);
+  font-size:15px;
+}
+.switch{
+  width:46px;
+  height:26px;
+  border-radius:20px;
+  background:#555;
+  position:relative;
+  transition:background .2s;
+}
+.switch::after{
+  content:"";
+  position:absolute;
+  top:3px;left:3px;
+  width:20px;height:20px;
+  border-radius:50%;
+  background:#fff;
+  transition:transform .2s;
+}
+.switch.on{background:var(--accent)}
+.switch.on::after{transform:translateX(20px)}
+
+/* RECHERCHE / MÉMOIRE */
+.search-box{padding:12px 14px;flex-shrink:0}
+.search-box input{
+  width:100%;
+  height:44px;
+  border-radius:22px;
+  background:var(--ai);
+  border:0;
+  outline:none;
+  padding:0 16px;
+  color:var(--text);
+}
+.result-item{
+  width:100%;
+  text-align:left;
+  padding:12px 16px;
+  border-bottom:1px solid var(--ai);
+  color:var(--text);
+  display:block;
+}
+.result-item .r-title{font-size:12px;color:var(--accent);margin-bottom:3px}
+.result-item .r-text{font-size:14px;line-height:1.5;color:var(--text);overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.empty-hint{padding:30px 22px;text-align:center;color:var(--muted);font-size:14px;line-height:1.7}
+.memory-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:13px 16px;
+  border-bottom:1px solid var(--ai);
+}
+.memory-item .m-text{flex:1;font-size:14px;line-height:1.5}
+.memory-item .m-time{font-size:11px;color:var(--muted);display:block;margin-top:3px}
+
+/* OUTILS (projet / analyse / fichier) */
+#toolPage.tool-dark{background:#0D1117;color:#E6EDF3}
+#toolPage.tool-dark .page-heading{border-color:#30363D}
+#toolPage.tool-dark .icon-btn,#toolPage.tool-dark .sub-description{color:#E6EDF3}
+#toolPage.tool-dark .sub-description{color:#9BA7B4}
+#toolPage.tool-dark .sheet-textarea{background:#161B22;border-color:#30363D;color:#E6EDF3}
+.tool-result{margin-top:18px;display:flex;flex-direction:column;gap:10px}
+.tool-result .code-wrap{max-width:100%}
+.tool-error{color:#ff9b9b;font-size:14px;line-height:1.6}
+.chip-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.chip{
+  background:#21262D;
+  border:1px solid #30363D;
+  color:#E6EDF3;
+  border-radius:16px;
+  padding:8px 14px;
+  font-size:13px;
+}
+.file-card{
+  background:#161B22;
+  border:1px solid #30363D;
+  border-radius:14px;
+  padding:14px;
+  color:#E6EDF3;
+  line-height:1.6;
+  font-size:14px;
+}
+.file-card .file-name{font-weight:700;margin-bottom:6px}
+
+/* DRAWER */
+#drawerOverlay,#sheetOverlay{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  z-index:50;
+  display:none;
+}
+#drawerOverlay.show,#sheetOverlay.show{display:block}
+
+#drawer{
+  position:absolute;
+  left:0;top:0;bottom:0;
+  width:75%;
+  max-width:340px;
+  background:var(--bg);
+  border-right:1px solid var(--border);
+  padding:14px 10px;
+  transform:translateX(-105%);
+  transition:transform .25s;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+#drawerOverlay.show #drawer{transform:translateX(0)}
+.drawer-head{display:flex;align-items:center;gap:10px;padding:6px 8px 14px}
+.drawer-title{font-size:20px;font-weight:700}
+.drawer-nav{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  width:100%;
+  padding:13px 10px;
+  border-radius:12px;
+  font-size:15px;
+  text-align:left;
+  color:var(--text);
+}
+.drawer-nav:active{background:rgba(128,128,128,.2)}
+.drawer-nav svg{width:24px;height:24px}
+.drawer-sep{height:1px;background:var(--border);margin:8px 6px}
+.drawer-sub{font-size:12px;color:var(--muted);padding:4px 10px}
+#conversationList{
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  min-height:0;
+}
+.conversation-item{
+  text-align:left;
+  padding:12px 10px;
+  border-radius:10px;
+  font-size:14px;
+  color:var(--text);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.conversation-item:active{background:rgba(128,128,128,.2)}
+
+/* BOTTOM SHEET */
+#bottomSheet{
+  position:absolute;
+  left:0;right:0;bottom:0;
+  background:var(--chat);
+  border-radius:20px 20px 0 0;
+  padding:16px 16px calc(18px + env(safe-area-inset-bottom));
+  transform:translateY(110%);
+  transition:transform .25s;
+  max-height:88%;
+  overflow-y:auto;
+}
+body.light #bottomSheet{box-shadow:0 -2px 14px rgba(0,0,0,.15)}
+#sheetOverlay.show #bottomSheet{transform:translateY(0)}
+.sheet-handle{width:38px;height:4px;border-radius:5px;background:#73839A;margin:0 auto 16px}
+.sheet-title{font-weight:700;font-size:17px;margin-bottom:10px}
+.sheet-action{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  width:100%;
+  padding:14px 5px;
+  text-align:left;
+  font-size:15px;
+  border-bottom:1px solid rgba(128,128,128,.18);
+  color:var(--text);
+}
+.sheet-action svg{width:24px;height:24px}
+.sheet-textarea{
+  width:100%;
+  min-height:105px;
+  resize:vertical;
+  background:var(--ai);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px;
+  color:var(--text);
+  outline:none;
+}
+.stars{display:flex;justify-content:center;gap:10px;padding:10px 0}
+.stars button{font-size:32px;color:#555}
+.stars button.on{color:#FACC15}
+
+/* VIEWER / BUSY / TOAST */
+#viewer{
+  position:absolute;
+  inset:0;
+  z-index:300;
+  background:rgba(0,0,0,.94);
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+#viewer.show{display:flex}
+#viewer img{max-width:100%;max-height:100%;object-fit:contain}
+#viewerClose{position:absolute;top:12px;right:12px;color:#fff}
+
+#busyOverlay{
+  position:absolute;
+  inset:0;
+  z-index:900;
+  background:var(--bg);
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:18px;
+  --spin:var(--accent);
+}
+#busyOverlay.show{display:flex}
+.busy-spin{
+  width:54px;
+  height:54px;
+  border-radius:50%;
+  border:5px solid rgba(128,128,128,.25);
+  border-top-color:var(--spin);
+  animation:spin 1s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.busy-done-icon{display:none}
+#busyOverlay.done .busy-spin{display:none}
+#busyOverlay.done .busy-done-icon{display:grid}
+#busyText{font-size:15px;color:var(--muted)}
+#busyOverlay.done #busyText{color:var(--text);font-weight:600}
+
+#toast{
+  position:absolute;
+  left:50%;
+  bottom:95px;
+  z-index:400;
+  transform:translate(-50%,20px);
+  opacity:0;
+  pointer-events:none;
+  background:#1B2A40;
+  border:1px solid #33445E;
+  color:#fff;
+  padding:10px 17px;
+  border-radius:25px;
+  font-size:13px;
+  white-space:nowrap;
+  transition:.2s;
+}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms!important;
+    transition-duration:.01ms!important;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- Icône de marque unique : étoile + orbite + constellation -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="novaIcon" viewBox="0 0 48 48">
+      <ellipse cx="24" cy="24" rx="20" ry="8" transform="rotate(-30 24 24)" fill="none" stroke="currentColor" stroke-width="2"/>
+      <path d="M24 9 27 21 39 24 27 27 24 39 21 27 9 24 21 21Z" fill="currentColor" stroke="none"/>
+      <circle cx="39" cy="12" r="2.6" fill="currentColor" stroke="none"/>
+      <circle cx="9" cy="36" r="2" fill="currentColor" stroke="none"/>
+      <circle cx="41" cy="34" r="1.5" fill="currentColor" stroke="none"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div id="app">
+
+  <div id="splash">
+    <div class="brand-circle"><svg class="brand" viewBox="0 0 48 48"><use href="#novaIcon"/></svg></div>
+    <div class="splash-name">NOVA AI</div>
+    <div class="splash-sub">Ton assistant intelligent</div>
+  </div>
+
+  <header id="mainHeader" class="on-home">
+    <div class="header-left">
+      <button class="icon-btn" id="menuBtn" aria-label="Menu">
+        <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div class="header-brand">
+        <div class="brand-circle small"><svg class="brand" viewBox="0 0 48 48"><use href="#novaIcon"/></svg></div>
+        <div class="header-title">Nova AI</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <button class="icon-btn" id="settingsBtn" aria-label="Paramètres">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="5" r="1.4" fill="currentColor"/>
+          <circle cx="12" cy="12" r="1.4" fill="currentColor"/>
+          <circle cx="12" cy="19" r="1.4" fill="currentColor"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="content">
+
+    <section class="page active" id="homePage">
+      <div class="home-inner">
+        <div class="brand-circle"><svg class="brand" viewBox="0 0 48 48"><use href="#novaIcon"/></svg></div>
+        <div class="home-name">Nova AI</div>
+        <div class="home-hello">Bonjour Cher amie</div>
+        <div class="suggestions">
+          <button class="suggestion" data-action="text">Discuter avec l'AI ou Nova AI</button>
+          <button class="suggestion" data-action="text">En savoir plus sur la formation des AI</button>
+          <button class="suggestion" data-action="image">Génère une image</button>
+          <button class="suggestion" data-action="text">Comment apprendre les travails à la main</button>
+          <button class="suggestion" data-action="text">Apprendre des choses sur le monde</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="chatPage">
+      <div id="messages"></div>
+    </section>
+
+    <section class="page" id="settingsPage">
+      <div class="page-heading">
+        <button class="icon-btn backSettings" aria-label="Retour">
+          <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <strong>Paramètre</strong>
+      </div>
+
+      <button class="setting-row" data-sub="mode">
+        <svg viewBox="0 0 24 24"><path d="M20.9 13A8.5 8.5 0 0 1 11 3.1 8.5 8.5 0 1 0 20.9 13Z"/></svg>
+        <div class="row-text">
+          <div class="setting-label">Mode clair / sombre / système</div>
+          <div class="setting-desc">Personnalise l'apparence de NOVA AI.</div>
+        </div>
+        <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+
+      <button class="setting-row" data-sub="theme">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 3a9 9 0 1 0 0 18h1.5a2 2 0 0 0 1.4-3.4 1.5 1.5 0 0 1 1.1-2.6H18a3 3 0 0 0 3-3c0-5-4-8-9-8Z"/>
+          <circle cx="7.5" cy="10" r="1"/><circle cx="11" cy="7" r="1"/><circle cx="15.5" cy="8.5" r="1"/>
+        </svg>
+        <div class="row-text">
+          <div class="setting-label">Thème</div>
+          <div class="setting-desc">12 thèmes pour changer les couleurs.</div>
+        </div>
+        <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+
+      <button class="setting-row" data-sub="lang">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+        <div class="row-text">
+          <div class="setting-label">Langue</div>
+          <div class="setting-desc">Français, English ou Kiswahili.</div>
+        </div>
+        <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+
+      <button class="setting-row" data-sub="size">
+        <svg viewBox="0 0 24 24"><path d="M4 20 10 5l6 15M6.5 14h7M17 20l3-8 3 8M18 18h4" transform="translate(-1 0)"/></svg>
+        <div class="row-text">
+          <div class="setting-label">Taille du texte</div>
+          <div class="setting-desc">Petit, moyen ou grand.</div>
+        </div>
+        <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+
+      <button class="setting-row" data-sub="about">
+        <svg viewBox="0 0 24 24"><use href="#novaIcon"/></svg>
+        <div class="row-text">
+          <div class="setting-label">
+            À propos de NOVA AI
+            <span class="badge"><svg viewBox="0 0 12 12"><path d="m2 6 2.5 2.5L10 3"/></svg></span>
+          </div>
+          <div class="setting-desc">Découvre NOVA AI et ses fonctionnalités.</div>
+        </div>
+        <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+
+      <button class="setting-row" data-sub="welcome">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16v13H8l-4 4z"/><path d="M8 9h8M8 13h5"/></svg>
+        <div class="row-text">
+          <div class="setting-label">Message de bienvenue</div>
+          <div class="setting-desc">Découvre le message d'accueil de NOVA AI.</div>
+        </div>
+        <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+
+      <button class="setting-row" data-sub="storage">
+        <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
+        <div class="row-text">
+          <div class="setting-label">Stockage et notifications</div>
+          <div class="setting-desc">Espace utilisé, forfait et notifications.</div>
+        </div>
+        <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+
+      <button class="setting-row" data-sub="clear">
+        <svg viewBox="0 0 24 24" style="color:var(--red)"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m4 4v6m6-6v6"/></svg>
+        <div class="row-text">
+          <div class="setting-label" style="color:var(--red)">Effacer discussion</div>
+          <div class="setting-desc">Supprimer l'historique de tes conversations.</div>
+        </div>
+        <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+
+      <div class="settings-footer">
+        Nova AI comme un coach à vous tenir compagnie et donner de bons conseils
+      </div>
+      <div class="settings-links">
+        <button id="linkVersion">Version V4</button>
+        <button id="linkShare">Partager</button>
+        <button id="linkRate">Noter</button>
+      </div>
+    </section>
+
+    <section class="page" id="subPage">
+      <div class="page-heading">
+        <button class="icon-btn" id="subBackBtn" aria-label="Retour">
+          <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <strong id="subTitle">Paramètre</strong>
+      </div>
+      <div class="sub-content" id="subContent"></div>
+    </section>
+
+    <section class="page" id="searchPage">
+      <div class="page-heading">
+        <button class="icon-btn" id="searchBackBtn" aria-label="Retour">
+          <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <strong>Rechercher</strong>
+      </div>
+      <div class="search-box"><input id="searchInput" placeholder="Rechercher dans les messages..." autocomplete="off"></div>
+      <div id="searchResults"></div>
+    </section>
+
+    <section class="page" id="memoryPage">
+      <div class="page-heading">
+        <button class="icon-btn" id="memoryBackBtn" aria-label="Retour">
+          <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <strong>Mémoire</strong>
+      </div>
+      <div id="memoryList"></div>
+    </section>
+
+    <section class="page" id="toolPage">
+      <div class="page-heading">
+        <button class="icon-btn" id="toolBackBtn" aria-label="Retour">
+          <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <strong id="toolTitle">Outil</strong>
+      </div>
+      <div class="sub-content">
+        <p class="sub-description" id="toolDesc"></p>
+        <textarea class="sheet-textarea" id="toolInput" style="min-height:150px"></textarea>
+        <button class="action-button" id="toolRun">Lancer</button>
+        <div class="tool-result" id="toolResult"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="composer">
+    <div id="attachBar">
+      <img id="attachImg" alt="Aperçu">
+      <div class="attach-label">Ajoute une description puis envoie.</div>
+      <button class="mini-x" id="attachRemove" aria-label="Supprimer l'image">
+        <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div id="replyBar">
+      <div class="reply-text" id="replyText"></div>
+      <button class="mini-x" id="replyRemove" aria-label="Annuler la réponse">
+        <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="composer-row">
+      <button id="plusBtn" aria-label="Ajouter">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+      <textarea id="messageInput" rows="1" placeholder="Écrivez à Nova AI.."></textarea>
+      <button id="sendBtn" aria-label="Envoyer">
+        <svg viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <input type="file" id="galerieInput" accept="image/*"
+    style="position:absolute;left:-9999px;top:-9999px;opacity:0;width:1px;height:1px;">
+
+  <div id="drawerOverlay">
+    <div id="drawer">
+      <div class="drawer-head">
+        <div class="brand-circle small"><svg class="brand" viewBox="0 0 48 48"><use href="#novaIcon"/></svg></div>
+        <div class="drawer-title">Nova AI</div>
+      </div>
+      <button class="drawer-nav" id="navNew">
+        <svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"/></svg>
+        Nouvelle discussion
+      </button>
+      <button class="drawer-nav" id="navSearch">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        Rechercher
+      </button>
+      <button class="drawer-nav" id="navMemory">
+        <svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/></svg>
+        Mémoire
+      </button>
+      <div class="drawer-sep"></div>
+      <div class="drawer-sub">Discussions</div>
+      <div id="conversationList"></div>
+    </div>
+  </div>
+
+  <div id="sheetOverlay">
+    <div id="bottomSheet">
+      <div class="sheet-handle"></div>
+      <div id="sheetContent"></div>
+    </div>
+  </div>
+
+  <div id="viewer">
+    <button class="icon-btn" id="viewerClose" aria-label="Fermer">
+      <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <img id="viewerImg" alt="Image">
+  </div>
+
+  <div id="busyOverlay">
+    <div class="busy-spin"></div>
+    <div class="brand-circle busy-done-icon"><svg class="brand" viewBox="0 0 48 48"><use href="#novaIcon"/></svg></div>
+    <div id="busyText"></div>
+  </div>
+
+  <div id="toast"></div>
+</div>
+
+<script>
+"use strict";
+
+/* CONFIGURATION SUPABASE */
+const SUPABASE_URL = "https://nqtychmsamftwiwwphis.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_yimnMzvL_cSPd5cDF0SWwg_8YxM8CSG";
+const NOVA_ENDPOINT = SUPABASE_URL + "/functions/v1/nova-ai";
+
+/* STOCKAGE */
+const STORAGE_KEY = "nova_conversations_v4";
+const SETTINGS_KEY = "nova_settings_v4";
+const MEMORY_KEY = "nova_memory";
+const PLAN_KEY = "nova_plan_v4";
+const MEMORY_TTL = 172800000; /* 2 jours = 172800 s */
+
+const $ = id => document.getElementById(id);
+
+let conversations = [];
+let currentConversationId = null;
+let settings = {mode:"dark",theme:"",welcome:true,lang:"fr",size:"medium",notif:false,rating:0};
+let previousPage = "homePage";
+let currentPage = "homePage";
+let returnTo = "homePage";
+let toastTimer = null;
+let sending = false;
+let pendingImage = null;
+let replyTo = "";
+let toolMode = "project";
+let toolBusy = false;
+let plan = {used:0,limitedStart:0,lockUntil:0};
+
+function uid(){
+  return Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
+function currentConversation(){
+  return conversations.find(c=>c.id===currentConversationId);
+}
+
+function saveData(){
+  try{
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(conversations));
+    return true;
+  }catch(e){
+    showToast("Espace de stockage insuffisant");
+    return false;
+  }
+}
+
+function saveSettings(){
+  try{
+    localStorage.setItem(SETTINGS_KEY,JSON.stringify(settings));
+  }catch(e){
+    showToast("Impossible d'enregistrer les paramètres");
+  }
+}
+
+/* THÈMES */
+const THEMES=[
+  ["","Nuit Charcoal","#111B21","#0084FF"],
+  ["neon","Néon Bleu","#0A0F2C","#00B8D9"],
+  ["sunrise","Levé soleil","#2A1220","#FF7A18"],
+  ["sky","Ciel étoilé","#050B1E","#4DA3FF"],
+  ["forest","Forêt sombre","#0C1A12","#2ECC71"],
+  ["ocean","Océan profond","#061A2B","#22B8CF"],
+  ["volcano","Volcan","#1A0A08","#FF4D2E"],
+  ["ice","Glace polaire","#0E1B24","#5CC8F0"],
+  ["desert","Désert","#241A0E","#E0A458"],
+  ["cyberpunk","Cyberpunk","#120022","#E91EC4"],
+  ["minimal","Minimal Blanc","#FFFFFF","#0084FF"],
+  ["oled","OLED Black","#000000","#0084FF"]
+];
+
+function loadData(){
+  try{
+    conversations=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");
+    settings={...settings,...JSON.parse(localStorage.getItem(SETTINGS_KEY)||"{}")};
+  }catch(e){
+    conversations=[];
+  }
+
+  if(settings.theme==="sun") settings.theme="sunrise";
+  if(!THEMES.some(t=>t[0]===settings.theme)) settings.theme="";
+
+  if(!Array.isArray(conversations)) conversations=[];
+
+  const now=Date.now();
+  conversations.forEach(c=>{
+    if(!Array.isArray(c.messages)) c.messages=[];
+    c.messages.forEach(m=>{
+      if(m.status==="Envoi" && now-(m.timestamp||now)>=60000){
+        m.status="Message non envoyé";
+      }
+    });
+  });
+
+  if(!conversations.length){
+    createConversation(false);
+  }else{
+    currentConversationId=conversations[0].id;
+  }
+
+  saveData();
+  applySettings();
+}
+
+function createConversation(go=true){
+  const c={
+    id:uid(),
+    title:"Nouvelle discussion",
+    messages:[],
+    createdAt:Date.now()
+  };
+
+  conversations.unshift(c);
+  currentConversationId=c.id;
+  saveData();
+  renderConversationList();
+  renderMessages();
+
+  if(go) showPage("homePage");
+  return c;
+}
+
+function startNewChat(){
+  const cur=currentConversation();
+  if(!cur||cur.messages.length){
+    createConversation(false);
+  }else{
+    renderMessages();
+  }
+  clearPending();
+  clearReply();
+  showPage("homePage");
+}
+
+/* PAGES */
+const PAGES=["homePage","chatPage","settingsPage","subPage","searchPage","memoryPage","toolPage"];
+
+function showPage(id){
+  PAGES.forEach(p=>$(p).classList.toggle("active",p===id));
+  currentPage=id;
+
+  const main=id==="homePage"||id==="chatPage";
+  $("composer").style.display=main?"flex":"none";
+  $("mainHeader").style.display=main?"flex":"none";
+  $("mainHeader").classList.toggle("on-home",id==="homePage");
+
+  if(id==="chatPage") setTimeout(scrollBottom,60);
+}
+
+function openSettings(){
+  if(!navigator.onLine){
+    showToast("Connexion requise");
+    return;
+  }
+  previousPage=currentPage==="chatPage"?"chatPage":"homePage";
+  showPage("settingsPage");
+}
+
+function openSubpage(name){
+  if(!navigator.onLine){
+    showToast("Connexion requise");
+    return;
+  }
+
+  const titles={
+    mode:"Mode d'affichage",
+    theme:"Thème",
+    lang:"Langue",
+    size:"Taille du texte",
+    about:"À propos de NOVA AI",
+    welcome:"Message de bienvenue",
+    storage:"Stockage et notifications",
+    clear:"Effacer discussion"
+  };
+
+  $("subTitle").textContent=titles[name]||"Paramètre";
+  renderSubpage(name);
+  showPage("subPage");
+}
+
+function backFromSettings(){
+  showPage(previousPage);
+}
+
+function applySettings(){
+  const light=settings.mode==="light"||
+    (settings.mode==="system"&&
+    window.matchMedia("(prefers-color-scheme: light)").matches);
+
+  document.body.classList.toggle("light",light);
+
+  if(settings.theme) document.body.setAttribute("data-theme",settings.theme);
+  else document.body.removeAttribute("data-theme");
+
+  const sizes={small:"14px",medium:"15px",large:"17px"};
+  document.documentElement.style.setProperty("--fs",sizes[settings.size]||"15px");
+
+  try{
+    const bg=getComputedStyle(document.body).getPropertyValue("--bg").trim();
+    const meta=document.querySelector('meta[name="theme-color"]');
+    if(meta&&bg) meta.setAttribute("content",bg);
+  }catch(e){}
+}
+
+const WELCOME_LINES=[
+"Bienvenue sur NOVA AI !","Content de te retrouver ici.","Je suis ton assistant intelligent.","Pose-moi toutes tes questions.","Je réponds simplement et clairement.",
+"Je peux t'expliquer un sujet difficile.","Je peux t'aider à apprendre.","Je peux t'aider à planifier tes projets.","Je peux analyser ton code.","Je peux créer des fichiers pour toi.",
+"Je peux générer des images.","Je peux garder des souvenirs utiles.","Dis « mémorise ça » pour que je retienne.","Dis « rappelle-toi » pour que je m'en souvienne.","Mes souvenirs durent 2 jours.",
+"Tu peux écrire en français, anglais ou swahili.","Choisis ton thème préféré dans les paramètres.","Change la taille du texte si besoin.","Le bouton + ouvre tes outils.","La galerie te permet d'envoyer une image.",
+"Le projet t'aide à démarrer un travail pro.","L'analyse de code regarde ton code en profondeur.","Créer un fichier te donne un fichier complet.","Appuie 3 secondes sur un message pour des options.","Tu peux modifier, copier ou partager.",
+"Tu peux répondre à un message précis.","Les pouces donnent ton avis.","Le haut-parleur lit la réponse à voix haute.","Ton historique reste sur ton appareil.","Tu peux le relire même sans connexion.",
+"Sans connexion, je ne peux pas répondre.","Ton message attend alors jusqu'à une minute.","Si rien ne passe, il est marqué non envoyé.","Je reste respectueux en toute situation.","Je m'adapte à ton humeur.",
+"Quand ça va mal, je t'écoute avec douceur.","Quand ça va bien, on rigole ensemble.","Quand tu apprends, je suis patient.","Quand tu travailles, je reste précis.","Je ne remplace pas un professionnel.",
+"Je peux me tromper : vérifie les infos importantes.","Je suis là pour t'accompagner, pas pour juger.","Chaque question est une occasion d'apprendre.","Prends ton temps pour explorer.","Essaie des idées nouvelles.",
+"Reviens quand tu veux.","Je serai toujours prêt.","Merci de ta confiance.","Ensemble, on va loin.","Alors, on discute de quoi aujourd'hui ?"
+];
+
+function renderSubpage(name){
+  const box=$("subContent");
+
+  if(name==="mode"){
+    box.innerHTML=`
+      <p class="sub-description">Choisis l'apparence de NOVA AI.</p>
+      <label class="choice"><input type="radio" name="mode" value="dark"> Mode sombre</label>
+      <label class="choice"><input type="radio" name="mode" value="light"> Mode clair</label>
+      <label class="choice"><input type="radio" name="mode" value="system"> Mode système</label>`;
+
+    box.querySelectorAll('input[name="mode"]').forEach(r=>{
+      r.checked=settings.mode===r.value;
+      r.addEventListener("change",()=>{
+        settings.mode=r.value;
+        saveSettings();
+        applySettings();
+      });
+    });
+  }
+
+  if(name==="theme"){
+    box.innerHTML=`
+      <p class="sub-description">Choisis un thème pour changer les couleurs de ton application.</p>
+      <div class="theme-grid"></div>`;
+
+    const grid=box.querySelector(".theme-grid");
+    THEMES.forEach(([id,label,bg,accent])=>{
+      const b=document.createElement("button");
+      b.className="theme-card"+(settings.theme===id?" selected":"");
+      b.style.background=`linear-gradient(135deg,${bg},${accent})`;
+      if(id==="minimal"||id==="") b.style.textShadow="0 1px 3px rgba(0,0,0,.7)";
+      b.textContent=label;
+      b.addEventListener("click",()=>chooseTheme(id,accent));
+      grid.appendChild(b);
+    });
+  }
+
+  if(name==="lang"){
+    box.innerHTML=`
+      <p class="sub-description">Langue préférée de NOVA AI pour ses réponses.</p>
+      <label class="choice"><input type="radio" name="lang" value="fr"> Français</label>
+      <label class="choice"><input type="radio" name="lang" value="en"> English</label>
+      <label class="choice"><input type="radio" name="lang" value="sw"> Kiswahili</label>`;
+    box.querySelectorAll('input[name="lang"]').forEach(r=>{
+      r.checked=settings.lang===r.value;
+      r.addEventListener("change",()=>{
+        settings.lang=r.value;
+        saveSettings();
+        showToast("Langue enregistrée");
+      });
+    });
+  }
+
+  if(name==="size"){
+    box.innerHTML=`
+      <p class="sub-description">Choisis la taille du texte des messages.</p>
+      <label class="choice"><input type="radio" name="size" value="small"> Petit</label>
+      <label class="choice"><input type="radio" name="size" value="medium"> Moyen</label>
+      <label class="choice"><input type="radio" name="size" value="large"> Grand</label>`;
+    box.querySelectorAll('input[name="size"]').forEach(r=>{
+      r.checked=settings.size===r.value;
+      r.addEventListener("change",()=>{
+        settings.size=r.value;
+        saveSettings();
+        applySettings();
+      });
+    });
+  }
+
+  if(name==="about"){
+    box.innerHTML=`
+      <div class="info-card">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:15px">
+          <div class="brand-circle small" style="width:48px;height:48px"><svg class="brand" viewBox="0 0 48 48" style="width:30px;height:30px"><use href="#novaIcon"/></svg></div>
+          <div>
+            <strong style="font-size:19px">NOVA AI</strong>
+            <span class="badge" style="margin-left:6px"><svg viewBox="0 0 12 12"><path d="m2 6 2.5 2.5L10 3"/></svg></span><br>
+            <span style="color:var(--green);font-size:12px">Assistant intelligent</span>
+          </div>
+        </div>
+        NOVA AI est ton assistant intelligent : il discute, explique, aide à apprendre, analyse du code, crée des fichiers et génère des images. Simple et respectueux, il t'accompagne comme un coach au quotidien.
+      </div>`;
+  }
+
+  if(name==="welcome"){
+    box.innerHTML=`<div class="info-card"></div>`;
+    const card=box.querySelector(".info-card");
+    WELCOME_LINES.forEach((l,i)=>{
+      const d=document.createElement("div");
+      if(i===0) d.style.cssText="font-size:18px;font-weight:700;margin-bottom:6px";
+      d.textContent=l;
+      card.appendChild(d);
+    });
+  }
+
+  if(name==="storage"){
+    let bytes=0;
+    try{bytes=(localStorage.getItem(STORAGE_KEY)||"").length*2;}catch(e){}
+    const kb=Math.round(bytes/1024);
+    const st=planState();
+    const stText=st==="full"?"Forfait actif":st==="limited"?"Forfait épuisé : mode texte seulement":"Recharge nécessaire";
+    const used=Math.min(plan.used,7200);
+
+    box.innerHTML=`
+      <div class="info-card">
+        <strong>Stockage</strong><br>
+        Historique sur cet appareil : ${kb>1024?(kb/1024).toFixed(1)+" Mo":kb+" Ko"}<br><br>
+        <strong>Forfait</strong><br>
+        ${stText}<br>
+        Temps utilisé : ${Math.floor(used/60)} min sur 120 min
+      </div>
+      <div class="toggle-row" style="margin-top:10px">
+        <span>Notifications</span>
+        <button class="switch ${settings.notif?"on":""}" id="notifSwitch" aria-label="Notifications"></button>
+      </div>`;
+
+    $("notifSwitch").addEventListener("click",async()=>{
+      settings.notif=!settings.notif;
+      if(settings.notif&&"Notification" in window&&Notification.permission==="default"){
+        try{await Notification.requestPermission();}catch(e){}
+      }
+      saveSettings();
+      $("notifSwitch").classList.toggle("on",settings.notif);
+      showToast(settings.notif?"Notifications activées":"Notifications désactivées");
+    });
+  }
+
+  if(name==="clear"){
+    box.innerHTML=`
+      <div class="info-card">
+        <h3 style="margin-top:0">Effacer les discussions</h3>
+        Cette action supprimera l'historique de tes conversations et tes souvenirs enregistrés sur cet appareil. Cette opération ne peut pas être annulée.
+        <button class="action-button danger-button" id="clearStart">Effacer toutes les discussions</button>
+      </div>`;
+
+    $("clearStart").addEventListener("click",confirmClear);
+  }
+}
+
+async function chooseTheme(id,accent){
+  if(!navigator.onLine){showToast("Connexion requise");return;}
+  if(!requireFull()) return;
+  if(settings.theme===id) return;
+
+  await busy("en train de charger le thème...",2000,accent);
+  settings.theme=id;
+  saveSettings();
+  applySettings();
+  busyDone();
+  renderSubpage("theme");
+}
+
+/* BUSY (cercle de chargement) */
+function busy(label,ms,color){
+  const o=$("busyOverlay");
+  $("busyText").textContent=label;
+  o.classList.remove("done");
+  o.style.setProperty("--spin",color||"var(--accent)");
+  o.classList.add("show");
+  return sleep(ms);
+}
+function busyDone(){
+  $("busyOverlay").classList.remove("show","done");
+}
+
+/* NAVIGATION */
+$("settingsBtn").addEventListener("click",openSettings);
+$("menuBtn").addEventListener("click",openDrawer);
+
+document.querySelectorAll(".backSettings").forEach(b=>{
+  b.addEventListener("click",backFromSettings);
+});
+
+$("subBackBtn").addEventListener("click",()=>showPage("settingsPage"));
+$("searchBackBtn").addEventListener("click",()=>showPage(returnTo));
+$("memoryBackBtn").addEventListener("click",()=>showPage(returnTo));
+$("toolBackBtn").addEventListener("click",()=>showPage(returnTo));
+
+document.querySelectorAll("[data-sub]").forEach(b=>{
+  b.addEventListener("click",()=>openSubpage(b.dataset.sub));
+});
+
+function openDrawer(){
+  renderConversationList();
+  $("drawerOverlay").classList.add("show");
+}
+function closeDrawer(){
+  $("drawerOverlay").classList.remove("show");
+}
+
+$("drawerOverlay").addEventListener("click",e=>{
+  if(e.target===$("drawerOverlay")) closeDrawer();
+});
+
+$("navNew").addEventListener("click",()=>{
+  closeDrawer();
+  startNewChat();
+});
+
+$("navSearch").addEventListener("click",()=>{
+  closeDrawer();
+  returnTo=currentPage==="chatPage"?"chatPage":"homePage";
+  $("searchInput").value="";
+  renderSearch("");
+  showPage("searchPage");
+  setTimeout(()=>$("searchInput").focus(),150);
+});
+
+$("navMemory").addEventListener("click",()=>{
+  closeDrawer();
+  returnTo=currentPage==="chatPage"?"chatPage":"homePage";
+  renderMemoryPage();
+  showPage("memoryPage");
+});
+
+function renderConversationList(){
+  const list=$("conversationList");
+  list.innerHTML="";
+
+  conversations.forEach(c=>{
+    if(!c.messages.length&&c.id!==currentConversationId) return;
+
+    const b=document.createElement("button");
+    b.className="conversation-item";
+    b.textContent=c.title||"Nouvelle discussion";
+
+    b.addEventListener("click",()=>{
+      currentConversationId=c.id;
+      closeDrawer();
+      renderMessages();
+      showPage(c.messages.length?"chatPage":"homePage");
+    });
+
+    list.appendChild(b);
+  });
+}
+
+/* RECHERCHE DANS LES MESSAGES */
+function renderSearch(q){
+  const box=$("searchResults");
+  box.innerHTML="";
+  q=q.trim().toLowerCase();
+
+  if(q.length<2){
+    box.innerHTML='<div class="empty-hint">Tape au moins 2 lettres pour chercher dans tes messages.</div>';
+    return;
+  }
+
+  let count=0;
+  conversations.forEach(c=>{
+    c.messages.forEach(m=>{
+      if(count>=50||!m.text||!m.text.toLowerCase().includes(q)) return;
+      count++;
+
+      const b=document.createElement("button");
+      b.className="result-item";
+      const t=document.createElement("div");
+      t.className="r-title";
+      t.textContent=(c.title||"Discussion")+" · "+(m.role==="user"?"Toi":"Nova AI");
+      const x=document.createElement("div");
+      x.className="r-text";
+      x.textContent=m.text;
+      b.append(t,x);
+
+      b.addEventListener("click",()=>{
+        currentConversationId=c.id;
+        renderMessages();
+        showPage("chatPage");
+        setTimeout(()=>{
+          const row=document.querySelector(`[data-message-id="${m.id}"]`);
+          if(row){
+            row.scrollIntoView({block:"center"});
+            row.classList.add("flash");
+            setTimeout(()=>row.classList.remove("flash"),1800);
+          }
+        },120);
+      });
+
+      box.appendChild(b);
+    });
+  });
+
+  if(!count) box.innerHTML='<div class="empty-hint">Aucun message trouvé.</div>';
+}
+$("searchInput").addEventListener("input",()=>renderSearch($("searchInput").value));
+
+/* MÉMOIRE (oubli après 2 jours) */
+function loadMemory(){
+  try{
+    const arr=JSON.parse(localStorage.getItem(MEMORY_KEY)||"[]");
+    const now=Date.now();
+    const ok=(Array.isArray(arr)?arr:[]).filter(x=>x&&x.text&&now-x.ts<MEMORY_TTL);
+    if(ok.length!==arr.length) localStorage.setItem(MEMORY_KEY,JSON.stringify(ok));
+    return ok;
+  }catch(e){return [];}
+}
+function saveMemory(arr){
+  try{localStorage.setItem(MEMORY_KEY,JSON.stringify(arr));}catch(e){}
+}
+function addMemory(text){
+  const arr=loadMemory();
+  arr.push({id:uid(),text:text.slice(0,300),ts:Date.now()});
+  saveMemory(arr.slice(-30));
+}
+function renderMemoryPage(){
+  const box=$("memoryList");
+  const arr=loadMemory();
+  box.innerHTML="";
+
+  if(!arr.length){
+    box.innerHTML='<div class="empty-hint">Aucun souvenir pour le moment.<br>Dis « mémorise ça » ou « rappelle-toi » pour que je retienne quelque chose pendant 2 jours.</div>';
+    return;
+  }
+
+  arr.slice().reverse().forEach(x=>{
+    const row=document.createElement("div");
+    row.className="memory-item";
+
+    const wrap=document.createElement("div");
+    wrap.className="m-text";
+    wrap.textContent=x.text;
+
+    const left=Math.max(0,MEMORY_TTL-(Date.now()-x.ts));
+    const h=Math.ceil(left/3600000);
+    const time=document.createElement("span");
+    time.className="m-time";
+    time.textContent="Oublié dans "+(h>=24?Math.floor(h/24)+" j "+(h%24)+" h":h+" h");
+    wrap.appendChild(time);
+
+    const del=document.createElement("button");
+    del.className="mini-x";
+    del.setAttribute("aria-label","Supprimer");
+    del.innerHTML='<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+    del.addEventListener("click",()=>{
+      saveMemory(loadMemory().filter(y=>y.id!==x.id));
+      renderMemoryPage();
+    });
+
+    row.append(wrap,del);
+    box.appendChild(row);
+  });
+}
+
+/* ACCUEIL */
+document.querySelectorAll(".suggestion").forEach(b=>{
+  b.addEventListener("click",()=>{
+    if(b.dataset.action==="image"){
+      openImageSheet();
+      return;
+    }
+    $("messageInput").value=b.textContent;
+    sendMessage();
+  });
+});
+
+/* AFFICHAGE DES MESSAGES */
+function scrollBottom(){
+  const el=$("messages");
+  el.scrollTop=el.scrollHeight;
+}
+
+function renderMessages(){
+  const c=currentConversation();
+  $("messages").innerHTML="";
+  if(!c) return;
+  c.messages.forEach(m=>renderMessage(m,false));
+  scrollBottom();
+}
+
+/* FORMATAGE SÉCURISÉ DU TEXTE */
+function cleanAIText(text){
+  return String(text||"")
+    .normalize("NFC")
+    .replace(/\u0000/g,"")
+    .replace(/[\u200B-\u200D\uFEFF]/g,"")
+    .replace(/\uFFFD/g,"");
+}
+
+function appendInlineFormatted(container,text){
+  const regex=/(\*\*(?!\s)[^*\n]+?(?<!\s)\*\*|(?<!\w)__(?!\s)[^_\n]+?(?<!\s)__(?!\w)|\*(?![\s*])[^*\n]+?(?<![\s*])\*|(?<![\w])_(?![\s_])[^_\n]+?(?<![\s_])_(?![\w])|`[^`\n]+`)/g;
+  let last=0;
+  let match;
+
+  while((match=regex.exec(text))){
+    if(match.index>last){
+      container.appendChild(document.createTextNode(text.slice(last,match.index)));
+    }
+
+    const token=match[0];
+    const el=document.createElement(
+      token.startsWith("**")||token.startsWith("__")?"strong":
+      token.startsWith("`")?"code":"em"
+    );
+
+    el.textContent=token.replace(/^(\*\*|__|\*|_|`)|(\*\*|__|\*|_|`)$/g,"");
+    container.appendChild(el);
+    last=regex.lastIndex;
+  }
+
+  if(last<text.length){
+    container.appendChild(document.createTextNode(text.slice(last)));
+  }
+}
+
+function appendFormattedLine(container,line){
+  const div=document.createElement("div");
+
+  if(!line.trim()){
+    div.className="message-line blank";
+    container.appendChild(div);
+    return;
+  }
+
+  div.className="message-line";
+  let text=line.trimEnd();
+
+  if(/^#{1,6}\s/.test(text)){
+    text=text.replace(/^#{1,6}\s+/,"");
+    const strong=document.createElement("strong");
+    appendInlineFormatted(strong,text);
+    div.appendChild(strong);
+  }else if(/^[-*+]\s/.test(text)){
+    div.textContent="• ";
+    appendInlineFormatted(div,text.replace(/^[-*+]\s+/,""));
+  }else if(/^\d+\.\s/.test(text)){
+    const match=text.match(/^(\d+\.)\s/);
+    div.textContent=match[1]+" ";
+    appendInlineFormatted(div,text.slice(match[0].length));
+  }else if(/^---+$/.test(text)){
+    div.textContent=" ";
+  }else{
+    appendInlineFormatted(div,text);
+  }
+
+  container.appendChild(div);
+}
+
+function splitCode(text){
+  const out=[];
+  const regex=/```([a-zA-Z0-9_+#-]*)[ \t]*\n?([\s\S]*?)```/g;
+  let last=0,match;
+
+  while((match=regex.exec(text))){
+    if(match.index>last){
+      out.push({text:text.slice(last,match.index),code:false});
+    }
+    out.push({text:match[2].replace(/\n$/,""),code:true,lang:match[1]});
+    last=regex.lastIndex;
+  }
+
+  if(last<text.length){
+    out.push({text:text.slice(last),code:false});
+  }
+
+  if(!out.length) out.push({text,code:false});
+  return out;
+}
+
+function renderTextPart(container,text){
+  text.split("\n").forEach(line=>appendFormattedLine(container,line));
+}
+
+/* COLORATION SYNTAXIQUE */
+function esc(s){
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+const HL_RE=/(\/\/[^\n]*|#[ \t][^\n]*|\/\*[\s\S]*?\*\/|<!--[\s\S]*?-->)|("(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'|`(?:\\.|[^`\\])*`)|(<\/?[A-Za-z][\w-]*)|(\b\d+(?:\.\d+)?\b)|(\b(?:function|const|let|var|return|if|else|elif|for|while|class|def|import|from|as|in|not|and|or|try|except|catch|finally|new|this|self|async|await|true|false|null|None|True|False|export|default|lambda|with|pass|break|continue|switch|case|throw|raise|yield|typeof|public|private|static|void)\b)/g;
+
+function highlight(code){
+  let out="",last=0,m;
+  HL_RE.lastIndex=0;
+  while((m=HL_RE.exec(code))){
+    out+=esc(code.slice(last,m.index));
+    const cls=m[1]?"c":m[2]?"s":m[3]?"t":m[4]?"n":"k";
+    out+='<span class="hl-'+cls+'">'+esc(m[0])+'</span>';
+    last=HL_RE.lastIndex;
+  }
+  return out+esc(code.slice(last));
+}
+
+const EXT={html:"html",python:"py",py:"py",javascript:"js",js:"js",css:"css",json:"json",java:"java",txt:"txt",text:"txt",md:"md",markdown:"md",sql:"sql",php:"php",c:"c",cpp:"cpp",bash:"sh",sh:"sh",xml:"xml",ts:"ts",typescript:"ts"};
+
+function renderCodePart(container,part,withDownload){
+  const wrap=document.createElement("div");
+  wrap.className="code-wrap";
+
+  const head=document.createElement("div");
+  head.className="code-head";
+
+  const label=document.createElement("span");
+  label.textContent=part.lang||"Code";
+
+  const btns=document.createElement("div");
+  btns.className="code-btns";
+
+  const copy=document.createElement("button");
+  copy.textContent="Copier";
+  copy.addEventListener("click",()=>copyText(part.text));
+  btns.appendChild(copy);
+
+  if(withDownload){
+    const dl=document.createElement("button");
+    dl.textContent="Télécharger";
+    dl.addEventListener("click",()=>{
+      const ext=EXT[(part.lang||"").toLowerCase()]||"txt";
+      downloadBlob(new Blob([part.text],{type:"text/plain"}),"nova-fichier."+ext);
+    });
+    btns.appendChild(dl);
+  }
+
+  head.append(label,btns);
+
+  const pre=document.createElement("pre");
+  const code=document.createElement("code");
+  code.innerHTML=highlight(part.text);
+
+  pre.appendChild(code);
+  wrap.append(head,pre);
+  container.appendChild(wrap);
+}
+
+/* Rendu riche (texte + code) dans un conteneur, y compris texte partiel */
+function renderRich(container,text){
+  container.innerHTML="";
+  if((text.match(/```/g)||[]).length%2===1) text+="\n```";
+
+  splitCode(text).forEach(part=>{
+    if(part.code){
+      renderCodePart(container,part);
+    }else if(part.text.trim()){
+      const bubble=document.createElement("div");
+      bubble.className="bubble";
+      renderTextPart(bubble,part.text);
+      container.appendChild(bubble);
+    }
+  });
+}
+
+function renderMessage(m,scroll=true){
+  const row=document.createElement("div");
+  row.className="message-row "+(m.role==="user"?"user":"ai");
+  row.dataset.messageId=m.id;
+
+  if(m.image){
+    const img=document.createElement("img");
+    img.className="message-image";
+    img.src=m.image;
+    img.alt="Image de la conversation";
+    row.appendChild(img);
+    addImageActions(row,m.image);
+  }
+
+  if(m.quote){
+    const q=document.createElement("div");
+    q.className="quote-block";
+    q.textContent=m.quote;
+    row.appendChild(q);
+  }
+
+  if(m.text){
+    const body=document.createElement("div");
+    body.className="msg-body";
+    renderRich(body,m.text);
+    row.appendChild(body);
+  }
+
+  if(m.role==="user"){
+    if(m.status) row.appendChild(makeStatusEl(m.status));
+  }else if(m.role==="assistant"){
+    addAIActions(row,m);
+  }
+
+  addLongPress(row,m);
+
+  $("messages").appendChild(row);
+  if(scroll) scrollBottom();
+  return row;
+}
+
+function makeStatusEl(status){
+  const el=document.createElement("div");
+  el.className="message-status"+(status==="Message non envoyé"?" failed":"");
+  el.textContent=status==="Envoi"?"Envoi...":status;
+  return el;
+}
+
+/* ACTIONS SUR IMAGE : Voir / Télécharger / Partager */
+function addImageActions(row,src){
+  const bar=document.createElement("div");
+  bar.className="image-actions";
+
+  const see=document.createElement("button");
+  see.textContent="Voir";
+  see.addEventListener("click",()=>{
+    $("viewerImg").src=src;
+    $("viewer").classList.add("show");
+  });
+
+  const dl=document.createElement("button");
+  dl.textContent="Télécharger";
+  dl.addEventListener("click",()=>downloadImage(src));
+
+  const sh=document.createElement("button");
+  sh.textContent="Partager";
+  sh.addEventListener("click",()=>shareImage(src));
+
+  bar.append(see,dl,sh);
+  row.appendChild(bar);
+}
+
+$("viewerClose").addEventListener("click",()=>$("viewer").classList.remove("show"));
+$("viewer").addEventListener("click",e=>{
+  if(e.target===$("viewer")) $("viewer").classList.remove("show");
+});
+
+async function imageToBlob(src){
+  const r=await fetch(src);
+  return await r.blob();
+}
+
+function downloadBlob(blob,name){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download=name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),4000);
+}
+
+async function downloadImage(src){
+  try{
+    const blob=await imageToBlob(src);
+    const ext=(blob.type.split("/")[1]||"jpg").replace("jpeg","jpg");
+    downloadBlob(blob,"nova-image."+ext);
+    showToast("Image téléchargée");
+  }catch(e){
+    showToast("Téléchargement impossible");
+  }
+}
+
+async function shareImage(src){
+  try{
+    const blob=await imageToBlob(src);
+    const file=new File([blob],"nova-image."+((blob.type.split("/")[1]||"jpg").replace("jpeg","jpg")),{type:blob.type||"image/jpeg"});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      await navigator.share({files:[file]});
+    }else{
+      showToast("Partage d'image indisponible");
+    }
+  }catch(e){
+    if(e&&e.name!=="AbortError") showToast("Partage impossible");
+  }
+}
+
+/* ACTIONS SOUS LES MESSAGES IA */
+function addAIActions(row,m){
+  const actions=document.createElement("div");
+  actions.className="ai-actions";
+
+  actions.innerHTML=`
+    <button aria-label="J'aime">
+      <svg viewBox="0 0 24 24"><path d="M7 10v11H4V10h3Zm0 0 5-7c2 0 3 2 2 4l-1 3h6a2 2 0 0 1 2 2l-2 7a2 2 0 0 1-2 2H7"/></svg>
+    </button>
+    <button aria-label="Je n'aime pas">
+      <svg viewBox="0 0 24 24"><path d="M7 14V3H4v11h3Zm0 0 5 7c2 0 3-2 2-4l-1-3h6a2 2 0 0 0 2-2l-2-7a2 2 0 0 0-2-2H7"/></svg>
+    </button>
+    <button aria-label="Copier">
+      <svg viewBox="0 0 24 24"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>
+    </button>
+    <button aria-label="Partager">
+      <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.7 10.7 6.6-4.4m-6.6 7 6.6 4.4"/></svg>
+    </button>
+    <button aria-label="Lire à voix haute">
+      <svg viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>
+    </button>`;
+
+  const b=actions.querySelectorAll("button");
+
+  if(m.rating==="up") b[0].classList.add("on");
+  if(m.rating==="down") b[1].classList.add("on");
+
+  b[0].addEventListener("click",()=>{
+    m.rating="up";
+    b[0].classList.add("on");
+    b[1].classList.remove("on");
+    saveData();
+    showToast("Avis envoyé");
+  });
+  b[1].addEventListener("click",()=>{
+    m.rating="down";
+    b[1].classList.add("on");
+    b[0].classList.remove("on");
+    saveData();
+    showToast("Avis envoyé");
+  });
+  b[2].addEventListener("click",()=>copyText(m.text||""));
+  b[3].addEventListener("click",()=>shareText(m.text||""));
+  b[4].addEventListener("click",()=>speak(m.text||""));
+
+  row.appendChild(actions);
+}
+
+function plainText(t){
+  return String(t||"").replace(/```[\s\S]*?```/g," ").replace(/[*_`#]/g,"");
+}
+
+function speak(text){
+  if(!("speechSynthesis" in window)){
+    showToast("Lecture vocale indisponible");
+    return;
+  }
+  if(speechSynthesis.speaking){
+    speechSynthesis.cancel();
+    return;
+  }
+  const u=new SpeechSynthesisUtterance(plainText(text));
+  u.lang={fr:"fr-FR",en:"en-US",sw:"sw-KE"}[settings.lang]||"fr-FR";
+  speechSynthesis.speak(u);
+}
+
+/* IMPRESSION PROGRESSIVE : caractère par caractère, 25 ms */
+async function typeAssistantMessage(text,conversationId){
+  const c=conversations.find(x=>x.id===conversationId);
+  if(!c) return null;
+
+  const clean=cleanAIText(text);
+  const m={
+    id:uid(),
+    role:"assistant",
+    text:clean,
+    timestamp:Date.now()
+  };
+
+  c.messages.push(m);
+  saveData();
+
+  if(currentConversationId!==conversationId) return m;
+
+  const row=document.createElement("div");
+  row.className="message-row ai";
+  row.dataset.messageId=m.id;
+
+  const body=document.createElement("div");
+  body.className="msg-body";
+  row.appendChild(body);
+  $("messages").appendChild(row);
+
+  let i=0;
+  let skip=false;
+  row.addEventListener("click",()=>{skip=true;});
+
+  await new Promise(resolve=>{
+    const timer=setInterval(()=>{
+      if(!row.isConnected){
+        clearInterval(timer);
+        resolve();
+        return;
+      }
+
+      i=skip?clean.length:i+1;
+
+      /* évite de couper un emoji en deux */
+      const code=clean.charCodeAt(i-1);
+      if(i<clean.length&&code>=0xD800&&code<=0xDBFF) i++;
+
+      renderRich(body,clean.slice(0,i));
+      scrollBottom();
+
+      if(i>=clean.length){
+        clearInterval(timer);
+        resolve();
+      }
+    },25);
+  });
+
+  if(row.isConnected){
+    renderRich(body,clean);
+    addAIActions(row,m);
+    addLongPress(row,m);
+    scrollBottom();
+  }
+
+  if(settings.notif&&document.hidden&&"Notification" in window&&Notification.permission==="granted"){
+    try{new Notification("Nova AI",{body:"Nouvelle réponse"});}catch(e){}
+  }
+
+  return m;
+}
+
+/* APPUI LONG (3 s) SUR UN MESSAGE */
+function addLongPress(row,m){
+  if(row._lp) return;
+  row._lp=true;
+  let timer=null;
+
+  const start=()=>{
+    clearTimeout(timer);
+    timer=setTimeout(()=>openMessageSheet(m),3000);
+  };
+  const cancel=()=>clearTimeout(timer);
+
+  row.addEventListener("touchstart",start,{passive:true});
+  row.addEventListener("touchend",cancel);
+  row.addEventListener("touchmove",cancel);
+  row.addEventListener("mousedown",start);
+  row.addEventListener("mouseup",cancel);
+  row.addEventListener("mouseleave",cancel);
+  row.addEventListener("contextmenu",e=>e.preventDefault());
+}
+
+const ICON_COPY='<svg viewBox="0 0 24 24"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>';
+const ICON_SHARE='<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.7 10.7 6.6-4.4m-6.6 7 6.6 4.4"/></svg>';
+const ICON_EDIT='<svg viewBox="0 0 24 24"><path d="m15 5 4 4M4 20l4-.8L19 8a2.8 2.8 0 0 0-4-4L4 15Z"/></svg>';
+const ICON_REPLY='<svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M20 20v-6a5 5 0 0 0-5-5H4"/></svg>';
+
+function openMessageSheet(m){
+  const isUser=m.role==="user";
+
+  showSheet(`
+    <div class="sheet-title">Message</div>
+    ${isUser
+      ?`<button class="sheet-action" id="editMessage">${ICON_EDIT} Modifier le message</button>`
+      :`<button class="sheet-action" id="replyMessage">${ICON_REPLY} Répondre à l'AI</button>`}
+    <button class="sheet-action" id="copyMessage">${ICON_COPY} Copier</button>
+    <button class="sheet-action" id="shareMessage">${ICON_SHARE} Partager</button>`);
+
+  if(isUser){
+    $("editMessage").onclick=()=>editMessage(m);
+  }else{
+    $("replyMessage").onclick=()=>{
+      closeSheet();
+      setReply(m.text||"");
+    };
+  }
+  $("copyMessage").onclick=()=>{copyText(m.text||"");closeSheet();};
+  $("shareMessage").onclick=()=>{shareText(m.text||"");closeSheet();};
+}
+
+function editMessage(m){
+  showSheet(`
+    <div class="sheet-title">Modifier le message</div>
+    <textarea class="sheet-textarea" id="editText"></textarea>
+    <button class="action-button" id="saveEdit">Enregistrer</button>`);
+
+  $("editText").value=m.text||"";
+
+  $("saveEdit").onclick=()=>{
+    m.text=$("editText").value.trim();
+    saveData();
+    renderMessages();
+    closeSheet();
+    showToast("Message modifié");
+  };
+}
+
+/* CITATION (répondre à un message de l'AI) */
+function setReply(text){
+  replyTo=String(text||"").replace(/```[\s\S]*?```/g," [code] ").trim().slice(0,220);
+  if(!replyTo) return;
+  $("replyText").textContent=replyTo;
+  $("replyBar").classList.add("show");
+  $("messageInput").focus();
+}
+function clearReply(){
+  replyTo="";
+  $("replyBar").classList.remove("show");
+}
+$("replyRemove").addEventListener("click",clearReply);
+
+/* FEUILLE INTERNE */
+function showSheet(html){
+  $("sheetContent").innerHTML=html;
+  $("sheetOverlay").classList.add("show");
+}
+function closeSheet(){
+  $("sheetOverlay").classList.remove("show");
+}
+$("sheetOverlay").addEventListener("click",e=>{
+  if(e.target===$("sheetOverlay")) closeSheet();
+});
+
+/* EFFACEMENT */
+function confirmClear(){
+  showSheet(`
+    <div class="sheet-title">Effacer les discussions ?</div>
+    <p class="sub-description">Toutes les conversations et souvenirs enregistrés sur cet appareil seront supprimés.</p>
+    <button class="action-button danger-button" id="confirmClearBtn">Confirmer la suppression</button>
+    <button class="action-button grey-button" id="cancelClearBtn">Annuler</button>`);
+
+  $("cancelClearBtn").onclick=closeSheet;
+
+  $("confirmClearBtn").onclick=async()=>{
+    closeSheet();
+    await busy("suppression en cours...",4000);
+
+    try{
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(MEMORY_KEY);
+    }catch(e){}
+
+    conversations=[];
+    createConversation(false);
+    renderConversationList();
+    showPage("homePage");
+
+    $("busyText").textContent="Supprimé avec succès";
+    $("busyOverlay").classList.add("done");
+    await sleep(1800);
+    busyDone();
+  };
+}
+
+/* MESSAGES UTILISATEUR */
+function addUserMessage(text,image,quote){
+  const c=currentConversation();
+
+  const m={
+    id:uid(),
+    role:"user",
+    text:text||"",
+    image:image||null,
+    quote:quote||"",
+    status:"Envoi",
+    timestamp:Date.now()
+  };
+
+  c.messages.push(m);
+
+  if(c.title==="Nouvelle discussion"){
+    c.title=text?text.slice(0,35):"Image";
+  }
+
+  saveData();
+  renderMessage(m);
+  renderConversationList();
+  return m;
+}
+
+/* Indicateur IA (4 animations différentes selon le contexte) */
+function showAIStatus(label){
+  let el=$("aiStatus");
+  if(!el){
+    el=document.createElement("div");
+    el.className="message-row ai";
+    el.id="aiStatus";
+    el.innerHTML='<div class="ai-status"></div>';
+    $("messages").appendChild(el);
+  }
+  el.firstChild.textContent=label;
+  scrollBottom();
+}
+function hideAIStatus(){
+  const el=$("aiStatus");
+  if(el) el.remove();
+}
+
+function setStatus(conversationId,messageId,status){
+  const c=conversations.find(x=>x.id===conversationId);
+  const m=c?.messages.find(x=>x.id===messageId);
+  if(!m) return;
+
+  m.status=status;
+  saveData();
+
+  if(currentConversationId===conversationId){
+    const row=document.querySelector(`[data-message-id="${messageId}"]`);
+    if(!row) return;
+    const old=row.querySelector(".message-status");
+    if(!status){
+      if(old) old.remove();
+    }else{
+      const el=makeStatusEl(status);
+      if(old) old.replaceWith(el); else row.appendChild(el);
+    }
+  }
+}
+
+function scheduleFail(conversationId,messageId,wait){
+  setTimeout(()=>{
+    const c=conversations.find(x=>x.id===conversationId);
+    const m=c?.messages.find(x=>x.id===messageId);
+    if(m&&m.status==="Envoi") setStatus(conversationId,messageId,"Message non envoyé");
+  },wait);
+}
+
+/* PERSONNALITÉ ET INSTRUCTIONS DE L'IA */
+const NOVA_SYSTEM_PROMPT =
+`Tu es NOVA AI, un assistant intelligent francophone.
+
+PERSONNALITÉ :
+Tu es à la fois un frère, un pote, un coach, un prof sérieux et un professionnel, selon le contexte. Tu es respectueux, direct, drôle quand ça s'y prête, et motivant. Tu ne dis jamais "désolé".
+Adapte naturellement ton ton à ce que l'utilisateur écrit :
+- Moment difficile ou tristesse : sois doux, rassurant, patient et respectueux. Écoute sans juger.
+- Discussion quotidienne : sois amical, chaleureux et naturel, comme un ami bienveillant.
+- Sujets importants, technique, professionnel : sois sérieux, précis et organisé.
+- Quand le contexte s'y prête : sois léger et amusant, sans forcer les blagues.
+- Quand l'utilisateur apprend : sois pédagogue, patient et encourageant.
+- Besoin de motivation : encourage de manière réaliste et positive.
+- Situation sensible : respect et bienveillance avant l'humour.
+- Ne prétends pas être un être humain, n'invente pas d'émotions ni de vie personnelle.
+- Si l'utilisateur dit "n'en mets pas trop" ou équivalent, réponds simplement "Compris." puis adapte-toi.
+
+LONGUEUR DES RÉPONSES (comme Meta AI) :
+- Message très court de l'utilisateur ("ok", "merci") : 2 à 7 lettres, par exemple "ok Boss".
+- Question simple : 150 à 300 caractères.
+- Explication : 800 à 1200 caractères bien organisés, sauf si l'utilisateur demande plus.
+- À la fin d'une explication, propose une suite utile, par exemple : "Tu veux que je montre les stats ou que j'explique plus simplement ?"
+- Pas de longues introductions, pas de répétitions, pas de questions inutiles.
+
+EMOJIS :
+Ne recopie jamais les emojis de l'utilisateur. Utilise 0 emoji, ou 1 au maximum tous les 2 messages.
+
+FORMAT :
+Paragraphes aérés, listes seulement quand elles sont utiles. Markdown propre : titres avec #, listes avec -, gras avec **.
+N'utilise aucune décoration comme _ ~ | ou des crochets décoratifs, ni symboles aléatoires.
+Quand tu écris du code, mets-le dans un bloc de code avec le nom du langage.
+Si l'utilisateur envoie du code, propose-lui de l'expliquer, le corriger ou l'améliorer.
+
+RÈGLES :
+N'invente pas de faits et indique clairement les incertitudes.
+Réponds toujours dans la langue utilisée par l'utilisateur, sauf demande contraire.`;
+
+function langLine(){
+  const names={fr:"français",en:"anglais",sw:"swahili"};
+  return "\n\nLangue préférée de l'utilisateur : "+(names[settings.lang]||"français")+". Utilise-la si la langue du message est ambiguë.";
+}
+
+function buildSystemPrompt(extra){
+  let s=NOVA_SYSTEM_PROMPT+langLine();
+  const mem=loadMemory();
+  if(mem.length){
+    s+="\n\nSOUVENIRS DE L'UTILISATEUR (valables 2 jours) :\n"+mem.map(x=>"- "+x.text).join("\n");
+  }
+  if(extra) s+="\n\n"+extra;
+  return s;
+}
+
+function buildApiMessages(conversation,extra){
+  const history=conversation.messages
+    .filter(m=>(m.role==="user"||m.role==="assistant")&&!m.failed&&(m.text||m.image))
+    .slice(-24);
+
+  let lastImg=-1;
+  history.forEach((m,i)=>{if(m.role==="user"&&m.image) lastImg=i;});
+
+  const mapped=history.map((m,i)=>{
+    const role=m.role==="assistant"?"assistant":"user";
+    let text=m.text||"";
+
+    if(m.quote&&role==="user"){
+      text='[En réponse à ce message de l\'assistant : "'+m.quote+'"]\n'+text;
+    }
+
+    /* Seule l'image la plus récente est envoyée en multimodal (payload plus léger) */
+    if(m.image&&role==="user"){
+      if(i===lastImg){
+        return {
+          role:"user",
+          content:[
+            {type:"text",text:text||"Analyse cette image et décris ce que tu observes."},
+            {type:"image_url",image_url:{url:m.image}}
+          ]
+        };
+      }
+      return {role:"user",content:(text?text+" ":"")+"[image envoyée plus tôt]"};
+    }
+
+    return {role,content:text||"[image générée]"};
+  });
+
+  return [{role:"system",content:buildSystemPrompt(extra)},...mapped];
+}
+
+/* API SUPABASE */
+async function callNovaAI(messages){
+  const ctrl=new AbortController();
+  const t=setTimeout(()=>ctrl.abort(),90000);
+
+  try{
+    const response=await fetch(NOVA_ENDPOINT,{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "apikey":SUPABASE_ANON_KEY
+      },
+      body:JSON.stringify({action:"chat",messages}),
+      signal:ctrl.signal
+    });
+
+    if(!response.ok) throw new Error("request_failed");
+
+    const data=await response.json();
+    const result=
+      data.choices?.[0]?.message?.content||
+      data.message||
+      data.response||
+      data.text;
+
+    if(typeof result!=="string"||!result.trim()) throw new Error("empty_response");
+
+    return cleanAIText(result.trim());
+  }finally{
+    clearTimeout(t);
+  }
+}
+
+async function generateImage(prompt){
+  const response=await fetch(NOVA_ENDPOINT,{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "apikey":SUPABASE_ANON_KEY
+    },
+    body:JSON.stringify({action:"image",prompt,width:512,height:512})
+  });
+
+  if(!response.ok) throw new Error("image_failed");
+
+  const data=await response.json();
+  const image=data.image_url||data.image;
+  if(!image) throw new Error("image_empty");
+  return image;
+}
+
+/* RECHERCHE WEB LÉGÈRE (jamais bloquante) */
+const SEARCH_TRIGGER=/(\bdate\b|\bprix\b|actu|2026|2025|m[ée]t[ée]o|\bscore\b|qui est|aujourd)/i;
+
+async function webSearch(q){
+  const query=q.slice(0,120);
+
+  try{
+    const ctrl=new AbortController();
+    const t=setTimeout(()=>ctrl.abort(),5000);
+    const r=await fetch("https://api.duckduckgo.com/?q="+encodeURIComponent(query)+"&format=json&no_html=1&skip_disambig=1",{signal:ctrl.signal});
+    clearTimeout(t);
+    const d=await r.json();
+    const txt=d.AbstractText||(d.RelatedTopics&&d.RelatedTopics[0]&&d.RelatedTopics[0].Text)||"";
+    if(txt) return txt.slice(0,700);
+  }catch(e){}
+
+  try{
+    const ctrl=new AbortController();
+    const t=setTimeout(()=>ctrl.abort(),5000);
+    const r=await fetch("https://fr.wikipedia.org/w/api.php?action=query&list=search&srlimit=1&format=json&origin=*&srsearch="+encodeURIComponent(query),{signal:ctrl.signal});
+    clearTimeout(t);
+    const d=await r.json();
+    const hit=d.query&&d.query.search&&d.query.search[0];
+    if(hit) return (hit.title+" : "+hit.snippet.replace(/<[^>]+>/g,"")).slice(0,700);
+  }catch(e){}
+
+  return "";
+}
+
+/* FORFAIT / SANS FORFAIT */
+function planLoad(){
+  try{plan={...plan,...JSON.parse(localStorage.getItem(PLAN_KEY)||"{}")};}catch(e){}
+}
+function planSave(){
+  try{localStorage.setItem(PLAN_KEY,JSON.stringify(plan));}catch(e){}
+}
+
+/* full = forfait actif (7200 s) · limited = 1 h texte seulement · locked = coupé 24 h */
+function planState(){
+  const now=Date.now();
+
+  if(plan.lockUntil){
+    if(now>=plan.lockUntil){
+      plan={used:0,limitedStart:0,lockUntil:0};
+      planSave();
+    }else{
+      return "locked";
+    }
+  }
+
+  if(plan.used>=7200){
+    if(!plan.limitedStart){
+      plan.limitedStart=now;
+      planSave();
+    }
+    if(now-plan.limitedStart>=3600000){
+      plan.lockUntil=now+86400000;
+      planSave();
+      return "locked";
+    }
+    return "limited";
+  }
+  return "full";
+}
+
+function requireFull(){
+  const st=planState();
+  if(st!=="full"){
+    if(st==="locked") showRecharge();
+    else showToast("Recharge forfait pour débloquer");
+    return false;
+  }
+  return true;
+}
+
+function showRecharge(){
+  showSheet(`
+    <div class="sheet-title">Recharge pour continuer</div>
+    <p class="sub-description">Recharge forfait pour débloquer NOVA AI. Le chronomètre se remet à zéro dans 24 h.</p>
+    <button class="action-button" id="rechargeOk">Compris</button>`);
+  $("rechargeOk").onclick=closeSheet;
+}
+
+let lastPlanState="full";
+setInterval(()=>{
+  const before=planState();
+  if(before==="full"&&navigator.onLine&&!document.hidden){
+    plan.used++;
+    if(plan.used%15===0) planSave();
+  }
+  const now=planState();
+  if(now!==lastPlanState){
+    lastPlanState=now;
+    if(now==="limited") showToast("Forfait épuisé : texte seulement pendant 1 h");
+    if(now==="locked") showRecharge();
+  }
+},1000);
+
+/* ENVOI */
+function looksLikeCode(t){
+  if(/```/.test(t)) return true;
+  if(t.split("\n").length<3) return false;
+  let score=0;
+  if(/\b(def |function |class |import |#include|console\.log|print\(|const |let |var )|<\/?(html|div|body|script)/.test(t)) score++;
+  if(/[{};]\s*$/m.test(t)) score++;
+  if(/^\s{2,}\S/m.test(t)) score++;
+  if(/<\w+[^>]*>/.test(t)&&/<\/\w+>/.test(t)) score++;
+  return score>=2;
+}
+
+const MEMORY_TRIGGER=/(m[ée]morise|rappelle[- ]toi|souviens[- ]toi)/i;
+
+function resetInput(){
+  const el=$("messageInput");
+  el.value="";
+  el.style.height="45px";
+}
+
+async function sendMessage(opts){
+  if(sending) return;
+
+  const input=$("messageInput");
+  let text=input.value.trim();
+  const image=opts&&opts.imagePrompt?null:pendingImage;
+  let imagePrompt=opts&&opts.imagePrompt?opts.imagePrompt:null;
+
+  if(!imagePrompt&&text.toLowerCase().startsWith("/image ")){
+    imagePrompt=text.slice(7).trim();
+  }
+
+  if(imagePrompt) text="Génère une image : "+imagePrompt;
+  if(!text&&!image) return;
+
+  const st=planState();
+  if(st==="locked"){showRecharge();return;}
+  if(imagePrompt&&st!=="full"){showToast("Recharge forfait pour débloquer");return;}
+
+  /* Code détecté : analyse dans la page dédiée */
+  if(!imagePrompt&&!image&&text.length>60&&looksLikeCode(text)){
+    resetInput();
+    openTool("analyze",text,true);
+    return;
+  }
+
+  if(currentPage==="homePage"){
+    const cur=currentConversation();
+    if(!cur||cur.messages.length) createConversation(false);
+    showPage("chatPage");
+  }
+  if(!currentConversation()) createConversation(false);
+
+  const conversationId=currentConversationId;
+  const quote=replyTo;
+
+  resetInput();
+  clearPending();
+  clearReply();
+
+  const userMessage=addUserMessage(text,image,quote);
+  const mid=userMessage.id;
+  const started=Date.now();
+
+  if(!navigator.onLine){
+    scheduleFail(conversationId,mid,60000);
+    return;
+  }
+
+  sending=true;
+
+  let label=imagePrompt?"génération d'une image...":"en train de réfléchir...";
+  let stopSteps=null;
+
+  /* Envoi... -> Envoyé -> disparaît quand l'AI réfléchit */
+  const t1=setTimeout(()=>setStatus(conversationId,mid,"Envoyé"),700);
+  const t2=setTimeout(()=>{
+    setStatus(conversationId,mid,"");
+    if(currentConversationId===conversationId) showAIStatus(label);
+    if(imagePrompt) stopSteps=imageSteps();
+  },1400);
+
+  const setLabel=l=>{
+    label=l;
+    if($("aiStatus")) showAIStatus(l);
+  };
+
+  try{
+    if(imagePrompt){
+      if(!imagePrompt) throw new Error("empty_prompt");
+
+      const img=await generateImage(imagePrompt);
+
+      clearTimeout(t1);clearTimeout(t2);
+      if(stopSteps) stopSteps();
+      hideAIStatus();
+      setStatus(conversationId,mid,"");
+
+      const c=conversations.find(x=>x.id===conversationId);
+      if(c){
+        const imageMessage={
+          id:uid(),
+          role:"assistant",
+          text:"Voici l'image générée.",
+          image:img,
+          timestamp:Date.now()
+        };
+        c.messages.push(imageMessage);
+        saveData();
+        if(currentConversationId===conversationId) renderMessage(imageMessage);
+      }
+    }else{
+      let extra="";
+
+      /* Mémoire */
+      if(MEMORY_TRIGGER.test(text)){
+        const cleaned=text.replace(MEMORY_TRIGGER,"").replace(/^[\s,:;.!-]+/,"").trim();
+        let toStore=cleaned.length>3?cleaned:"";
+        if(!toStore){
+          const c0=conversations.find(x=>x.id===conversationId);
+          const prev=c0?c0.messages.filter(x=>x.role==="user"&&x.id!==mid&&x.text).slice(-1)[0]:null;
+          toStore=prev?prev.text:"";
+        }
+        if(toStore){
+          addMemory(toStore);
+          setLabel("mémorisé");
+          if(!$("aiStatus")&&currentConversationId===conversationId){
+            clearTimeout(t2);
+            setStatus(conversationId,mid,"");
+            showAIStatus("mémorisé");
+          }
+          await sleep(1300);
+          setLabel("en train de réfléchir...");
+          extra="L'utilisateur vient de te demander de mémoriser quelque chose. Confirme brièvement que c'est retenu pour 2 jours.";
+        }
+      }
+
+      /* Recherche web légère */
+      if(!extra&&SEARCH_TRIGGER.test(text)){
+        clearTimeout(t2);
+        setStatus(conversationId,mid,"");
+        if(currentConversationId===conversationId) showAIStatus("recherche sur les documents...");
+        label="recherche sur les documents...";
+        const found=await webSearch(text);
+        if(found){
+          extra="Informations trouvées sur le web (peuvent être imparfaites ou datées) :\n"+found+"\nCommence ta réponse par « D'après ce que j'ai trouvé... » et reste prudent sur les incertitudes.";
+        }
+        setLabel("en train de réfléchir...");
+      }
+
+      const conversation=conversations.find(c=>c.id===conversationId);
+      if(!conversation) throw new Error("conversation_missing");
+
+      const answer=await callNovaAI(buildApiMessages(conversation,extra));
+
+      clearTimeout(t1);clearTimeout(t2);
+      hideAIStatus();
+      setStatus(conversationId,mid,"");
+
+      await typeAssistantMessage(answer,conversationId);
+    }
+
+  }catch(error){
+    clearTimeout(t1);clearTimeout(t2);
+    if(stopSteps) stopSteps();
+    hideAIStatus();
+
+    /* Pas de connexion utilisable : "Envoi..." pendant 60 s puis "Message non envoyé" */
+    setStatus(conversationId,mid,"Envoi");
+    scheduleFail(conversationId,mid,Math.max(0,60000-(Date.now()-started)));
+  }finally{
+    sending=false;
+  }
+}
+
+function imageSteps(){
+  const steps=["génération d'une image...","ajustements...","finalisation..."];
+  let i=0;
+  const t=setInterval(()=>{
+    i=Math.min(i+1,steps.length-1);
+    if($("aiStatus")) showAIStatus(steps[i]);
+  },3000);
+  return ()=>clearInterval(t);
+}
+
+$("sendBtn").addEventListener("click",()=>sendMessage());
+
+$("messageInput").addEventListener("keydown",e=>{
+  if(e.key==="Enter"&&!e.shiftKey){
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+$("messageInput").addEventListener("input",()=>{
+  const el=$("messageInput");
+  el.style.height="45px";
+  el.style.height=Math.min(el.scrollHeight,120)+"px";
+});
+
+/* BOUTON + : 5 OUTILS */
+const ICONS={
+  gallery:'<svg viewBox="0 0 24 24"><rect x="7" y="3" width="14" height="14" rx="2"/><path d="M3 7v12a2 2 0 0 0 2 2h12"/><circle cx="12" cy="8" r="1.5"/><path d="m21 13-4-4-8 8"/></svg>',
+  project:'<svg viewBox="0 0 24 24"><path d="M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M3 7h3M3 12h3M3 17h3M10 8h6M10 12h6"/></svg>',
+  brain:'<svg viewBox="0 0 24 24"><path d="M9.5 3A3.5 3.5 0 0 0 6 6.5v.3A3.5 3.5 0 0 0 4 10a3.5 3.5 0 0 0 1.5 2.9A3.5 3.5 0 0 0 8 18.5 3 3 0 0 0 12 21V3.5A2.5 2.5 0 0 0 9.5 3Z"/><path d="M14.5 3A3.5 3.5 0 0 1 18 6.5v.3A3.5 3.5 0 0 1 20 10a3.5 3.5 0 0 1-1.5 2.9A3.5 3.5 0 0 1 16 18.5 3 3 0 0 1 12 21"/></svg>',
+  magic:'<svg viewBox="0 0 24 24"><path d="m14 7 3 3L7 20H4v-3z"/><path d="M19 3v4M17 5h4M21 12v2M20 13h2"/></svg>',
+  file:'<svg viewBox="0 0 24 24"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>'
+};
+
+$("plusBtn").addEventListener("click",()=>{
+  showSheet(`
+    <div class="sheet-title">Ajouter</div>
+    <button class="sheet-action" id="optGallery">${ICONS.gallery} Galerie</button>
+    <button class="sheet-action" id="optProject">${ICONS.project} Projet</button>
+    <button class="sheet-action" id="optCode">${ICONS.brain} Analyser un code en profondeur</button>
+    <button class="sheet-action" id="optImage">${ICONS.magic} Générer une image</button>
+    <button class="sheet-action" id="optFile">${ICONS.file} Créer un fichier</button>`);
+
+  $("optGallery").onclick=()=>{
+    closeSheet();
+    if(!requireFull()) return;
+    $("galerieInput").click();
+  };
+  $("optProject").onclick=()=>{closeSheet();openTool("project");};
+  $("optCode").onclick=()=>{closeSheet();openTool("analyze");};
+  $("optImage").onclick=()=>openImageSheet();
+  $("optFile").onclick=()=>{closeSheet();openTool("file");};
+});
+
+/* GALERIE : aperçu avant envoi */
+$("galerieInput").addEventListener("change",async e=>{
+  const file=e.target.files?.[0];
+  e.target.value="";
+
+  if(!file) return;
+
+  if(!file.type.startsWith("image/")){
+    showToast("Choisis une image");
+    return;
+  }
+
+  try{
+    pendingImage=await compressImage(file);
+    $("attachImg").src=pendingImage;
+    $("attachBar").classList.add("show");
+    $("messageInput").focus();
+  }catch(err){
+    showToast("Impossible de charger cette image");
+  }
+});
+
+function clearPending(){
+  pendingImage=null;
+  $("attachBar").classList.remove("show");
+  $("attachImg").removeAttribute("src");
+}
+$("attachRemove").addEventListener("click",clearPending);
+
+function compressImage(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onerror=reject;
+
+    reader.onload=()=>{
+      const img=new Image();
+      img.onerror=reject;
+
+      img.onload=()=>{
+        const max=1200;
+        const ratio=Math.min(1,max/Math.max(img.width,img.height));
+
+        const canvas=document.createElement("canvas");
+        canvas.width=Math.round(img.width*ratio);
+        canvas.height=Math.round(img.height*ratio);
+
+        const ctx=canvas.getContext("2d");
+        ctx.drawImage(img,0,0,canvas.width,canvas.height);
+
+        resolve(canvas.toDataURL("image/jpeg",.78));
+      };
+
+      img.src=reader.result;
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
+/* GÉNÉRATION D'IMAGE */
+function openImageSheet(){
+  if(!navigator.onLine){showToast("Connexion requise");return;}
+  if(!requireFull()) return;
+
+  showSheet(`
+    <div class="sheet-title">Générer une image</div>
+    <p class="sub-description">Décris l'image que tu souhaites créer.</p>
+    <textarea class="sheet-textarea" id="imagePrompt" placeholder="Exemple : une ville futuriste en 3D..."></textarea>
+    <button class="action-button" id="generateImageBtn">Générer l'image</button>`);
+
+  $("generateImageBtn").onclick=()=>{
+    const prompt=$("imagePrompt").value.trim();
+    if(!prompt){
+      showToast("Décris ton image");
+      return;
+    }
+    closeSheet();
+    sendMessage({imagePrompt:prompt});
+  };
+}
+
+/* PAGES OUTILS : projet / analyse de code / créer un fichier */
+const TOOLS={
+  project:{
+    title:"Nouveau projet pro",
+    desc:"Décris ton projet professionnel (ex : créer une application de bibliothèque). Je prépare un plan clair : objectifs, étapes, outils, risques.",
+    ph:"Ex : créer une application de bibliothèque...",
+    btn:"Lancer le projet",
+    status:"en train de réfléchir...",
+    dark:false,
+    sys:"Tu es NOVA AI, expert en gestion de projets professionnels. L'utilisateur décrit un projet. Réponds avec un plan clair : objectif, étapes numérotées, outils conseillés, risques, première action à faire. Style direct et motivant, sans décorations inutiles."
+  },
+  analyze:{
+    title:"Analyse de code",
+    desc:"Colle ton code (Python, HTML, JavaScript...). Je l'analyse en profondeur : ce qu'il fait, ses erreurs et comment l'améliorer.",
+    ph:"Colle ton code ici...",
+    btn:"Analyser",
+    status:"l'AI est en train d'analyser le code envoyé...",
+    dark:true,
+    sys:"Tu es NOVA AI, expert en analyse de code. Analyse le code en profondeur : ce qu'il fait, erreurs, points faibles, améliorations possibles. Montre le code corrigé dans un bloc de code avec le langage. Termine en proposant d'expliquer, corriger ou améliorer."
+  },
+  file:{
+    title:"Créer un fichier",
+    desc:"Décris le fichier complet que tu veux : type (html, python, txt...), contenu, fonctions, style. Plus c'est précis, moins il y aura d'erreurs.",
+    ph:"Ex : une page HTML de connexion avec un formulaire, en bleu...",
+    btn:"Créer le fichier",
+    status:"création du fichier...",
+    dark:true,
+    sys:"Tu es NOVA AI. Crée le fichier demandé, complet et sans faute. Réponds par une phrase courte puis UN seul bloc de code contenant le fichier entier, avec le nom du langage après les trois guillemets."
+  }
+};
+
+function openTool(mode,prefill,auto){
+  toolMode=mode;
+  const cfg=TOOLS[mode];
+
+  returnTo=currentPage==="chatPage"?"chatPage":"homePage";
+
+  $("toolTitle").textContent=cfg.title;
+  $("toolDesc").textContent=cfg.desc;
+  $("toolInput").placeholder=cfg.ph;
+  $("toolInput").value=prefill||"";
+  $("toolRun").textContent=cfg.btn;
+  $("toolResult").innerHTML="";
+  $("toolPage").classList.toggle("tool-dark",cfg.dark);
+
+  showPage("toolPage");
+
+  if(auto) runTool();
+}
+
+$("toolRun").addEventListener("click",()=>runTool());
+
+async function runTool(action){
+  if(toolBusy) return;
+
+  const text=$("toolInput").value.trim();
+  if(!text){
+    showToast("Écris d'abord ta demande");
+    return;
+  }
+  if(!navigator.onLine){
+    showToast("Connexion requise");
+    return;
+  }
+  if(planState()==="locked"){
+    showRecharge();
+    return;
+  }
+
+  const cfg=TOOLS[toolMode];
+  const out=$("toolResult");
+  toolBusy=true;
+  $("toolRun").disabled=true;
+  out.innerHTML="";
+
+  const st=document.createElement("div");
+  st.className="ai-status";
+  st.textContent=cfg.status;
+  out.appendChild(st);
+
+  try{
+    const messages=[
+      {role:"system",content:cfg.sys+langLine()},
+      {role:"user",content:(action?action+"\n\n":"")+text}
+    ];
+    const answer=await callNovaAI(messages);
+    renderToolResult(answer);
+  }catch(e){
+    out.innerHTML='<div class="tool-error">Impossible d\'obtenir une réponse pour le moment. Vérifie ta connexion et réessaie.</div>';
+  }finally{
+    toolBusy=false;
+    $("toolRun").disabled=false;
+  }
+}
+
+function renderToolResult(answer){
+  const out=$("toolResult");
+  out.innerHTML="";
+
+  if(toolMode==="file"){
+    const parts=splitCode(answer);
+    const codePart=parts.find(p=>p.code);
+
+    if(codePart){
+      const summary=parts.filter(p=>!p.code).map(p=>p.text.trim()).join(" ").trim();
+      const ext=EXT[(codePart.lang||"").toLowerCase()]||"txt";
+
+      const card=document.createElement("div");
+      card.className="file-card";
+
+      const name=document.createElement("div");
+      name.className="file-name";
+      name.textContent="Fichier prêt : nova-fichier."+ext;
+
+      const desc=document.createElement("div");
+      desc.textContent=summary||"Ton fichier est prêt.";
+
+      const more=document.createElement("button");
+      more.className="action-button";
+      more.textContent="Voir plus";
+      more.addEventListener("click",()=>{
+        more.remove();
+        renderCodePart(out,codePart,true);
+      });
+
+      card.append(name,desc,more);
+      out.appendChild(card);
+      return;
+    }
+  }
+
+  const body=document.createElement("div");
+  body.className="msg-body";
+  out.appendChild(body);
+  renderRich(body,answer);
+  body.querySelectorAll(".bubble").forEach(b=>{
+    if(toolMode==="analyze"){
+      b.style.background="#161B22";
+      b.style.color="#E6EDF3";
+    }
+    b.style.maxWidth="100%";
+    b.style.width="100%";
+  });
+
+  if(toolMode==="analyze"){
+    const row=document.createElement("div");
+    row.className="chip-row";
+    [
+      ["Expliquer","Explique ce code simplement, étape par étape."],
+      ["Corriger","Corrige les erreurs de ce code et montre la version corrigée complète."],
+      ["Améliorer","Améliore ce code (lisibilité, performances, bonnes pratiques) et montre la version améliorée."]
+    ].forEach(([label,prompt])=>{
+      const b=document.createElement("button");
+      b.className="chip";
+      b.textContent=label;
+      b.addEventListener("click",()=>runTool(prompt));
+      row.appendChild(b);
+    });
+    out.appendChild(row);
+  }
+}
+
+/* COPIER ET PARTAGER */
+async function copyText(text){
+  try{
+    await navigator.clipboard.writeText(text);
+    showToast("Copié");
+  }catch(e){
+    const area=document.createElement("textarea");
+    area.value=text;
+    document.body.appendChild(area);
+    area.select();
+
+    try{
+      document.execCommand("copy");
+      showToast("Copié");
+    }catch(err){
+      showToast("Copie impossible");
+    }
+
+    area.remove();
+  }
+}
+
+async function shareText(text){
+  if(!text){
+    showToast("Aucun texte à partager");
+    return;
+  }
+
+  if(navigator.share){
+    try{
+      await navigator.share({text});
+    }catch(e){}
+  }else{
+    copyText(text);
+    showToast("Texte copié pour le partager");
+  }
+}
+
+/* BAS DES PARAMÈTRES : Version / Partager / Noter */
+$("linkVersion").addEventListener("click",()=>showToast("NOVA AI · Version V4"));
+
+$("linkShare").addEventListener("click",async()=>{
+  const data={title:"NOVA AI",text:"Découvre NOVA AI, ton assistant intelligent.",url:location.href.split("#")[0]};
+  if(navigator.share){
+    try{await navigator.share(data);}catch(e){}
+  }else{
+    copyText(data.url);
+  }
+});
+
+$("linkRate").addEventListener("click",()=>{
+  showSheet(`
+    <div class="sheet-title" style="text-align:center">Note NOVA AI</div>
+    <div class="stars" id="stars"></div>`);
+
+  const box=$("stars");
+  for(let i=1;i<=5;i++){
+    const b=document.createElement("button");
+    b.textContent="★";
+    if(i<=settings.rating) b.classList.add("on");
+    b.addEventListener("click",()=>{
+      settings.rating=i;
+      saveSettings();
+      closeSheet();
+      showToast("Merci pour ta note");
+    });
+    box.appendChild(b);
+  }
+});
+
+/* NOTIFICATIONS TOAST */
+function showToast(message){
+  const t=$("toast");
+  t.textContent=message;
+  t.classList.add("show");
+
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove("show"),2300);
+}
+
+/* MODE SYSTÈME */
+try{
+  window.matchMedia("(prefers-color-scheme: light)")
+    .addEventListener("change",()=>{
+      if(settings.mode==="system") applySettings();
+    });
+}catch(e){}
+
+/* CLAVIER ANDROID */
+function adjustForAndroidKeyboard(){
+  const root=document.documentElement;
+  let baseH=window.innerHeight;
+  let timer=null;
+
+  const isInput=el=>el&&el.id==="messageInput";
+  const setKb=px=>root.style.setProperty("--kb",px+"px");
+
+  window.addEventListener("resize",()=>{
+    if(!isInput(document.activeElement)) baseH=window.innerHeight;
+  });
+
+  document.addEventListener("focusin",e=>{
+    if(!isInput(e.target)) return;
+    clearTimeout(timer);
+
+    timer=setTimeout(()=>{
+      const vv=window.visualViewport;
+      const shrunk=Math.max(
+        baseH-window.innerHeight,
+        vv?baseH-vv.height:0
+      );
+
+      /* Si le WebView s'est redimensionné seul, rien à faire */
+      setKb(shrunk>80?0:Math.round(baseH*0.4));
+
+      $("messages")?.scrollTo(0,99999);
+      e.target.scrollIntoView({block:"nearest"});
+    },350);
+  });
+
+  document.addEventListener("focusout",()=>{
+    clearTimeout(timer);
+    setTimeout(()=>{
+      if(!isInput(document.activeElement)) setKb(0);
+    },100);
+  });
+}
+adjustForAndroidKeyboard();
+
+/* BOUTON RETOUR ANDROID */
+function handleAppBack(){
+  if($("viewer").classList.contains("show")){
+    $("viewer").classList.remove("show");
+    return true;
+  }
+  if($("sheetOverlay").classList.contains("show")){
+    closeSheet();
+    return true;
+  }
+  if($("drawerOverlay").classList.contains("show")){
+    closeDrawer();
+    return true;
+  }
+  if($("busyOverlay").classList.contains("show")){
+    return true;
+  }
+
+  if(currentPage==="subPage"){showPage("settingsPage");return true;}
+  if(currentPage==="settingsPage"){backFromSettings();return true;}
+  if(currentPage==="searchPage"||currentPage==="memoryPage"||currentPage==="toolPage"){
+    showPage(returnTo);
+    return true;
+  }
+  if(currentPage==="chatPage"){showPage("homePage");return true;}
+
+  return false;
+}
+
+history.pushState({novaAI:true},"","#nova");
+
+window.addEventListener("popstate",()=>{
+  if(handleAppBack()){
+    history.pushState({novaAI:true},"","#nova");
+  }else{
+    /* Page d'accueil : le prochain retour quitte l'app */
+    showToast("Appuie encore pour quitter");
+    setTimeout(()=>history.pushState({novaAI:true},"","#nova"),2500);
+  }
+});
+
+/* INITIALISATION */
+loadData();
+planLoad();
+renderConversationList();
+
+const lastWithHistory=conversations.find(c=>c.messages.length);
+if(lastWithHistory) currentConversationId=lastWithHistory.id;
+
+renderMessages();
+renderSearch("");
+showPage("homePage");
+
+setTimeout(async()=>{
+  $("splash").style.opacity="0";
+  setTimeout(()=>$("splash").remove(),400);
+
+  if(lastWithHistory){
+    await busy("chargement historique...",3500);
+    showPage("chatPage");
+    busyDone();
+  }
+},3000);
+
+/* SERVICE WORKER */
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>{
+    navigator.serviceWorker.register("./sw.js").catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
