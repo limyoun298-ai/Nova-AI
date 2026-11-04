@@ -3290,7 +3290,52 @@ if ('serviceWorker' in navigator) {
 <script src="./update.comportement.js" defer></script>
 <script src="./update.memoire.js" defer></script>
 <script src="./update.reactions.js" defer></script>
-<script src="./update-private.js"></script>
+<!-- NOVA CHAT PRIVE - TEST BOSS V1 - DANS INDEX.HTML -->
+<style>
+  #btn-chat-prive-test{position:fixed;left:14px;bottom:90px;z-index:99999;background:#111;color:white;border:1px solid #fff;padding:10px 14px;border-radius:30px;display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.5)}
+  #private-view-test{position:fixed;inset:0;background:#000;z-index:100000;display:none;flex-direction:column}
+</style>
+
+<button id="btn-chat-prive-test">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+  Chat privé
+</button>
+
+<div id="private-view-test">
+  <div style="display:flex;align-items:center;gap:10px;padding:12px;border-bottom:1px solid #222;color:white;">
+    <button id="back-prive-test" style="background:none;border:none;color:white;font-size:22px;">←</button>
+    <b>Chat privé 🔒</b><span style="font-size:11px;color:#888;">Enregistré seulement ici</span>
+  </div>
+  <div id="prive-msgs-test" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;color:white;"></div>
+  <div style="display:flex;gap:8px;padding:10px;border-top:1px solid #222;">
+    <input id="prive-input-test" placeholder="Écris en privé..." style="flex:1;background:#111;border:none;padding:12px;border-radius:20px;color:white;outline:none;">
+    <button id="prive-send-test" style="background:#0af;color:white;border:none;width:44px;height:44px;border-radius:50%;font-size:18px;">➤</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  const KEY='nova_private_messages_test';
+  function load(){
+    const box=document.getElementById('prive-msgs-test');
+    const msgs=JSON.parse(localStorage.getItem(KEY)||'[]');
+    box.innerHTML=msgs.map(m=>'<div style="align-self:'+(m.who==='moi'?'flex-end':'flex-start')+';background:'+(m.who==='moi'?'#0af':'#222')+';padding:10px 14px;border-radius:16px;max-width:80%;">'+m.text+'</div>').join('');
+    box.scrollTop=box.scrollHeight;
+  }
+  document.getElementById('btn-chat-prive-test').onclick=()=>{document.getElementById('private-view-test').style.display='flex';load();};
+  document.getElementById('back-prive-test').onclick=()=>{document.getElementById('private-view-test').style.display='none';};
+  document.getElementById('prive-send-test').onclick=()=>{
+    const inp=document.getElementById('prive-input-test');
+    if(!inp.value.trim()) return;
+    const msgs=JSON.parse(localStorage.getItem(KEY)||'[]');
+    msgs.push({text:inp.value,who:'moi'}); localStorage.setItem(KEY,JSON.stringify(msgs));
+    inp.value=''; load();
+    setTimeout(()=>{const m2=JSON.parse(localStorage.getItem(KEY)||'[]'); m2.push({text:'Bien reçu en privé, BOSS. Ici c’est seulement entre nous. 🔒',who:'nova'}); localStorage.setItem(KEY,JSON.stringify(m2)); load();},500);
+  };
+  console.log('CHAT PRIVE TEST ACTIF');
+})();
+</script>
+<!-- FIN CHAT PRIVE TEST -->
 </body>
 </html>
 
