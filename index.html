@@ -3257,13 +3257,32 @@ setTimeout(async()=>{
   }
 },3000);
 
-/* SERVICE WORKER */
-if("serviceWorker" in navigator){
-  window.addEventListener("load",()=>{
-    navigator.serviceWorker.register("./sw.js").catch(()=>{});
+
+/* SERVICE WORKER - NOVA 1 MIN */
+if ('serviceWorker' in navigator) {
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloading = false;
+
+  navigator.serviceWorker.register('./sw.js').then((reg) => {
+    const ping = () => {
+      reg.update().catch(() => {});
+      if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({ type: 'CHECK' });
+      }
+    };
+    setInterval(ping, 30000);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) ping();
+    });
   });
-}
-</script>
+
+  navigator.serviceWorker.addEventListener('message', (e) => {
+    if (e.data && e.data.type === 'NOVA_UPDATE_READY' && hadController && !reloading) {
+      reloading = true;
+      location.reload();
+    }
+  });
+  }/script>
 <script src="./update.js" defer></script>
 <script src="./update.limite.js" defer></script>
 <script src="./update.voix.js" defer></script>
