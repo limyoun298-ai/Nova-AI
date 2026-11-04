@@ -2984,7 +2984,7 @@ async function runTool(action){
 
   try{
     const messages=[
-      {role:"system",content:cfg.sys+langLine()},
+      {role:"system",content:obtenirInstructionsNova(action||"")+langLine(
       {role:"user",content:(action?action+"\n\n":"")+text}
     ];
     const answer=await callNovaAI(messages);
