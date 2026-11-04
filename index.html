@@ -3262,7 +3262,990 @@ if("serviceWorker" in navigator){
   window.addEventListener("load",()=>{
     navigator.serviceWorker.register("./sw.js").catch(()=>{});
   });
-}
+}// === NOVA - MÉMOIRE 1 SEMAINE QUI GLISSE ===
+class HumanPersonaBase {
+  constructor(personaJson) {
+    this.name = personaJson.name;
+    this.warmUp = personaJson.warmUp;
+    this.min = personaJson.min;
+    this.max = personaJson.max;
+    this.LIMITE = 60; // Carnet du jour
+    this.LIMITE_LONGUE = 500; // Mémoire de la semaine
+    this.DUREE_MEMOIRE = 7 * 24 * 60 * 60 * 1000; // 7 JOURS EN MILLISECONDES
+
+    // Chargement au démarrage
+    try {
+      const sauve = JSON.parse(localStorage.getItem("nova_memory") || "null");
+      if (sauve) {
+        this.previousStatements = sauve.carnet || [];
+        this.memoireLongue = sauve.longue || [];
+        this.exchangeCount = sauve.count || 0;
+        // On nettoie direct au démarrage les trucs vieux de +7 jours
+        this.nettoyerVieuxSouvenirs();
+        console.log(`[NOVA] Lundi à Dimanche chargé: ${this.memoireLongue.length} souvenirs`);
+      } else {
+        this.previousStatements = [];
+        this.memoireLongue = [];
+        this.exchangeCount = 0;
+      }
+    } catch(e) {
+      this.previousStatements = [];
+      this.memoireLongue = [];
+      this.exchangeCount = 0;
+    }
+  }
+
+  // La fonction qui oublie le vieux Lundi quand Mardi arrive
+  nettoyerVieuxSouvenirs() {
+    const maintenant = Date.now();
+    const limite = maintenant - this.DUREE_MEMOIRE;
+    
+    // On garde seulement ce qui a moins de 7 jours
+    this.memoireLongue = this.memoireLongue.filter(m => m.date > limite);
+    
+    // Carnet rapide = seulement aujourd'hui, donc on le garde tel quel, 
+    // il sera géré par le shift() de 50
+  }
+
+  remember(message) {
+    if (!message || !message.trim()) return;
+    
+    const maintenant = Date.now();
+    const souvenir = { text: message.trim(), date: maintenant };
+
+    // 1. On nettoie d'abord les vieux souvenirs de +7 jours
+    this.nettoyerVieuxSouvenirs();
+
+    // 2. Carnet rapide - 50 max (la journée d'aujourd'hui)
+    this.previousStatements.push(message.trim());
+    if (this.previousStatements.length > this.LIMITE) {
+      this.previousStatements.shift(); // Oublie le début de Lundi
+    }
+
+    // 3. Mémoire longue - 500 max mais avec date de 7 jours
+    this.memoireLongue.push(souvenir);
+    if (this.memoireLongue.length > this.LIMITE_LONGUE) {
+      this.memoireLongue.shift(); // Oublie le plus vieux si trop plein
+    }
+    
+    this.exchangeCount++;
+
+    // 4. Sauvegarde dans le téléphone
+    try {
+      localStorage.setItem("nova_memory", JSON.stringify({
+        carnet: this.previousStatements,
+        longue: this.memoireLongue,
+        count: this.exchangeCount
+      }));
+    } catch(e) {
+      localStorage.removeItem("nova_memory");
+    }
+  }
+  
+  // Reste de ton code parler() et calculateDelay() inchangé...
+  }
+/* update.voix.js - NOVA AI - Voix Femme / Homme + Barre en haut - 100% SVG */
+(function () {
+  "use strict";
+  if (window.__novaVoixLoaded) return;
+  window.__novaVoixLoaded = true;
+
+  function toast(msg){
+    if (window.showToast) return window.showToast(msg);
+    const t = document.createElement("div");
+    t.textContent = msg;
+    t.style.cssText = "position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:999px;z-index:10000;font-size:13px;";
+    document.body.appendChild(t);
+    setTimeout(()=>t.remove(), 2000);
+  }
+
+  /* ========== SVG BLANC ========== */
+  const SVG_BACK = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>';
+  const SVG_MIC = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 19v3"/></svg>';
+  const SVG_CHECK = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+  const SVG_PAUSE = '<svg viewBox="0 0 24 24" width="14" height="14" fill="#000"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>';
+  const SVG_PLAY = '<svg viewBox="0 0 24 24" width="14" height="14" fill="#000"><path d="M7 4l13 8-13 8z"/></svg>';
+  const SVG_STOP = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>';
+
+  /* ========== STYLE ========== */
+  const st = document.createElement("style");
+  st.id = "nova-voix-css";
+  st.textContent = `
+    .nova-voice-page{
+      position:fixed; inset:0; z-index:9999;
+      background:#0f0f0f; color:#fff;
+      display:flex; flex-direction:column;
+      padding:20px; font-family:inherit;
+    }
+    .nova-voice-top{
+      display:flex; align-items:center; gap:12px; margin-bottom:24px;
+    }
+    .nova-voice-back{
+      width:38px; height:38px; border-radius:999px; border:none;
+      background:rgba(255,255,255,0.15); color:#fff;
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
+    }
+    .nova-voice-title{ font-size:20px; font-weight:700; }
+    .nova-voice-sub{ font-size:13px; color:#aaa; margin-bottom:18px; }
+    .nova-voice-opt{
+      display:flex; align-items:center; justify-content:space-between;
+      background:#1e1e1e; border:2px solid transparent;
+      border-radius:18px; padding:16px; margin-bottom:12px; cursor:pointer;
+    }
+    .nova-voice-opt.active{ border-color:#7b61ff; background:#2a2a2a; }
+    .nova-voice-left{ display:flex; align-items:center; gap:14px; }
+    .nova-voice-icon{
+      width:44px; height:44px; border-radius:999px; background:rgba(255,255,255,0.12);
+      display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    }
+    .nova-voice-opt b{ font-size:16px; display:block; }
+    .nova-voice-opt span{ font-size:12px; color:#aaa; }
+    .nova-voice-check{
+      width:26px; height:26px; border-radius:999px;
+      background:#7b61ff; color:#fff; display:flex;
+      align-items:center; justify-content:center; flex-shrink:0;
+    }
+    .nova-speak-bar{
+      position:fixed; top:10px; left:50%; transform:translateX(-50%);
+      z-index:9998; background:#1e1e1e; color:#fff;
+      border-radius:999px; padding:8px 10px 8px 14px;
+      display:flex; align-items:center; gap:10px;
+      box-shadow:0 8px 24px rgba(0,0,0,0.35);
+      font-size:13px; max-width:92%;
+    }
+    .nova-speak-dot{
+      width:8px; height:8px; border-radius:999px; background:#ff3b30;
+      animation:novaBlink 1s infinite; flex-shrink:0;
+    }
+    @keyframes novaBlink{ 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .nova-speak-bar button{
+      border:none; cursor:pointer; border-radius:999px;
+      width:32px; height:32px; display:flex;
+      align-items:center; justify-content:center;
+      background:#fff; color:#000; flex-shrink:0;
+    }
+    .nova-speak-bar .nova-stop{ background:rgba(255,255,255,0.2); color:#fff; }
+  `;
+  document.head.appendChild(st);
+
+  /* ========== MÉMOIRE VOIX - Dans NOVA AI ========== */
+  function getVoix() {
+    try { return localStorage.getItem("nova_voice") || null; } catch(e){ return null; }
+  }
+  function setVoix(v) {
+    try { localStorage.setItem("nova_voice", v); } catch(e){}
+  }
+
+  /* ========== A. PAGE CHOIX VOIX ========== */
+  function ouvrirPageVoix() {
+    if (document.querySelector(".nova-voice-page")) return;
+    arreterVoix();
+
+    const page = document.createElement("div");
+    page.className = "nova-voice-page";
+    const actuelle = getVoix() || "femme";
+
+    page.innerHTML = `
+      <div class="nova-voice-top">
+        <button class="nova-voice-back">${SVG_BACK}</button>
+        <div class="nova-voice-title">Voix de NOVA</div>
+      </div>
+      <div class="nova-voice-sub">Choisis la voix que NOVA utilisera pour te parler. C'est enregistré directement.</div>
+      <div class="nova-voice-opt ${actuelle === 'femme' ? 'active' : ''}" data-voice="femme">
+        <div class="nova-voice-left">
+          <div class="nova-voice-icon">${SVG_MIC}</div>
+          <div><b>Voix Femme</b><span>Douce, claire, comme une amie</span></div>
+        </div>
+        <div class="nova-voice-check" style="display:${actuelle === 'femme' ? 'flex' : 'none'}">${SVG_CHECK}</div>
+      </div>
+      <div class="nova-voice-opt ${actuelle === 'homme' ? 'active' : ''}" data-voice="homme">
+        <div class="nova-voice-left">
+          <div class="nova-voice-icon">${SVG_MIC}</div>
+          <div><b>Voix Homme</b><span>Calme, posé, comme un grand frère</span></div>
+        </div>
+        <div class="nova-voice-check" style="display:${actuelle === 'homme' ? 'flex' : 'none'}">${SVG_CHECK}</div>
+      </div>
+    `;
+
+    page.querySelector(".nova-voice-back").onclick = () => page.remove();
+
+    page.querySelectorAll(".nova-voice-opt").forEach(opt => {
+      opt.onclick = () => {
+        const v = opt.dataset.voice;
+        setVoix(v);
+        page.querySelectorAll(".nova-voice-opt").forEach(o => {
+          const isActive = o.dataset.voice === v;
+          o.classList.toggle("active", isActive);
+          o.querySelector(".nova-voice-check").style.display = isActive ? "flex" : "none";
+        });
+        toast(v === "femme" ? "Voix Femme enregistrée" : "Voix Homme enregistrée");
+        setTimeout(() => parler("Bonjour, c'est moi NOVA", true), 400);
+        setTimeout(() => page.remove(), 1000);
+      };
+    });
+
+    document.body.appendChild(page);
+  }
+
+  window.novaOpenVoicePage = ouvrirPageVoix;
+  window.novaChangeVoice = ouvrirPageVoix;
+
+  /* ========== B. BARRE EN HAUT + MINUTEUR + PAUSE ========== */
+  let bar = null;
+  let timerEl = null;
+  let pauseBtn = null;
+  let timerInterval = null;
+  let secondes = 0;
+  let enPause = false;
+
+  function creerBarre() {
+    if (bar) return;
+    bar = document.createElement("div");
+    bar.className = "nova-speak-bar";
+    bar.innerHTML = `
+      <div class="nova-speak-dot"></div>
+      <span>NOVA parle...</span>
+      <b class="nova-timer">00:00</b>
+      <button class="nova-pause">${SVG_PAUSE}</button>
+      <button class="nova-stop">${SVG_STOP}</button>
+    `;
+    timerEl = bar.querySelector(".nova-timer");
+    pauseBtn = bar.querySelector(".nova-pause");
+    pauseBtn.onclick = () => {
+      if (!window.speechSynthesis) return;
+      if (enPause) {
+        window.speechSynthesis.resume();
+        pauseBtn.innerHTML = SVG_PAUSE;
+        enPause = false;
+      } else {
+        window.speechSynthesis.pause();
+        pauseBtn.innerHTML = SVG_PLAY;
+        enPause = true;
+      }
+    };
+    bar.querySelector(".nova-stop").onclick = () => arreterVoix();
+    document.body.appendChild(bar);
+  }
+
+  function demarrerMinuteur() {
+    secondes = 0;
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      if (enPause) return;
+      secondes++;
+      const m = String(Math.floor(secondes / 60)).padStart(2, "0");
+      const s = String(secondes % 60).padStart(2, "0");
+      if (timerEl) timerEl.textContent = m + ":" + s;
+    }, 1000);
+  }
+
+  function arreterVoix() {
+    try { window.speechSynthesis.cancel(); } catch(e){}
+    clearInterval(timerInterval);
+    enPause = false;
+    if (bar) { bar.remove(); bar = null; }
+  }
+
+  /* ========== PARLER ========== */
+  function choisirVoixSysteme(veuxFemme) {
+    const voix = window.speechSynthesis.getVoices() || [];
+    if (!voix.length) return null;
+    const fr = voix.filter(v => v.lang.toLowerCase().startsWith("fr"));
+    const liste = fr.length ? fr : voix;
+    if (veuxFemme) {
+      return liste.find(v => /female|femme|marie|amelie|google français/i.test(v.name)) || liste[0];
+    } else {
+      return liste.find(v => /male|homme|thomas|paul|daniel/i.test(v.name)) || liste[1] || liste[0];
+    }
+  }
+
+  function parler(texte, test = false) {
+    if (!texte) return;
+    if (!("speechSynthesis" in window)) { toast("Voix non disponible sur ce téléphone"); return; }
+    arreterVoix();
+    if (!test && !getVoix()) { ouvrirPageVoix(); return; }
+
+    const veuxFemme = (getVoix() || "femme") === "femme";
+    const utterance = new SpeechSynthesisUtterance(texte);
+    utterance.lang = "fr-FR";
+    utterance.rate = 1;
+    utterance.pitch = veuxFemme ? 1.1 : 0.9;
+    const voix = choisirVoixSysteme(veuxFemme);
+    if (voix) utterance.voice = voix;
+    utterance.onend = () => arreterVoix();
+    utterance.onerror = () => arreterVoix();
+    creerBarre();
+    demarrerMinuteur();
+    window.speechSynthesis.speak(utterance);
+  }
+
+  window.novaSpeak = (texte) => {
+    if (!getVoix()) {
+      ouvrirPageVoix();
+    } else {
+      parler(texte);
+    }
+  };
+
+  console.log("update.voix.js chargé - SVG + Voix Femme/Homme + Barre en haut");
+})();
+/* update.reactions.js - NOVA AI - Réactions du message de l'AI - SVG blanc */
+(function () {
+  "use strict";
+  if (window.__novaReactionsLoaded) return;
+  window.__novaReactionsLoaded = true;
+
+  const EMOJIS = ["😂", "👀", "😦", "😍", "😇", "😏", "😳", "🥺", "😴", "😎"];
+
+  /* ========== STYLE - TOUT ALIGNÉ ========== */
+  const st = document.createElement("style");
+  st.id = "nova-reactions-css";
+  st.textContent = `
+    .nova-reactions{
+      display:flex; gap:4px; margin-top:6px; align-items:center;
+    }
+    .nova-reactions button{
+      background:transparent; border:none; width:32px; height:32px;
+      border-radius:999px; cursor:pointer; padding:0;
+      display:flex; align-items:center; justify-content:center;
+      flex-shrink:0;
+    }
+    .nova-reactions button svg{
+      width:20px; height:20px; fill:none; stroke:#fff; stroke-width:1.8;
+      stroke-linecap:round; stroke-linejoin:round;
+    }
+    .nova-reactions button.active{
+      background:rgba(255,255,255,0.25);
+    }
+    .nova-reactions button.active svg{
+      stroke:#fff; fill:rgba(255,255,255,0.3);
+    }
+    .nova-emoji-picker{
+      display:flex; gap:6px; background:#fff; border-radius:999px;
+      padding:6px 10px; box-shadow:0 8px 24px rgba(0,0,0,0.2);
+      position:absolute; z-index:99; margin-top:-46px;
+    }
+    .nova-emoji-picker span{
+      font-size:22px; cursor:pointer;
+    }
+    .nova-emoji-picked{
+      font-size:18px; margin-top:4px;
+    }
+  `;
+  document.head.appendChild(st);
+
+  /* ========== SVG BLANC ========== */
+  const SVG_UP = '<svg viewBox="0 0 24 24"><path d="M7 10v12H4a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h3zm0 0l4-7a2 2 0 0 1 3.5 1.3L16 10h4a2 2 0 0 1 2 2.2l-1.5 7A2 2 0 0 1 18.5 21H7"/></svg>';
+  const SVG_DOWN = '<svg viewBox="0 0 24 24"><path d="M7 14V2H4a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h3zm0 0l4 7a2 2 0 0 0 3.5-1.3L16 14h4a2 2 0 0 0 2-2.2l-1.5-7A2 2 0 0 0 18.5 3H7"/></svg>';
+  const SVG_COPY = '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
+  const SVG_SHARE = '<svg viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M12 3v13"/><path d="M7 8l5-5 5 5"/></svg>';
+  const SVG_SPEAKER = '<svg viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+
+  /* ========== CRÉER LES RÉACTIONS ========== */
+  function creerReactions(messageEl, messageText) {
+    const wrap = document.createElement("div");
+    wrap.className = "nova-reactions";
+
+    function makeBtn(svg, onClick) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.innerHTML = svg;
+      b.onclick = (e) => { e.stopPropagation(); onClick(b); };
+      return b;
+    }
+
+    let upBtn, downBtn;
+    upBtn = makeBtn(SVG_UP, (btn) => {
+      btn.classList.add("active");
+      if (downBtn) downBtn.classList.remove("active");
+      showToast("Avis envoyé");
+      try { localStorage.setItem("nova_last_like", "up"); } catch (err) {}
+    });
+
+    downBtn = makeBtn(SVG_DOWN, (btn) => {
+      btn.classList.add("active");
+      if (upBtn) upBtn.classList.remove("active");
+      showToast("Avis envoyé");
+      try { localStorage.setItem("nova_last_like", "down"); } catch (err) {}
+    });
+
+    const copyBtn = makeBtn(SVG_COPY, () => {
+      navigator.clipboard.writeText(messageText || "");
+      showToast("Copié");
+    });
+
+    const shareBtn = makeBtn(SVG_SHARE, () => {
+      if (navigator.share) navigator.share({ text: messageText || "" });
+      else {
+        navigator.clipboard.writeText(messageText || "");
+        showToast("Copié pour partager");
+      }
+    });
+
+    // Haut-parleur - même taille, même alignement que les autres
+    const speakerBtn = makeBtn(SVG_SPEAKER, () => {
+      if (window.novaSpeak) window.novaSpeak(messageText || "");
+      else showToast("Voix en cours d'activation");
+    });
+
+    wrap.append(upBtn, downBtn, copyBtn, shareBtn, speakerBtn);
+    return wrap;
+  }
+
+  /* ========== APPUI LONG = 10 EMOJIS ========== */
+  function ajouterAppuiLong(messageEl) {
+    let timer = null;
+    let picker = null;
+
+    function ouvrirPicker() {
+      if (messageEl.querySelector(".nova-emoji-picker")) return;
+      picker = document.createElement("div");
+      picker.className = "nova-emoji-picker";
+      EMOJIS.forEach((em) => {
+        const s = document.createElement("span");
+        s.textContent = em;
+        s.onclick = (e) => {
+          e.stopPropagation();
+          let old = messageEl.querySelector(".nova-emoji-picked");
+          if (!old) {
+            old = document.createElement("div");
+            old.className = "nova-emoji-picked";
+            messageEl.appendChild(old);
+          }
+          old.textContent = em;
+          picker.remove();
+          picker = null;
+        };
+        picker.appendChild(s);
+      });
+      messageEl.style.position = "relative";
+      messageEl.appendChild(picker);
+      setTimeout(() => {
+        document.addEventListener("click", function closeOnce() {
+          if (picker) picker.remove();
+          picker = null;
+        }, { once: true });
+      }, 100);
+    }
+
+    messageEl.addEventListener("touchstart", () => { timer = setTimeout(ouvrirPicker, 500); });
+    messageEl.addEventListener("touchend", () => clearTimeout(timer));
+    messageEl.addEventListener("mousedown", () => { timer = setTimeout(ouvrirPicker, 500); });
+    messageEl.addEventListener("mouseup", () => clearTimeout(timer));
+  }
+
+  /* ========== RÈGLE A : SEUL LE DERNIER MESSAGE DE NOVA A LES RÉACTIONS ========== */
+  function appliquerReactions() {
+    const allAi = document.querySelectorAll(".message.assistant, .ai-message, .msg-ai, [data-role='assistant']");
+    if (!allAi.length) return;
+    allAi.forEach((el, index) => {
+      const isLast = index === allAi.length - 1;
+      let existing = el.querySelector(".nova-reactions");
+      if (!isLast) {
+        if (existing) existing.remove();
+      } else {
+        if (!existing) {
+          const text = el.innerText || el.textContent || "";
+          const reactions = creerReactions(el, text);
+          el.appendChild(reactions);
+        }
+      }
+      if (!el.dataset.novaLong) {
+        el.dataset.novaLong = "1";
+        ajouterAppuiLong(el);
+      }
+    });
+  }
+
+  const observer = new MutationObserver(() => appliquerReactions());
+  observer.observe(document.body, { childList: true, subtree: true });
+  setTimeout(appliquerReactions, 800);
+  setInterval(appliquerReactions, 1500);
+
+  console.log("update.reactions.js chargé - SVG blanc + aligné + 10 emojis");
+})();
+/* update.limite.js - NOVA AI - VRAIE LOGIQUE : 5h actif avec forfait / 1h gratuit sans forfait */
+(function () {
+  "use strict";
+  if (window.__novaLimiteLoaded) return;
+  window.__novaLimiteLoaded = true;
+
+  /* ================= RÉGLAGES ================= */
+  const LIMITE_AVEC_FORFAIT_MS = 5 * 3600000; // 5h de discussion RÉELLE avec forfait
+  const LIMITE_SANS_FORFAIT_MS = 1 * 3600000; // 1h gratuite par jour sans forfait
+  const RESET_MS = 24 * 3600000;              // réinitialisation auto après 24h
+  const FORFAIT_SEC = 7200;                   // 120 min de forfait
+  const HISTORY_WINDOW = 60;
+
+  const H = 3600000;
+
+  /* ================= ÉTAT - Compteur qui s'arrête quand on ferme l'app ================= */
+  const KEY = "nova_limit_v2"; // v2 = nouvelle logique
+  let L = {
+    dayStart: 0,          // 1ère ouverture du cycle de 24h
+    totalActif: 0,        // temps réel accumulé AVEC forfait (5h)
+    sessionStart: 0,      // quand tu as ouvert l'app cette fois-ci (avec forfait)
+    freeActif: 0,         // temps réel accumulé SANS forfait (1h)
+    freeSessionStart: 0,  // quand tu as ouvert l'app cette fois-ci (sans forfait)
+    reason: "",
+    ann: ""
+  };
+  try { L = { ...L, ...JSON.parse(localStorage.getItem(KEY) || "{}") }; } catch (e) {}
+  function saveL() { try { localStorage.setItem(KEY, JSON.stringify(L)); } catch (e) {} }
+
+  function safe(name, fn) {
+    try { fn(); } catch (e) { console.error("update.limite.js [" + name + "] :", e); }
+  }
+
+  /* Est-ce que l'utilisateur a du forfait ? */
+  function aForfait() {
+    // Si plan.used < FORFAIT_SEC, il lui reste du forfait
+    try {
+      if (typeof plan !== "undefined" && plan && typeof plan.used === "number") {
+        return plan.used < FORFAIT_SEC;
+      }
+    } catch (e) {}
+    return false; // par défaut = sans forfait
+  }
+
+  /* ================= COMPTEUR ACTIF : tourne seulement quand l'app est ouverte ================= */
+  function demarrerCompteur() {
+    const now = Date.now();
+    if (!L.dayStart) L.dayStart = now;
+
+    if (aForfait()) {
+      if (!L.sessionStart) L.sessionStart = now;
+    } else {
+      // Sans forfait : seulement si données ouvertes
+      if (navigator.onLine && !L.freeSessionStart) L.freeSessionStart = now;
+    }
+    saveL();
+  }
+
+  function arreterCompteur() {
+    const now = Date.now();
+    // Avec forfait
+    if (L.sessionStart) {
+      L.totalActif += now - L.sessionStart;
+      L.sessionStart = 0;
+    }
+    // Sans forfait
+    if (L.freeSessionStart) {
+      L.freeActif += now - L.freeSessionStart;
+      L.freeSessionStart = 0;
+    }
+    saveL();
+  }
+
+  function getTotalActif() {
+    let total = L.totalActif;
+    if (L.sessionStart) total += Date.now() - L.sessionStart;
+    return total;
+  }
+
+  function getFreeActif() {
+    let total = L.freeActif;
+    if (L.freeSessionStart) total += Date.now() - L.freeSessionStart;
+    return total;
+  }
+
+  /* Réinitialisation auto après 24h depuis dayStart */
+  function verifierResetAuto() {
+    if (!L.dayStart) return;
+    if (Date.now() - L.dayStart >= RESET_MS) {
+      L.dayStart = Date.now();
+      L.totalActif = 0;
+      L.sessionStart = 0;
+      L.freeActif = 0;
+      L.freeSessionStart = 0;
+      L.reason = "";
+      L.ann = "";
+      saveL();
+      // On redémarre le compteur tout de suite
+      demarrerCompteur();
+    }
+  }
+
+  // Le compteur s'arrête quand tu fermes / mets en arrière-plan, il continue quand tu rouvres
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) arreterCompteur();
+    else { verifierResetAuto(); demarrerCompteur(); }
+  });
+  window.addEventListener("beforeunload", arreterCompteur);
+  window.addEventListener("pagehide", arreterCompteur);
+
+  // Au démarrage
+  verifierResetAuto();
+  demarrerCompteur();
+  // On vérifie le reset toutes les minutes
+  setInterval(verifierResetAuto, 60000);
+
+  /* ================= A. BORNE SYSTÈME - PAS DE COMPTEUR VISIBLE ================= */
+  function lockText(li) {
+    return "Nous vous rappelons que vous discutez avec une AI et non une vraie personne.";
+  }
+
+  function pushNotice(text, conversationId) {
+    const c = conversations.find(x => x.id === conversationId) || currentConversation();
+    if (!c) return;
+    if (currentConversationId === c.id && currentPage === "chatPage") {
+      const old = document.querySelector(".nova-system-notice");
+      if (old) old.remove();
+      const div = document.createElement("div");
+      div.className = "nova-system-notice";
+      div.textContent = text;
+      const container = document.querySelector("#messages") || document.querySelector(".messages") || document.body;
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+    }
+  }
+
+  safe("borne-systeme", () => {
+    const st = document.createElement("style");
+    st.id = "nova-system-css";
+    st.textContent = `
+      .nova-system-notice{
+        margin: 10px auto 12px auto;
+        max-width: 88%;
+        padding: 10px 16px;
+        background: rgba(0,0,0,0.6);
+        color: #fff;
+        font-size: 13px;
+        line-height: 1.4;
+        text-align: center;
+        border-radius: 999px;
+        opacity: 1;
+        position: sticky;
+        bottom: 10px;
+        z-index: 10;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      }
+    `;
+    document.head.appendChild(st);
+  });
+
+  /* ================= ÉTAT : full / limited / locked ================= */
+  function estBloque() {
+    verifierResetAuto();
+    if (aForfait()) {
+      // AVEC FORFAIT : seule limite = 5h actives
+      return getTotalActif() >= LIMITE_AVEC_FORFAIT_MS;
+    } else {
+      // SANS FORFAIT : 1h gratuite, seulement avec données
+      if (!navigator.onLine) return false; // données fermées = on ne bloque pas, on ne compte pas
+      return getFreeActif() >= LIMITE_SANS_FORFAIT_MS;
+    }
+  }
+
+  function lockInfo() {
+    if (!estBloque()) return null;
+    return { reason: aForfait() ? "daily" : "sans-forfait", until: L.dayStart + RESET_MS };
+  }
+
+  safe("planState", () => {
+    planState = function () {
+      verifierResetAuto();
+      if (estBloque()) return "locked";
+      if (aForfait()) return "full"; // tout débloqué : images, vidéo, trucs lourds
+      return "limited"; // sans forfait : discussion simple seulement
+    };
+
+    showRecharge = function () {
+      const li = lockInfo();
+      if (!li) return;
+      showToast("Limite atteinte");
+    };
+  });
+
+  /* ================= ENVOI BLOQUÉ ================= */
+  function blockedSend(opts, li) {
+    const input = $("messageInput");
+    let text = opts && opts.imagePrompt ? "Génère une image : " + opts.imagePrompt : input.value.trim();
+    if (!text) text = "[image]";
+
+    if (currentPage === "homePage") {
+      const cur = currentConversation();
+      if (!cur || cur.messages.length) createConversation(false);
+      showPage("chatPage");
+    }
+    if (!currentConversation()) createConversation(false);
+
+    const cid = currentConversationId;
+    resetInput(); clearPending(); clearReply();
+
+    const um = addUserMessage(text, null, "");
+    um.failed = true;
+    setStatus(cid, um.id, "");
+    // A : à chaque tentative, borne système en bas, jusqu'à reset auto
+    pushNotice(lockText(li), cid);
+  }
+
+  safe("sendMessage", () => {
+    const _send = sendMessage;
+    sendMessage = async function (opts) {
+      if (sending) return;
+      const has = (opts && opts.imagePrompt) || $("messageInput").value.trim() || pendingImage;
+      if (!has) return _send(opts);
+
+      // SANS FORFAIT : on bloque les trucs lourds (images) même avant la limite
+      if (!aForfait() && opts && opts.imagePrompt) {
+        // On laisse passer la discussion, mais pas la génération d'image
+        showToast("Génération d'image réservée au forfait");
+        return;
+      }
+
+      const li = planState() === "locked" ? lockInfo() : null;
+      if (li) { blockedSend(opts, li); return; }
+
+      // Le compteur tourne déjà via demarrerCompteur, on s'assure juste qu'il tourne
+      demarrerCompteur();
+      return _send(opts);
+    };
+  });
+
+  safe("runTool", () => {
+    const _runTool = runTool;
+    runTool = function (action) {
+      // SANS FORFAIT : outils lourds bloqués, discussion simple seulement
+      if (!aForfait()) {
+        const out = $("toolResult");
+        if (out) {
+          out.innerHTML = "";
+          const d = document.createElement("div");
+          d.className = "nova-system-notice";
+          d.textContent = "Outils réservés au forfait. Tu as 1h gratuite de discussion par jour.";
+          out.appendChild(d);
+        }
+        return;
+      }
+      if (toolBusy) return _runTool(action);
+      if (planState() === "locked") {
+        const li = lockInfo();
+        if (li) {
+          const out = $("toolResult");
+          out.innerHTML = "";
+          const d = document.createElement("div");
+          d.className = "nova-system-notice";
+          d.textContent = lockText(li);
+          out.appendChild(d);
+          return;
+        }
+      }
+      demarrerCompteur();
+      return _runTool(action);
+    };
+  });
+
+  /* ================= TICK : vérifie le reset auto ================= */
+  safe("tick", () => {
+    setInterval(() => {
+      try {
+        verifierResetAuto();
+        // Si données coupées en mode sans forfait, on met en pause
+        if (!aForfait() && !navigator.onLine && L.freeSessionStart) {
+          L.freeActif += Date.now() - L.freeSessionStart;
+          L.freeSessionStart = 0;
+          saveL();
+        }
+        if (!aForfait() && navigator.onLine && !L.freeSessionStart && !document.hidden) {
+          L.freeSessionStart = Date.now();
+          saveL();
+        }
+      } catch (e) {}
+    }, 1000);
+  });
+
+  /* ================= PERSONNALITÉ + CRÉATEUR ================= */
+  safe("personnalité", () => {
+    const _build = buildSystemPrompt;
+    buildSystemPrompt = function (extra) {
+      return _build(extra) +
+        "\n\nMISE À JOUR DE PERSONNALITÉ (prioritaire sur les règles précédentes concernant le ton et les emojis) :\n" +
+        "- Tu es affectueux, chaleureux et bienveillant : tu parles comme un ami proche, un grand frère ou un coach qui croit en la personne.\n" +
+        "- Selon le contexte, tu es l'ami complice, le coach qui motive, le prof patient ou le professionnel sérieux.\n" +
+        "- Tu peux utiliser des emojis quand c'est naturel, mais pas dans tous les messages (rarement plus de 2 par message). " +
+        "Pas d'emoji dans les sujets graves ou très techniques. Ne recopie pas mécaniquement ceux de l'utilisateur.\n" +
+        "- Tu restes une IA : ne prétends pas être humain et n'invente pas de vie personnelle.\n\n" +
+        "CRÉATEUR : tu as été créé par M-ei Ho, un créateur âgé de 18 ans. " +
+        "Si on te demande qui t'a créé, réponds-le simplement et avec fierté. N'invente aucun autre détail sur lui.\n\n" +
+        "MÉMOIRE : tu disposes de l'historique de la discussion, retiens-le et appuie-toi dessus. " +
+        "Si l'utilisateur te rappelle une information que tu avais oubliée, reprends-la naturellement, sans te justifier.";
+    };
+  });
+
+  /* ================= MÉMOIRE DE LA DISCUSSION (60 messages + résumé) ================= */
+  safe("mémoire", () => {
+    buildApiMessages = function (conversation, extra) {
+      const all = conversation.messages.filter(m =>
+        (m.role === "user" || m.role === "assistant") && !m.failed && (m.text || m.image));
+      const history = all.slice(-HISTORY_WINDOW);
+      const older = all.slice(0, Math.max(0, all.length - HISTORY_WINDOW));
+
+      let digest = "";
+      if (older.length) {
+        const lines = [];
+        let total = 0;
+        for (let k = older.length - 1; k >= 0; k--) {
+          const m = older[k];
+          const t = String(m.text || "[image]").replace(/\s+/g, " ").slice(0, 160);
+          const line = (m.role === "user" ? "Utilisateur : " : "Toi : ") + t;
+          if (total + line.length > 5000) break;
+          total += line.length;
+          lines.unshift(line);
+        }
+        digest = "MÉMOIRE DE CETTE DISCUSSION (anciens échanges résumés, du plus ancien au plus récent) :\n" + lines.join("\n");
+      }
+
+      let lastImg = -1;
+      history.forEach((m, i) => { if (m.role === "user" && m.image) lastImg = i; });
+
+      const mapped = history.map((m, i) => {
+        const role = m.role === "assistant" ? "assistant" : "user";
+        let text = m.text || "";
+        if (m.quote && role === "user") {
+          text = '[En réponse à ce message de l\'assistant : "' + m.quote + '"]\n' + text;
+        }
+        if (m.image && role === "user") {
+          if (i === lastImg) {
+            return {
+              role: "user",
+              content: [
+                { type: "text", text: text || "Analyse cette image et décris ce que tu observes." },
+                { type: "image_url", image_url: { url: m.image } }
+              ]
+            };
+          }
+          return { role: "user", content: (text ? text + " " : "") + "[image envoyée plus tôt]" };
+        }
+        return { role, content: text || "[image générée]" };
+      });
+
+      const sys = buildSystemPrompt([extra, digest].filter(Boolean).join("\n\n"));
+      return [{ role: "system", content: sys }, ...mapped];
+    };
+
+    MEMORY_TRIGGER.test = function (t) {
+      t = String(t || "");
+      if (t.includes("?")) return false;
+      if (/m[ée]moris(er|é|ée|és)\b/i.test(t)) return false;
+      return /(m[ée]morise|rappelle[- ]toi|souviens[- ]toi)/i.test(t);
+    };
+  });
+
+  /* ============ B. MODIFIER MESSAGE -> L'AI REFAIT SA RÉPONSE DU DÉBUT ============ */
+  async function regenerateReply(m) {
+    const cid = currentConversationId;
+    const c = conversations.find(x => x.id === cid);
+    if (!c) return;
+    if (sending) { showToast("Patiente, une réponse est en cours"); return; }
+    if (!navigator.onLine) { showToast("Connexion requise pour corriger la réponse"); return; }
+    if (planState() === "locked") {
+      const li = lockInfo();
+      if (li) pushNotice(lockText(li), cid);
+      return;
+    }
+    if (c.messages.indexOf(m) < 0) return;
+    if (m.failed) delete m.failed;
+
+    sending = true;
+    showToast("Je refais ma réponse...");
+    showAIStatus("je refais ma réponse...");
+    try {
+      let extra = "";
+      if (SEARCH_TRIGGER.test(m.text)) {
+        try {
+          const found = await webSearch(m.text);
+          if (found) extra = "Informations trouvées sur le web (peuvent être imparfaites ou datées) :\n" + found +
+            "\nCommence ta réponse par « D'après ce que j'ai trouvé... » et reste prudent sur les incertitudes.";
+        } catch (e) {}
+      }
+
+      const idx = c.messages.indexOf(m);
+      const answer = await callNovaAI(buildApiMessages({ messages: c.messages.slice(0, idx + 1) }, extra));
+      hideAIStatus();
+
+      const i2 = c.messages.indexOf(m);
+      if (i2 < 0) return;
+      let j = i2 + 1;
+      while (j < c.messages.length && c.messages[j].role !== "user") j++;
+
+      // ON EFFACE COMPLÈTEMENT l'ancienne réponse
+      c.messages.splice(i2 + 1, j - (i2 + 1));
+      saveData();
+      renderMessages();
+
+      // L'AI RECOMMENCE DU DÉBUT À LA FIN
+      const atEnd = j >= c.messages.length;
+      if (atEnd) {
+        await typeAssistantMessage(answer, cid);
+      } else {
+        c.messages.splice(i2 + 1, 0, { id: uid(), role: "assistant", text: cleanAIText(answer), timestamp: Date.now() });
+        saveData(); renderMessages();
+      }
+    } catch (e) {
+      hideAIStatus();
+      showToast("Impossible de corriger la réponse");
+    } finally {
+      sending = false;
+      hideAIStatus();
+    }
+  }
+
+  safe("editMessage", () => {
+    editMessage = function (m) {
+      showSheet(`
+        <div class="sheet-title">Modifier le message</div>
+        <textarea class="sheet-textarea" id="editText"></textarea>
+        <button class="action-button" id="saveEdit">Enregistrer</button>`);
+      $("editText").value = m.text || "";
+
+      $("saveEdit").onclick = () => {
+        const nt = $("editText").value.trim();
+        if (!nt) { showToast("Message vide"); return; }
+        const changed = nt !== (m.text || "");
+        m.text = nt;
+        saveData();
+        renderMessages();
+        closeSheet();
+        if (changed) regenerateReply(m);
+        else showToast("Message modifié");
+      };
+    };
+  });
+
+  /* ================= ZONE DE TEXTE JUSTE AU-DESSUS DU CLAVIER ================= */
+  safe("clavier", () => {
+    const st = document.createElement("style");
+    st.id = "nova-limite-css";
+    st.textContent = `
+      #composer{padding:6px 10px calc(6px + env(safe-area-inset-bottom)) !important}
+      body.nova-kb #composer{padding-bottom:calc(6px + var(--nova-kb,0px)) !important}
+      #messageInput{max-height:96px !important}
+    `;
+    document.head.appendChild(st);
+
+    function updateKb() {
+      const vv = window.visualViewport;
+      if (!vv) return;
+      let kb = Math.round(window.innerHeight - vv.height - vv.offsetTop);
+      if (kb < 80) kb = 0;
+      document.documentElement.style.setProperty("--nova-kb", kb + "px");
+      document.body.classList.toggle("nova-kb", kb > 0);
+      if (currentPage === "chatPage" && document.activeElement === $("messageInput")) scrollBottom();
+    }
+
+    if (window.visualViewport) {
+      visualViewport.addEventListener("resize", updateKb);
+      visualViewport.addEventListener("scroll", updateKb);
+    }
+    window.addEventListener("resize", updateKb);
+    document.addEventListener("focusin", () => { [100, 400, 800].forEach(t => setTimeout(updateKb, t)); });
+    document.addEventListener("focusout", () => setTimeout(updateKb, 150));
+    updateKb();
+  });
+
+  console.log("update.limite.js chargé - logique v2 : 5h actif / 1h gratuit");
+})();
 </script>
 </body>
   </html>
