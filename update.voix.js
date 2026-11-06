@@ -1,9 +1,9 @@
 /* =====================================================================
    update.voix.js  —  NOVA AI  —  MODULE VOIX (cape d'invisibilité)
-   =====================================================================
+
 
    RÈGLE D'OR : ON NE TOUCHE JAMAIS À index.html.
-   -----------------------------------------------------------------
+
    Ce fichier fonctionne exactement comme update.compotement.js :
    - Il est chargé par UNE SEULE balise <script src="update.voix.js"></script>
      placée après update.compotement.js. C'est la seule modification
@@ -20,9 +20,8 @@
    C. Ouvre une belle modale arrondie pour choisir Homme / Femme.
    D. Affiche une barre fixe EN HAUT pendant la lecture
       (pause, ralenti, vitesse, fermer, début du texte lu).
-   E. Ajoute un micro SVG dans la zone de saisie (dictée fr-FR).
-      Le micro disparaît quand il y a du texte, et réapparaît
-      quand la zone est vide.
+   E. [SUPPRIMÉ] Micro dans la zone de saisie - SUPPRIMÉ SUR DEMANDE.
+      Le micro ne sera plus créé.
 
    CLÉS localStorage UTILISÉES :
    - nova_voix_choisie  : "homme" ou "femme"
@@ -212,18 +211,8 @@
                "margin-right:6px;}";
 
         /* ---------- Micro dans la zone de saisie ---------- */
-        css += ".nv-micro{position:fixed;z-index:9990;width:36px;height:36px;" +
-               "border:none;border-radius:50%;background:transparent;" +
-               "display:none;align-items:center;justify-content:center;" +
-               "cursor:pointer;padding:0;transition:background .2s ease;" +
-               "-webkit-tap-highlight-color:transparent;}";
-        css += ".nv-micro:active{background:rgba(255,255,255,.12);}";
-        css += ".nv-micro.nv-ecoute{background:rgba(255,69,58,.25);" +
-               "animation:nvPulse 1.2s ease-in-out infinite;}";
-        css += ".nv-micro.nv-ecoute svg{stroke:#ff453a;fill:#ff453a;}";
-        css += "@keyframes nvPulse{0%{box-shadow:0 0 0 0 rgba(255,69,58,.45);}" +
-               "70%{box-shadow:0 0 0 10px rgba(255,69,58,0);}" +
-               "100%{box-shadow:0 0 0 0 rgba(255,69,58,0);}}";
+        /* [SUPPRESSION MICRO] Le micro ne doit plus jamais apparaître */
+        css += ".nv-micro{display:none !important;visibility:hidden !important;width:0 !important;height:0 !important;opacity:0 !important;pointer-events:none !important;}";
 
         var style = document.createElement("style");
         style.id = "nova-voix-style";
@@ -269,12 +258,8 @@
       'stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">' +
       '<path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 
-    var SVG_MICRO =
-      '<svg width="22" height="22" viewBox="0 0 24 24" fill="#fff" stroke="#fff" ' +
-      'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.85">' +
-      '<rect x="9" y="3" width="6" height="12" rx="3" stroke="none"/>' +
-      '<path d="M5 11a7 7 0 0 0 14 0" fill="none"/>' +
-      '<path d="M12 18v3" fill="none"/></svg>';
+    /* [SUPPRESSION MICRO] SVG_MICRO supprimé - plus utilisé */
+    var SVG_MICRO = '';
 
     /* =============================================================
        5. CHARGEMENT DES VOIX (obligatoire sur Android)
@@ -1129,263 +1114,46 @@
     }
 
     /* =============================================================
-       14. MICRO DANS LA ZONE DE SAISIE (dictée fr-FR)
+       14. MICRO DANS LA ZONE DE SAISIE (dictée fr-FR) - SUPPRIMÉ
        ============================================================= */
+    /* [SUPPRESSION MICRO] Toute la section 14 est neutralisée.
+       Les fonctions ci-dessous restent présentes pour ne pas casser
+       les appels existants, mais elles ne font plus rien. */
 
     function trouverZoneSaisie() {
-      try {
-        var candidats = document.querySelectorAll(
-          "textarea, input[type='text'], input:not([type]), [contenteditable='true']"
-        );
-        var meilleur = null;
-        var meilleurBas = -1;
-
-        for (var i = 0; i < candidats.length; i++) {
-          var el = candidats[i];
-          if (el.closest && el.closest("[data-nova-voix]")) continue;
-
-          var r = el.getBoundingClientRect();
-          if (r.width < 80 || r.height < 16) continue;
-
-          // On prend la zone la plus basse à l'écran (la zone de chat)
-          if (r.bottom > meilleurBas) {
-            meilleurBas = r.bottom;
-            meilleur = el;
-          }
-        }
-        return meilleur;
-      } catch (e) {
-        return null;
-      }
+      try { return null; } catch (e) { return null; }
     }
 
     function lireValeurSaisie(el) {
-      try {
-        if (!el) return "";
-        if (el.isContentEditable) return el.textContent || "";
-        return el.value || "";
-      } catch (e) {
-        return "";
-      }
+      try { return ""; } catch (e) { return ""; }
     }
 
     function ecrireValeurSaisie(el, valeur) {
-      try {
-        if (!el) return;
-
-        if (el.isContentEditable) {
-          el.textContent = valeur;
-        } else {
-          // Setter natif : compatible avec les frameworks (React, etc.)
-          var proto = el.tagName === "TEXTAREA"
-            ? window.HTMLTextAreaElement.prototype
-            : window.HTMLInputElement.prototype;
-          var desc = Object.getOwnPropertyDescriptor(proto, "value");
-          if (desc && desc.set) desc.set.call(el, valeur);
-          else el.value = valeur;
-        }
-
-        el.dispatchEvent(new Event("input", { bubbles: true }));
-      } catch (e) {}
+      try {} catch (e) {}
     }
 
     function positionnerMicro() {
-      try {
-        var bouton = etatMic.bouton;
-        if (!bouton) return;
-
-        var zone = trouverZoneSaisie();
-        if (!zone) { bouton.style.display = "none"; return; }
-
-        var r = zone.getBoundingClientRect();
-        if (r.width === 0 || r.height === 0) { bouton.style.display = "none"; return; }
-
-        var taille = 36;
-        var droite = r.right - 8;
-
-        // On cherche un bouton "envoyer" à droite pour se placer avant lui
-        var zoneParent = zone.parentElement;
-        var grandParent = zoneParent ? zoneParent.parentElement : null;
-        var conteneurs = [zoneParent, grandParent];
-
-        for (var c = 0; c < conteneurs.length; c++) {
-          if (!conteneurs[c]) continue;
-          var boutons = conteneurs[c].querySelectorAll("button,[role='button']");
-          for (var i = 0; i < boutons.length; i++) {
-            var b = boutons[i];
-            if (b === bouton || (b.closest && b.closest("[data-nova-voix]"))) continue;
-            var br = b.getBoundingClientRect();
-            if (br.width === 0) continue;
-
-            var chevauche = br.top < r.bottom && br.bottom > r.top;
-            var aDroite = br.left >= r.left + r.width * 0.5;
-
-            if (chevauche && aDroite && br.left < droite) {
-              droite = br.left - 6;
-            }
-          }
-        }
-
-        var gauche = droite - taille;
-        var haut = r.height > 60
-          ? r.bottom - taille - 6
-          : r.top + (r.height - taille) / 2;
-
-        bouton.style.left = gauche + "px";
-        bouton.style.top = haut + "px";
-
-        // On laisse de la place au texte pour qu'il ne passe pas sous le micro
-        if (!zone.isContentEditable && gauche > r.left) {
-          if (zone.getAttribute("data-nv-pad") === null) {
-            zone.setAttribute("data-nv-pad", zone.style.paddingRight || "");
-          }
-          zone.style.paddingRight = Math.ceil(r.right - gauche + 6) + "px";
-        }
-      } catch (e) {}
+      try {} catch (e) {}
     }
 
     function mettreAJourMicro() {
-      try {
-        var bouton = etatMic.bouton;
-        if (!bouton) return;
-
-        var zone = trouverZoneSaisie();
-        if (!zone) { bouton.style.display = "none"; return; }
-
-        var texte = lireValeurSaisie(zone).trim();
-
-        // RÈGLE : des lettres dans la zone => le micro DISPARAÎT
-        //         zone vide => le micro RÉAPPARAÎT
-        // (pendant l'enregistrement, il reste visible pour pouvoir arrêter)
-        var doitAfficher = texte.length === 0 || etatMic.enregistre;
-
-        if (doitAfficher) {
-          bouton.style.display = "flex";
-          positionnerMicro();
-        } else {
-          bouton.style.display = "none";
-          // On rend son espace normal au champ
-          if (zone.getAttribute("data-nv-pad") !== null) {
-            zone.style.paddingRight = zone.getAttribute("data-nv-pad");
-            zone.removeAttribute("data-nv-pad");
-          }
-        }
-      } catch (e) {}
+      try {} catch (e) {}
     }
 
     function arreterDictee() {
-      try {
-        if (etatMic.reco) {
-          try { etatMic.reco.stop(); } catch (e) {}
-        }
-      } catch (e) {}
+      try {} catch (e) {}
     }
 
     function demarrerDictee() {
-      try {
-        var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!SR) {
-          afficherToast("La dictée n'est pas supportée sur ce navigateur.");
-          return;
-        }
-
-        var zone = trouverZoneSaisie();
-        if (!zone) return;
-
-        // Si Nova parle, on la fait taire pour ne pas se dicter elle-même
-        if (etat.enLecture) arreterVoix();
-
-        var reco = new SR();
-        reco.lang = "fr-FR";
-        reco.interimResults = true;
-        reco.continuous = false;
-        reco.maxAlternatives = 1;
-
-        etatMic.base = lireValeurSaisie(zone).trim();
-
-        reco.onstart = function () {
-          etatMic.enregistre = true;
-          if (etatMic.bouton) etatMic.bouton.classList.add("nv-ecoute");
-          mettreAJourMicro();
-        };
-
-        reco.onresult = function (e) {
-          try {
-            var transcript = "";
-            for (var i = 0; i < e.results.length; i++) {
-              transcript += e.results[i][0].transcript;
-            }
-            var complet = (etatMic.base ? etatMic.base + " " : "") + transcript;
-            ecrireValeurSaisie(zone, complet);
-          } catch (err) {}
-        };
-
-        reco.onerror = function () {
-          try {
-            etatMic.enregistre = false;
-            if (etatMic.bouton) etatMic.bouton.classList.remove("nv-ecoute");
-            mettreAJourMicro();
-          } catch (err) {}
-        };
-
-        reco.onend = function () {
-          try {
-            etatMic.enregistre = false;
-            etatMic.reco = null;
-            if (etatMic.bouton) etatMic.bouton.classList.remove("nv-ecoute");
-            mettreAJourMicro();
-          } catch (err) {}
-        };
-
-        etatMic.reco = reco;
-        reco.start();
-      } catch (e) {
-        etatMic.enregistre = false;
-        if (etatMic.bouton) etatMic.bouton.classList.remove("nv-ecoute");
-      }
+      try {} catch (e) {}
     }
 
     function basculerDictee() {
-      try {
-        if (etatMic.enregistre) arreterDictee();
-        else demarrerDictee();
-      } catch (e) {}
+      try {} catch (e) {}
     }
 
     function installerMicro() {
-      try {
-        if (etatMic.bouton) return;
-
-        var bouton = document.createElement("button");
-        bouton.className = "nv-micro";
-        bouton.setAttribute("data-nova-voix", "micro");
-        bouton.setAttribute("aria-label", "Dicter un message");
-        bouton.setAttribute("type", "button");
-        bouton.innerHTML = SVG_MICRO;
-
-        bouton.addEventListener("click", function (e) {
-          e.preventDefault();
-          e.stopPropagation();
-          basculerDictee();
-        });
-
-        // Empêche le champ de perdre le focus quand on touche le micro
-        bouton.addEventListener("mousedown", function (e) { e.preventDefault(); });
-
-        document.body.appendChild(bouton);
-        etatMic.bouton = bouton;
-
-        // Mise à jour régulière : couvre l'envoi d'un message
-        // (le champ est vidé par l'app, sans événement "input")
-        setInterval(mettreAJourMicro, 250);
-
-        window.addEventListener("resize", mettreAJourMicro);
-        window.addEventListener("scroll", mettreAJourMicro, true);
-        document.addEventListener("input", mettreAJourMicro, true);
-        document.addEventListener("keyup", mettreAJourMicro, true);
-
-        mettreAJourMicro();
-      } catch (e) {}
+      return; // MICRO SUPPRIMÉ - ne crée plus aucun bouton micro
     }
 
     /* =============================================================
