@@ -1,22 +1,16 @@
 /* ============================================================
-   NOVA AI - update.scroll.js
-   VERSION : 2.0
-   MODULE : SCROLL + FLECHE + 3 POINTS + CODE PYTHON
+   NOVA AI - UPDATE.SCROLL.JS
+   VERSION 2.1
+   MODULE : SCROLL + FLECHE + POINTS + PYTHON
 
-   OBJECTIFS :
-   1. Fleche au milieu de la discussion.
-   2. Trois points places a cote de la fleche.
-   3. Affichage uniquement pendant l'ecriture de NOVA.
-   4. Disparition lorsque NOVA termine.
-   5. Disparition lorsque l'utilisateur retourne en bas.
-   6. Conservation de la position de lecture.
-   7. Detection des blocs Python.
-   8. Boutons SVG blancs : VOIR / COPIER / FERMER.
-   9. Grande zone de code consultable.
-   10. Protection generale try/catch.
+   CORRECTION PRINCIPALE :
+   - DEFILEMENT LIBRE.
+   - AUCUN SCROLLTOP FORCE.
+   - AUCUN BLOCAGE TACTILE.
+   - AUCUNE INTERCEPTION DU GESTE UTILISATEUR.
 
    REGLE D'OR :
-   NE PAS MODIFIER index.html.
+   NE PAS MODIFIER INDEX.HTML.
    NE PAS MODIFIER LES AUTRES FICHIERS.
    ============================================================ */
 
@@ -35,20 +29,16 @@ if (!window.NOVA_SCROLL_INITIALISE) {
       ====================================================== */
 
       var CONFIG = {
-        delaiFinEcriture: 1200,
         margeBas: 100,
-        largeurBouton: 46,
-        hauteurBouton: 46,
-        maxHauteurCode: 180
+        delaiFinEcriture: 1400,
+        hauteurApercuPython: 180
       };
 
       var utilisateurEnHaut = false;
       var novaEcrit = false;
 
-      var timerFinEcriture = null;
-      var timerRecherche = null;
-
-      var dernierScrollTop = 0;
+      var timerFin = null;
+      var timerSurveillance = null;
 
       var zoneObservee = null;
       var observer = null;
@@ -82,7 +72,7 @@ if (!window.NOVA_SCROLL_INITIALISE) {
       }
 
       /* ======================================================
-         VERIFICATION POSITION BAS
+         POSITION DE L'UTILISATEUR
       ====================================================== */
 
       function estEnBas(zone) {
@@ -104,7 +94,7 @@ if (!window.NOVA_SCROLL_INITIALISE) {
       }
 
       /* ======================================================
-         INSTALLATION CSS
+         CSS
       ====================================================== */
 
       function installerStyle() {
@@ -113,18 +103,16 @@ if (!window.NOVA_SCROLL_INITIALISE) {
 
           if (styleInstalle) return;
 
-          if (document.getElementById("nova-scroll-v2-style")) {
+          if (document.getElementById("nova-scroll-v21-style")) {
             styleInstalle = true;
             return;
           }
 
           var style = document.createElement("style");
 
-          style.id = "nova-scroll-v2-style";
+          style.id = "nova-scroll-v21-style";
 
           style.textContent = `
-
-            /* GROUPE FLECHE + POINTS */
 
             #nova-scroll-groupe {
 
@@ -142,7 +130,7 @@ if (!window.NOVA_SCROLL_INITIALISE) {
 
               justify-content: center;
 
-              gap: 12px;
+              gap: 10px;
 
               z-index: 999;
 
@@ -150,19 +138,17 @@ if (!window.NOVA_SCROLL_INITIALISE) {
 
             }
 
-            /* FLECHE */
-
             #nova-fleche-bas {
+
+              width: 46px;
+
+              height: 46px;
 
               display: flex;
 
               align-items: center;
 
               justify-content: center;
-
-              width: 46px;
-
-              height: 46px;
 
               border-radius: 50%;
 
@@ -176,19 +162,17 @@ if (!window.NOVA_SCROLL_INITIALISE) {
 
               cursor: pointer;
 
-              box-shadow: 0 4px 15px rgba(0,0,0,.35);
+              box-shadow: 0 4px 14px rgba(0,0,0,.35);
 
-              transition: transform .2s, opacity .2s;
+              -webkit-tap-highlight-color: transparent;
 
             }
 
             #nova-fleche-bas:active {
 
-              transform: scale(.90);
+              transform: scale(.92);
 
             }
-
-            /* TROIS POINTS */
 
             #nova-3-points {
 
@@ -214,17 +198,17 @@ if (!window.NOVA_SCROLL_INITIALISE) {
 
             #nova-3-points span {
 
-              display: block;
-
               width: 7px;
 
               height: 7px;
+
+              display: block;
 
               border-radius: 50%;
 
               background: white;
 
-              animation: novaPointV2 1s infinite;
+              animation: novaPointV21 1s infinite;
 
             }
 
@@ -240,7 +224,7 @@ if (!window.NOVA_SCROLL_INITIALISE) {
 
             }
 
-            @keyframes novaPointV2 {
+            @keyframes novaPointV21 {
 
               0%,100% {
 
@@ -290,7 +274,9 @@ if (!window.NOVA_SCROLL_INITIALISE) {
 
               justify-content: flex-end;
 
-              gap: 9px;
+              flex-wrap: wrap;
+
+              gap: 8px;
 
               padding: 10px;
 
@@ -309,8 +295,6 @@ if (!window.NOVA_SCROLL_INITIALISE) {
               justify-content: center;
 
               gap: 6px;
-
-              min-width: 38px;
 
               min-height: 36px;
 
@@ -350,11 +334,9 @@ if (!window.NOVA_SCROLL_INITIALISE) {
 
             .nova-python-content {
 
-              max-height: ${CONFIG.maxHauteurCode}px;
+              max-height: ${CONFIG.hauteurApercuPython}px;
 
               overflow: hidden;
-
-              position: relative;
 
               transition: max-height .3s ease;
 
@@ -400,31 +382,13 @@ if (!window.NOVA_SCROLL_INITIALISE) {
 
             .nova-python-footer {
 
-              padding: 7px 12px;
+              padding: 8px 12px;
 
               color: #94a3b8;
 
               font-size: 11px;
 
               border-top: 1px solid #26354b;
-
-            }
-
-            @media(max-width:480px) {
-
-              #nova-scroll-groupe {
-
-                bottom: 12px;
-
-              }
-
-              .nova-python-btn {
-
-                padding: 7px 8px;
-
-                font-size: 11px;
-
-              }
 
             }
 
@@ -439,7 +403,7 @@ if (!window.NOVA_SCROLL_INITIALISE) {
       }
 
       /* ======================================================
-         SVG
+         SVG BLANCS
       ====================================================== */
 
       var SVG = {
@@ -468,7 +432,7 @@ if (!window.NOVA_SCROLL_INITIALISE) {
       };
 
       /* ======================================================
-         CREATION GROUPE SCROLL
+         CREATION FLECHE ET POINTS
       ====================================================== */
 
       function creerGroupe(zone) {
@@ -491,6 +455,18 @@ if (!window.NOVA_SCROLL_INITIALISE) {
 
           }
 
+          var parent = zone.parentElement;
+
+          if (!parent) return null;
+
+          var cs = window.getComputedStyle(parent);
+
+          if (cs.position === "static") {
+
+            parent.style.position = "relative";
+
+          }
+
           groupeScroll = document.createElement("div");
 
           groupeScroll.id = "nova-scroll-groupe";
@@ -506,7 +482,7 @@ if (!window.NOVA_SCROLL_INITIALISE) {
             "Retourner en bas de la discussion"
           );
 
-          fleche.innerHTML = "↓";
+          fleche.textContent = "↓";
 
           points = document.createElement("div");
 
@@ -522,9 +498,13 @@ if (!window.NOVA_SCROLL_INITIALISE) {
 
           groupeScroll.appendChild(points);
 
-          fleche.addEventListener("click", function () {
+          fleche.addEventListener("click", function (event) {
 
             try {
+
+              event.preventDefault();
+
+              event.stopPropagation();
 
               var z = zoneChat();
 
@@ -540,29 +520,9 @@ if (!window.NOVA_SCROLL_INITIALISE) {
 
               cacherGroupe();
 
-              utilisateurEnHaut = false;
-
-              novaEcrit = false;
-
             } catch (e) {}
 
           });
-
-          var parent = zone.parentElement;
-
-          if (!parent) return null;
-
-          try {
-
-            var cs = window.getComputedStyle(parent);
-
-            if (cs.position === "static") {
-
-              parent.style.position = "relative";
-
-            }
-
-          } catch (e) {}
 
           parent.appendChild(groupeScroll);
 
@@ -577,7 +537,7 @@ if (!window.NOVA_SCROLL_INITIALISE) {
       }
 
       /* ======================================================
-         AFFICHAGE GROUPE
+         AFFICHAGE
       ====================================================== */
 
       function montrerGroupe() {
@@ -615,7 +575,7 @@ if (!window.NOVA_SCROLL_INITIALISE) {
       }
 
       /* ======================================================
-         FIN ECRITURE
+         GESTION DE L'ECRITURE
       ====================================================== */
 
       function terminerEcriture() {
@@ -624,11 +584,11 @@ if (!window.NOVA_SCROLL_INITIALISE) {
 
           novaEcrit = false;
 
-          if (timerFinEcriture) {
+          if (timerFin) {
 
-            clearTimeout(timerFinEcriture);
+            clearTimeout(timerFin);
 
-            timerFinEcriture = null;
+            timerFin = null;
 
           }
 
@@ -644,11 +604,17 @@ if (!window.NOVA_SCROLL_INITIALISE) {
 
           novaEcrit = true;
 
-          if (timerFinEcriture) {
+          if (timerFin) {
 
-            clearTimeout(timerFinEcriture);
+            clearTimeout(timerFin);
 
           }
+
+          timerFin = setTimeout(function () {
+
+            terminerEcriture();
+
+          }, CONFIG.delaiFinEcriture);
 
           var z = zoneChat();
 
@@ -656,24 +622,24 @@ if (!window.NOVA_SCROLL_INITIALISE) {
 
           if (!estEnBas(z)) {
 
-            utilisateurEnHaut = true;
-
             montrerGroupe();
 
+          } else {
+
+            cacherGroupe();
+
           }
-
-          timerFinEcriture = setTimeout(function () {
-
-            terminerEcriture();
-
-          }, CONFIG.delaiFinEcriture);
 
         } catch (e) {}
 
       }
 
       /* ======================================================
-         SURVEILLANCE DU SCROLL
+         MISE A JOUR SCROLL
+
+         IMPORTANT :
+         AUCUNE MODIFICATION DE scrollTop ICI.
+         AUCUN BLOCAGE DU DEFILEMENT.
       ====================================================== */
 
       function majAffichage() {
@@ -690,30 +656,15 @@ if (!window.NOVA_SCROLL_INITIALISE) {
 
           if (enBas) {
 
-            dernierScrollTop = z.scrollTop;
-
             cacherGroupe();
 
-            if (novaEcrit) {
+          } else if (novaEcrit) {
 
-              // L'utilisateur est revenu en bas.
-              // La fleche et les points disparaissent.
-
-            }
+            montrerGroupe();
 
           } else {
 
-            dernierScrollTop = z.scrollTop;
-
-            if (novaEcrit) {
-
-              montrerGroupe();
-
-            } else {
-
-              cacherGroupe();
-
-            }
+            cacherGroupe();
 
           }
 
@@ -722,7 +673,7 @@ if (!window.NOVA_SCROLL_INITIALISE) {
       }
 
       /* ======================================================
-         DETECTION DES BLOCS PYTHON
+         DETECTION PYTHON
       ====================================================== */
 
       function estPython(pre) {
@@ -744,18 +695,11 @@ if (!window.NOVA_SCROLL_INITIALISE) {
             ""
           ).toLowerCase();
 
-          if (
-            classes.includes("language-python") ||
-            classes.includes("lang-python") ||
-            classes.includes("python") ||
+          return (
+            classes.indexOf("language-python") !== -1 ||
+            classes.indexOf("lang-python") !== -1 ||
             langage === "python"
-          ) {
-
-            return true;
-
-          }
-
-          return false;
+          );
 
         } catch (e) {
 
@@ -766,10 +710,10 @@ if (!window.NOVA_SCROLL_INITIALISE) {
       }
 
       /* ======================================================
-         BOUTON PYTHON
+         BOUTONS PYTHON
       ====================================================== */
 
-      function creerBoutonPython(texte, icone, action) {
+      function creerBoutonPython(nom, icone, action) {
 
         try {
 
@@ -779,7 +723,7 @@ if (!window.NOVA_SCROLL_INITIALISE) {
 
           btn.className = "nova-python-btn";
 
-          btn.innerHTML = icone + "<span>" + texte + "</span>";
+          btn.innerHTML = icone + "<span>" + nom + "</span>";
 
           btn.addEventListener("click", function (event) {
 
@@ -789,7 +733,7 @@ if (!window.NOVA_SCROLL_INITIALISE) {
 
               event.stopPropagation();
 
-              action();
+              action(btn);
 
             } catch (e) {}
 
@@ -806,26 +750,109 @@ if (!window.NOVA_SCROLL_INITIALISE) {
       }
 
       /* ======================================================
-         INITIALISATION BLOC PYTHON
+         COPIE PYTHON
+      ====================================================== */
+
+      function copierTexte(texte, bouton) {
+
+        try {
+
+          function confirmation() {
+
+            try {
+
+              var label = bouton.querySelector("span");
+
+              if (!label) return;
+
+              label.textContent = "Copié";
+
+              setTimeout(function () {
+
+                label.textContent = "Copier";
+
+              }, 1500);
+
+            } catch (e) {}
+
+          }
+
+          if (
+            navigator.clipboard &&
+            navigator.clipboard.writeText
+          ) {
+
+            navigator.clipboard.writeText(texte).then(
+
+              confirmation,
+
+              function () {
+
+                copierAncienMode();
+
+              }
+
+            );
+
+          } else {
+
+            copierAncienMode();
+
+          }
+
+          function copierAncienMode() {
+
+            try {
+
+              var textarea = document.createElement("textarea");
+
+              textarea.value = texte;
+
+              textarea.style.position = "fixed";
+
+              textarea.style.left = "-9999px";
+
+              textarea.style.top = "0";
+
+              document.body.appendChild(textarea);
+
+              textarea.select();
+
+              var resultat = document.execCommand("copy");
+
+              textarea.remove();
+
+              if (resultat) {
+
+                confirmation();
+
+              }
+
+            } catch (e) {}
+
+          }
+
+        } catch (e) {}
+
+      }
+
+      /* ======================================================
+         TRAITEMENT PYTHON
       ====================================================== */
 
       function traiterBlocPython(pre) {
 
         try {
 
-          if (!pre || pre.dataset.novaPythonReady === "1") {
+          if (!pre) return;
 
-            return;
-
-          }
+          if (pre.dataset.novaPythonReady === "1") return;
 
           if (!estPython(pre)) return;
 
-          pre.dataset.novaPythonReady = "1";
+          var parent = pre.parentElement;
 
-          var parentOriginal = pre.parentElement;
-
-          if (!parentOriginal) return;
+          if (!parent) return;
 
           var wrapper = document.createElement("div");
 
@@ -845,15 +872,11 @@ if (!window.NOVA_SCROLL_INITIALISE) {
 
           footer.textContent = "Code Python";
 
-          var code = pre.querySelector("code");
+          var boutonVoir;
+          var boutonCopier;
+          var boutonFermer;
 
-          var texteCode = code
-            ? code.textContent
-            : pre.textContent;
-
-          /* VOIR */
-
-          var boutonVoir = creerBoutonPython(
+          boutonVoir = creerBoutonPython(
 
             "Voir",
 
@@ -871,55 +894,27 @@ if (!window.NOVA_SCROLL_INITIALISE) {
 
           );
 
-          /* COPIER */
-
-          var boutonCopier = creerBoutonPython(
+          boutonCopier = creerBoutonPython(
 
             "Copier",
 
             SVG.copier,
 
-            function () {
+            function (btn) {
 
-              try {
+              var code = pre.querySelector("code");
 
-                var texte = code
-                  ? code.textContent
-                  : pre.textContent;
+              var texte = code
+                ? code.textContent
+                : pre.textContent;
 
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-
-                  navigator.clipboard.writeText(texte).then(function () {
-
-                    boutonCopier.querySelector("span").textContent = "Copié";
-
-                    setTimeout(function () {
-
-                      boutonCopier.querySelector("span").textContent = "Copier";
-
-                    }, 1500);
-
-                  }).catch(function () {
-
-                    copierAncienMode(texte);
-
-                  });
-
-                } else {
-
-                  copierAncienMode(texte);
-
-                }
-
-              } catch (e) {}
+              copierTexte(texte, btn);
 
             }
 
           );
 
-          /* FERMER */
-
-          var boutonFermer = creerBoutonPython(
+          boutonFermer = creerBoutonPython(
 
             "Fermer",
 
@@ -937,41 +932,7 @@ if (!window.NOVA_SCROLL_INITIALISE) {
 
           );
 
-          function copierAncienMode(texte) {
-
-            try {
-
-              var textarea = document.createElement("textarea");
-
-              textarea.value = texte;
-
-              textarea.style.position = "fixed";
-
-              textarea.style.left = "-9999px";
-
-              document.body.appendChild(textarea);
-
-              textarea.select();
-
-              document.execCommand("copy");
-
-              textarea.remove();
-
-              boutonCopier.querySelector("span").textContent = "Copié";
-
-              setTimeout(function () {
-
-                boutonCopier.querySelector("span").textContent = "Copier";
-
-              }, 1500);
-
-            } catch (e) {}
-
-          }
-
           if (!boutonVoir || !boutonCopier || !boutonFermer) {
-
-            pre.dataset.novaPythonReady = "0";
 
             return;
 
@@ -985,6 +946,17 @@ if (!window.NOVA_SCROLL_INITIALISE) {
 
           toolbar.appendChild(boutonFermer);
 
+          /*
+
+            Marquer avant le déplacement pour éviter
+            les traitements répétés par MutationObserver.
+
+          */
+
+          pre.dataset.novaPythonReady = "1";
+
+          parent.insertBefore(wrapper, pre);
+
           content.appendChild(pre);
 
           wrapper.appendChild(toolbar);
@@ -993,17 +965,12 @@ if (!window.NOVA_SCROLL_INITIALISE) {
 
           wrapper.appendChild(footer);
 
-          parentOriginal.insertBefore(wrapper, pre);
-
-          // Le bloc est maintenant dans le wrapper.
-          // On ne supprime ni ne reconstruit son contenu.
-
         } catch (e) {}
 
       }
 
       /* ======================================================
-         RECHERCHE DES BLOCS PYTHON
+         RECHERCHE PYTHON
       ====================================================== */
 
       function rechercherPython(zone) {
@@ -1025,7 +992,7 @@ if (!window.NOVA_SCROLL_INITIALISE) {
       }
 
       /* ======================================================
-         OBSERVATEUR DE LA DISCUSSION
+         OBSERVATEUR
       ====================================================== */
 
       function installerObservateur(zone) {
@@ -1054,9 +1021,11 @@ if (!window.NOVA_SCROLL_INITIALISE) {
 
               for (var i = 0; i < mutations.length; i++) {
 
+                var mutation = mutations[i];
+
                 if (
-                  mutations[i].type === "childList" ||
-                  mutations[i].type === "characterData"
+                  mutation.type === "characterData" ||
+                  mutation.type === "childList"
                 ) {
 
                   changement = true;
@@ -1070,23 +1039,6 @@ if (!window.NOVA_SCROLL_INITIALISE) {
               if (!changement) return;
 
               rechercherPython(z);
-
-              if (utilisateurEnHaut) {
-
-                // On ne force jamais le scroll.
-                // On conserve la position de lecture.
-
-                if (dernierScrollTop >= 0) {
-
-                  if (Math.abs(z.scrollTop - dernierScrollTop) < 5) {
-
-                    // Position stable.
-
-                  }
-
-                }
-
-              }
 
               signalerEcriture();
 
@@ -1111,36 +1063,25 @@ if (!window.NOVA_SCROLL_INITIALISE) {
       }
 
       /* ======================================================
-         EVENEMENTS DE SCROLL
+         EVENEMENTS SCROLL
+
+         PASSIVE = TRUE
+         LE NAVIGATEUR GARDE LE CONTROLE DU GESTE TACTILE.
       ====================================================== */
 
       function installerEvenements(zone) {
 
         try {
 
-          if (zone.dataset.novaScrollV2 === "1") return;
+          if (zone.dataset.novaScrollV21 === "1") return;
 
-          zone.dataset.novaScrollV2 = "1";
+          zone.dataset.novaScrollV21 = "1";
 
           zone.addEventListener("scroll", function () {
 
             try {
 
-              var etaitEnHaut = utilisateurEnHaut;
-
               majAffichage();
-
-              if (utilisateurEnHaut) {
-
-                dernierScrollTop = zone.scrollTop;
-
-              }
-
-              if (!utilisateurEnHaut && etaitEnHaut) {
-
-                terminerEcriture();
-
-              }
 
             } catch (e) {}
 
@@ -1166,13 +1107,7 @@ if (!window.NOVA_SCROLL_INITIALISE) {
 
           var zone = zoneChat();
 
-          if (!zone) {
-
-            setTimeout(demarrer, 500);
-
-            return;
-
-          }
+          if (!zone) return;
 
           if (zoneObservee !== zone) {
 
@@ -1193,20 +1128,20 @@ if (!window.NOVA_SCROLL_INITIALISE) {
       }
 
       /* ======================================================
-         SURVEILLANCE REMPLACEMENT ZONE CHAT
+         SURVEILLANCE DU REMPLACEMENT DE DISCUSSION
       ====================================================== */
 
       function surveillerZone() {
 
         try {
 
-          if (timerRecherche) {
+          if (timerSurveillance) {
 
-            clearInterval(timerRecherche);
+            clearInterval(timerSurveillance);
 
           }
 
-          timerRecherche = setInterval(function () {
+          timerSurveillance = setInterval(function () {
 
             try {
 
@@ -1229,7 +1164,7 @@ if (!window.NOVA_SCROLL_INITIALISE) {
       }
 
       /* ======================================================
-         LANCEMENT
+         LANCEMENT FINAL
       ====================================================== */
 
       if (document.readyState === "loading") {
@@ -1252,11 +1187,11 @@ if (!window.NOVA_SCROLL_INITIALISE) {
 
     } catch (e) {
 
-      // NOVA AI continue de fonctionner
-      // meme si ce module rencontre une erreur.
+      // Le module ne doit pas empêcher
+      // le fonctionnement principal de NOVA AI.
 
     }
 
   })();
 
-}
+      }
