@@ -1492,6 +1492,109 @@ function zoneChat() {
 }
 
 
+/* ============================================================
+   15.1 MASQUER LE MESSAGE ANGLAIS D'INDEX.HTML
+   RESTAURATION DE LA FONCTION V4
+   ============================================================ */
+
+function cacherMessageAnglais() {
+
+  try {
+
+    const PHRASE = "Hi! What would you like help with";
+
+    function nettoyer() {
+
+      try {
+
+        const zone = zoneChat();
+
+        if (!zone) return;
+
+        const tous = zone.querySelectorAll("div, p, span");
+
+        for (let i = 0; i < tous.length; i++) {
+
+          const el = tous[i];
+
+          if (
+            el &&
+            el.textContent &&
+            el.textContent.indexOf(PHRASE) !== -1
+          ) {
+
+            el.style.display = "none";
+
+          }
+
+        }
+
+        if (
+          zone.textContent &&
+          zone.textContent.indexOf(PHRASE) !== -1
+        ) {
+
+          const noeuds = zone.childNodes;
+
+          for (let j = 0; j < noeuds.length; j++) {
+
+            if (
+              noeuds[j].nodeType === 3 &&
+              noeuds[j].textContent &&
+              noeuds[j].textContent.indexOf(PHRASE) !== -1
+            ) {
+
+              noeuds[j].textContent = "";
+
+            }
+
+          }
+
+        }
+
+      } catch (e) {}
+
+    }
+
+    nettoyer();
+
+    try {
+
+      const zone2 = zoneChat();
+
+      if (
+        zone2 &&
+        typeof MutationObserver !== "undefined"
+      ) {
+
+        const obs = new MutationObserver(nettoyer);
+
+        obs.observe(zone2, {
+
+          childList: true,
+
+          subtree: true,
+
+          characterData: true
+
+        });
+
+      }
+
+    } catch (e) {}
+
+    setInterval(nettoyer, 1000);
+
+  } catch (e) {}
+
+}
+
+
+/* ============================================================
+   FIN DE LA RESTAURATION DU MASQUAGE V4
+   ============================================================ */
+
+
 function afficherVoix(texte, role) {
 
   try {
@@ -2019,6 +2122,12 @@ function demarrerNOVA() {
   try {
 
     attendreBranchement();
+
+  } catch (e) {}
+
+  try {
+
+    cacherMessageAnglais();
 
   } catch (e) {}
 
