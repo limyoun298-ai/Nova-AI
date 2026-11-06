@@ -556,6 +556,43 @@ if (window.NOVA_COMPORTEMENT_INITIALISE) {
         } catch (e) {}
       }
 
+      /* ---------- 8.5 CACHER LE MESSAGE ANGLAIS DE INDEX.HTML - AJOUT SEUL ---------- */
+      function cacherMessageAnglais() {
+        try {
+          var PHRASE = "Hi! What would you like help with";
+          function nettoyer() {
+            try {
+              var zone = zoneChat();
+              if (!zone) return;
+              var tous = zone.querySelectorAll("div, p, span");
+              for (var i = 0; i < tous.length; i++) {
+                var el = tous[i];
+                if (el && el.textContent && el.textContent.indexOf(PHRASE) !== -1) {
+                  el.style.display = "none";
+                }
+              }
+              if (zone.textContent && zone.textContent.indexOf(PHRASE) !== -1) {
+                var noeuds = zone.childNodes;
+                for (var j = 0; j < noeuds.length; j++) {
+                  if (noeuds[j].nodeType === 3 && noeuds[j].textContent && noeuds[j].textContent.indexOf(PHRASE) !== -1) {
+                    noeuds[j].textContent = "";
+                  }
+                }
+              }
+            } catch (e) {}
+          }
+          nettoyer();
+          try {
+            var zone2 = zoneChat();
+            if (zone2 && typeof MutationObserver !== "undefined") {
+              var obs = new MutationObserver(nettoyer);
+              obs.observe(zone2, { childList: true, subtree: true, characterData: true });
+            }
+          } catch (e) {}
+          setInterval(nettoyer, 1000);
+        } catch (e) {}
+      }
+
       /* ---------- 9. BRANCHEMENT AUTOMATIQUE - TU N'AS RIEN A FAIRE ---------- */
       window.NovaComportement = {
         parler: parler,
@@ -578,6 +615,7 @@ if (window.NOVA_COMPORTEMENT_INITIALISE) {
           ecouterReactions();
           brancherBoutonsMicro();
           attendreEtBrancher();
+          cacherMessageAnglais();
           accueil();
         } catch (e) {}
       }
@@ -590,4 +628,4 @@ if (window.NOVA_COMPORTEMENT_INITIALISE) {
 
     } catch (e) {}
   })();
-}
+         }
