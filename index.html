@@ -2456,8 +2456,20 @@ function buildApiMessages(conversation,extra){
   return [{role:"system",content:buildSystemPrompt(extra)},...mapped];
 }
 
-/* API SUPABASE */
+/* API SUPABASE : tout passe par la Edge Function "nova-ai" (la clé OpenRouter reste dans les Secrets Supabase) */
+function messagesToText(messages){
+  return messages.map(m=>{
+    let c=m.content;
+    if(Array.isArray(c)){
+      c=c.map(p=>p&&p.type==="text"?p.text:"[image jointe]").join(" ");
+    }
+    const tag=m.role==="system"?"INSTRUCTIONS":m.role==="assistant"?"NOVA AI":"UTILISATEUR";
+    return tag+" : "+c;
+  }).join("\n\n");
+}
+
 async function callNovaAI(messages){
+  const message=messagesToText(messages);
   const ctrl=new AbortController();
   const t=setTimeout(()=>ctrl.abort(),90000);
 
@@ -2466,20 +2478,17 @@ async function callNovaAI(messages){
       method:"POST",
       headers:{
         "Content-Type":"application/json",
+        "Authorization":"Bearer "+SUPABASE_ANON_KEY,
         "apikey":SUPABASE_ANON_KEY
       },
-      body:JSON.stringify({action:"chat",messages}),
+      body:JSON.stringify({message:message}),
       signal:ctrl.signal
     });
 
     if(!response.ok) throw new Error("request_failed");
 
     const data=await response.json();
-    const result=
-      data.choices?.[0]?.message?.content||
-      data.message||
-      data.response||
-      data.text;
+    const result=data.reponse;
 
     if(typeof result!=="string"||!result.trim()) throw new Error("empty_response");
 
@@ -2494,6 +2503,7 @@ async function generateImage(prompt){
     method:"POST",
     headers:{
       "Content-Type":"application/json",
+      "Authorization":"Bearer "+SUPABASE_ANON_KEY,
       "apikey":SUPABASE_ANON_KEY
     },
     body:JSON.stringify({action:"image",prompt,width:512,height:512})
@@ -2507,32 +2517,10 @@ async function generateImage(prompt){
   return image;
 }
 
-/* RECHERCHE WEB LÉGÈRE (jamais bloquante) */
+/* RECHERCHE WEB : désactivée (seule NOVA_ENDPOINT est appelée) */
 const SEARCH_TRIGGER=/(\bdate\b|\bprix\b|actu|2026|2025|m[ée]t[ée]o|\bscore\b|qui est|aujourd)/i;
 
 async function webSearch(q){
-  const query=q.slice(0,120);
-
-  try{
-    const ctrl=new AbortController();
-    const t=setTimeout(()=>ctrl.abort(),5000);
-    const r=await fetch("https://api.duckduckgo.com/?q="+encodeURIComponent(query)+"&format=json&no_html=1&skip_disambig=1",{signal:ctrl.signal});
-    clearTimeout(t);
-    const d=await r.json();
-    const txt=d.AbstractText||(d.RelatedTopics&&d.RelatedTopics[0]&&d.RelatedTopics[0].Text)||"";
-    if(txt) return txt.slice(0,700);
-  }catch(e){}
-
-  try{
-    const ctrl=new AbortController();
-    const t=setTimeout(()=>ctrl.abort(),5000);
-    const r=await fetch("https://fr.wikipedia.org/w/api.php?action=query&list=search&srlimit=1&format=json&origin=*&srsearch="+encodeURIComponent(query),{signal:ctrl.signal});
-    clearTimeout(t);
-    const d=await r.json();
-    const hit=d.query&&d.query.search&&d.query.search[0];
-    if(hit) return (hit.title+" : "+hit.snippet.replace(/<[^>]+>/g,"")).slice(0,700);
-  }catch(e){}
-
   return "";
 }
 
