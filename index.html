@@ -2118,38 +2118,53 @@ async function typeAssistantMessage(text,conversationId){
   $("messages").appendChild(row);
 
   let i=0;
-  let skip=false;
-  row.addEventListener("click",()=>{skip=true;});
+let skip=false;
+row.addEventListener("click",()=>{skip=true;});
 
-  await new Promise(resolve=>{
-    const timer=setInterval(()=>{
-      if(!row.isConnected){
-        clearInterval(timer);
-        resolve();
-        return;
+await new Promise((resolve)=>{
+  const timer=setInterval(()=>{
+    if(!row.isConnected){
+      clearInterval(timer);
+      resolve();
+      return;
+    }
+
+    i=skip?clean.length:i+8;
+
+    /* évite de couper un emoji en deux */
+    const code=clean.charCodeAt(i-1);
+    if(i<clean.length&&code>=0xD800&&code<=0xDBFF){
+      i++;
+    }
+
+    renderRich(body,clean.slice(0,i));
+
+    const box=$("messages");
+    if(box){
+      const distanceDuBas = box.scrollHeight - box.scrollTop - box.clientHeight;
+      if(distanceDuBas < 120){
+        box.scrollTop = box.scrollHeight;
       }
+    }
 
-      i=skip?clean.length:i+1;
-
-      /* évite de couper un emoji en deux */
-      const code=clean.charCodeAt(i-1);
-      if(i<clean.length&&code>=0xD800&&code<=0xDBFF) i++;
-
-      renderRich(body,clean.slice(0,i));
-      scrollBottom();
-
-      if(i>=clean.length){
-        clearInterval(timer);
-        resolve();
-      }
-    },25);
+    if(i>=clean.length){
+      clearInterval(timer);
+      resolve();
+    }
+  },12);
+});
   });
 
   if(row.isConnected){
-    renderRich(body,clean);
-    addAIActions(row,m);
-    addLongPress(row,m);
-    scrollBottom();
+  renderRich(body,clean);
+  addAIActions(row,m);
+  addLongPress(row,m);
+  const boxFin=$("messages");
+  if(boxFin){
+    const distFin = boxFin.scrollHeight - boxFin.scrollTop - boxFin.clientHeight;
+    if(distFin < 120){ boxFin.scrollTop = boxFin.scrollHeight; }
+  }
+  }
   }
 
   if(settings.notif&&document.hidden&&"Notification" in window&&Notification.permission==="granted"){
