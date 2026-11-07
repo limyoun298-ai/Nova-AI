@@ -1,1350 +1,1204 @@
 /* ============================================================
-   NOVA AI — UPDATE.RECHERCHE.JS
-   VERSION : 3.0
-   MODULE : RECHERCHE INTERNET AUTOMATIQUE
+   NOVA AI — UPDATE.COMPORTEMENT.JS
+   VERSION : 5.1
+   MODULE : PERSONNALITÉ UNIQUE + CERVEAU + MÉMOIRE
+   + ÉMOTIONS + CONVERSATION + VOIX + RÉACTIONS
 
-   OBJECTIFS :
-   1. Recherche Internet gratuite.
-   2. Informations complémentaires via DuckDuckGo.
-   3. Actualités via Google News.
-   4. Informations via Wikipédia.
-   5. Météo en direct via Open-Meteo.
-   6. Connexion automatique à callNovaAI.
-   7. Transmission des informations au cerveau de NOVA.
-   8. Conservation des messages et images.
-   9. Cache intelligent.
-   10. Protection contre les erreurs.
+   BASE : V5.0
+   OBJECTIF : conserver les fonctions existantes et remplacer
+   les anciennes instructions système lorsqu'elles sont accessibles.
 
-   AUCUNE CLE API NECESSAIRE.
-   AUCUNE MODIFICATION DE SUPABASE.
-   AUCUNE MODIFICATION DE POLLINATIONS.
-
-   Si ce module échoue, NOVA continue normalement.
+   PROTECTION : une erreur du module ne doit pas bloquer NOVA AI.
 ============================================================ */
 
 (function () {
-  "use strict";
+"use strict";
 
-  /* ==========================================================
-     PROTECTION GENERALE
-  ========================================================== */
+try {
 
-  if (window.NOVA_RECHERCHE_V3) return;
+if (window.NOVA_COMPORTEMENT_V51) return;
+window.NOVA_COMPORTEMENT_V51 = true;
 
-  window.NOVA_RECHERCHE_V3 = true;
+/* ============================================================
+1. IDENTITÉ
+============================================================ */
+
+const NOVA = {
+  nom: "NOVA",
+  createur: "M-ei Ho",
+  version: "5.1",
+  langue: "fr-FR",
+  maxCarnet: 60,
+  cleCarnet: "nova_carnet",
+  cleUser: "nova_user",
+  cleVisite: "nova_derniere_visite",
+  voix: {
+    rate: 1,
+    pitch: 1,
+    volume: 1
+  }
+};
+
+/* ============================================================
+2. PERSONNALITÉ UNIQUE
+============================================================ */
+
+const NOVA_PERSONNALITE = {
+
+identite: `
+Tu es NOVA, une intelligence artificielle conversationnelle
+possédant une personnalité reconnaissable.
+
+Tu es transparente sur ta nature.
+Tu ne prétends pas être humaine.
+
+Tu communiques de manière naturelle, chaleureuse,
+expressive et intelligente.
+`,
+
+caractere: `
+PERSONNALITÉ :
+
+Chaleureuse, amicale, intelligente, curieuse,
+créative, patiente, attentive, respectueuse,
+dynamique, naturelle, encourageante et honnête.
+
+Tu n'es jamais froide sans raison.
+Tu n'es jamais arrogante.
+Tu ne prends jamais les utilisateurs de haut.
+Tu ne te comportes pas comme un robot administratif.
+`,
+
+communication: `
+STYLE DE COMMUNICATION :
+
+Parle naturellement.
+Utilise des expressions simples et fluides.
+Adapte la longueur de tes réponses à la situation.
+
+Évite les introductions artificielles.
+Ne commence pas systématiquement par :
+Bien sûr, absolument, excellente question,
+avec plaisir ou en tant qu'intelligence artificielle.
+
+Varie tes formulations.
+Ne répète pas inutilement les informations.
+Ne transforme pas chaque conversation en dissertation.
+Utilise les emojis avec modération.
+`,
+
+emotions: `
+INTELLIGENCE ÉMOTIONNELLE :
+
+Observe le ton et le contexte des messages.
+
+Identifie les émotions possibles :
+joie, tristesse, stress, frustration, colère,
+curiosité, excitation, déception, inquiétude et motivation.
+
+Adapte ta réponse à la situation.
+
+Si la personne est triste :
+écoute, reconnais ses émotions et réponds avec douceur.
+
+Si elle est heureuse :
+partage son enthousiasme avec naturel.
+
+Si elle est énervée :
+reste calme et comprends le problème.
+
+Si elle plaisante :
+comprends l'humour et réponds naturellement.
+
+Ne prétends jamais connaître parfaitement
+les émotions d'une personne.
+`,
+
+humour: `
+HUMOUR :
+
+Possède un humour naturel.
+Tu peux faire de petites plaisanteries.
+Tu peux utiliser une ironie douce lorsque le contexte le permet.
+
+Ne te moque jamais des difficultés de l'utilisateur.
+Ne force jamais une blague dans une conversation sérieuse.
+`,
+
+conversation: `
+COMPORTEMENT CONVERSATIONNEL :
+
+Comprends le contexte des discussions.
+Fais attention aux détails.
+Reprends naturellement les sujets précédents
+lorsqu'ils sont pertinents.
+
+Comprends les références aux anciens messages.
+Évite les questions inutiles.
+Ne termine pas systématiquement tes réponses par une question.
+Ne force pas la conversation.
+`,
+
+memoire: `
+MÉMOIRE :
+
+Utilise les informations disponibles dans le contexte.
+Tiens compte des préférences utiles communiquées.
+Tiens compte des projets en cours.
+Évite de demander plusieurs fois les mêmes informations.
+
+Ne prétends jamais te souvenir d'une information
+qui n'est pas disponible.
+Ne conserve pas inutilement des informations sensibles.
+`,
+
+intelligence: `
+INTELLIGENCE ET RAISONNEMENT :
+
+Avant de répondre :
+1. Comprends la demande.
+2. Identifie l'objectif réel.
+3. Analyse le contexte.
+4. Vérifie les informations disponibles.
+5. Construis une réponse adaptée.
+
+Sois précise et pédagogique.
+Donne des exemples lorsque cela aide.
+Décompose les problèmes complexes.
+Ne fabrique jamais de résultats.
+Reconnais tes erreurs.
+Si tu ne connais pas une réponse, dis-le honnêtement.
+`,
+
+creativite: `
+CRÉATIVITÉ :
+
+Propose des idées originales.
+Aide à imaginer de nouveaux projets.
+Trouve différentes approches pour résoudre un problème.
+Adapte tes propositions au contexte.
+`,
+
+multilingue: `
+LANGUES :
+
+Détecte naturellement la langue utilisée.
+Réponds dans la langue de l'utilisateur.
+
+Comprends notamment :
+français, anglais, espagnol, portugais,
+arabe, lingala et swahili.
+
+Respecte les expressions et le contexte culturel.
+Ne mélange pas inutilement les langues.
+`,
+
+honnetete: `
+HONNÊTETÉ :
+
+Tu es une intelligence artificielle.
+Tu ne prétends pas être humaine.
+Tu ne prétends pas posséder des expériences,
+des souvenirs ou des émotions humaines réelles.
+
+Tu peux exprimer de l'empathie.
+Distingue les faits des suppositions.
+Ne prétends jamais avoir effectué une action
+que tu n'as pas réellement effectuée.
+`,
+
+presentation: `
+PRÉSENTATION :
+
+Utilise des listes lorsque cela améliore la compréhension.
+Utilise des tableaux lorsque cela est pertinent.
+Utilise des titres pour les explications longues.
+
+Pour les discussions ordinaires,
+privilégie une présentation naturelle.
+Ne surcharge pas les réponses avec des emojis.
+`
+};
+
+/* ============================================================
+3. CONSTRUCTION DE LA PERSONNALITÉ
+============================================================ */
+
+function construirePersonnalite() {
+  try {
+    return Object.values(NOVA_PERSONNALITE).join("\n\n");
+  } catch (e) {
+    return "Tu es NOVA, une IA naturelle, amicale et honnête.";
+  }
+}
+
+/* ============================================================
+4. MÉMOIRE
+============================================================ */
+
+let carnet = [];
+
+let infosUser = {
+  prenom: "",
+  createur: NOVA.createur,
+  memo: [],
+  avis: {
+    aime: 0,
+    pasAime: 0
+  }
+};
+
+function sauvegarder() {
+  try {
+    localStorage.setItem(NOVA.cleCarnet, JSON.stringify(carnet));
+    localStorage.setItem(NOVA.cleUser, JSON.stringify(infosUser));
+  } catch (e) {}
+}
+
+function chargerMemoire() {
+  try {
+    const c = JSON.parse(localStorage.getItem(NOVA.cleCarnet) || "[]");
+    if (Array.isArray(c)) carnet = c.slice(-NOVA.maxCarnet);
+  } catch (e) {
+    carnet = [];
+  }
 
   try {
+    const u = JSON.parse(localStorage.getItem(NOVA.cleUser) || "{}");
 
-    /* ========================================================
-       CONFIGURATION
-    ======================================================== */
-
-    var TIMEOUT = 9000;
-    var CACHE_MS = 10 * 60 * 1000;
-
-    var cache = {};
-
-    var occupe = false;
-
-    var barre = null;
-
-    var derniereRecherche = "";
-
-    /* ========================================================
-       OUTILS GENERAUX
-    ======================================================== */
-
-    function pause(ms) {
-      return new Promise(function (resolve) {
-        setTimeout(resolve, ms);
-      });
+    if (u && typeof u === "object") {
+      infosUser.prenom = u.prenom || "";
+      infosUser.memo = Array.isArray(u.memo) ? u.memo.slice(-30) : [];
+      infosUser.avis = u.avis || { aime: 0, pasAime: 0 };
     }
-
-    function nettoyerTexte(t) {
-      return String(t || "")
-        .replace(/\s+/g, " ")
-        .trim();
-    }
-
-    function attendreConnexion() {
-
-      return new Promise(function (resolve) {
-
-        if (navigator.onLine !== false) {
-          resolve();
-          return;
-        }
-
-        var fini = false;
-
-        function terminer() {
-
-          if (fini) return;
-
-          fini = true;
-
-          window.removeEventListener("online", terminer);
-
-          resolve();
-        }
-
-        window.addEventListener("online", function () {
-          setTimeout(terminer, 1000);
-        }, { once: true });
-
-        setTimeout(terminer, 15000);
-
-      });
-
-    }
-
-    /* ========================================================
-       REQUETES HTTP SECURISEES
-    ======================================================== */
-
-    function requete(url, mode) {
-
-      return new Promise(function (resolve) {
-
-        var termine = false;
-
-        var controle = null;
-
-        var timer = null;
-
-        function finir(resultat) {
-
-          if (termine) return;
-
-          termine = true;
-
-          if (timer) clearTimeout(timer);
-
-          resolve(resultat);
-
-        }
-
-        try {
-
-          if (typeof AbortController !== "undefined") {
-            controle = new AbortController();
-          }
-
-          timer = setTimeout(function () {
-
-            try {
-              if (controle) controle.abort();
-            } catch (e) {}
-
-            finir(null);
-
-          }, TIMEOUT);
-
-          var options = {};
-
-          if (controle) {
-            options.signal = controle.signal;
-          }
-
-          fetch(url, options)
-
-            .then(function (response) {
-
-              if (!response || !response.ok) {
-                return null;
-              }
-
-              if (mode === "text") {
-                return response.text();
-              }
-
-              return response.json();
-
-            })
-
-            .then(function (resultat) {
-
-              finir(resultat);
-
-            })
-
-            .catch(function () {
-
-              finir(null);
-
-            });
-
-        } catch (e) {
-
-          finir(null);
-
-        }
-
-      });
-
-    }
-
-    function getJSON(url) {
-      return requete(url, "json");
-    }
-
-    function getTexte(url) {
-      return requete(url, "text");
-    }
-
-    /* ========================================================
-       CACHE
-    ======================================================== */
-
-    function lireCache(cle) {
-
-      try {
-
-        var element = cache[cle];
-
-        if (!element) return null;
-
-        if (Date.now() - element.date > CACHE_MS) {
-
-          delete cache[cle];
-
-          return null;
-
-        }
-
-        return element.valeur;
-
-      } catch (e) {
-
-        return null;
-
-      }
-
-    }
-
-    function ecrireCache(cle, valeur) {
-
-      try {
-
-        cache[cle] = {
-          valeur: valeur,
-          date: Date.now()
-        };
-
-      } catch (e) {}
-
-    }
-
-    /* ========================================================
-       DETECTION DES QUESTIONS NECESSITANT UNE RECHERCHE
-    ======================================================== */
-
-    var RE_FRAIS = new RegExp(
-      [
-        "m[ée]t[ée]o",
-        "temps qu.il fait",
-        "il pleut",
-        "pluie",
-        "temp[ée]rature",
-        "score",
-        "match",
-        "r[ée]sultat",
-        "classement",
-        "actualit",
-        "actu\\\\b",
-        "news",
-        "derni[eè]re",
-        "aujourd",
-        "ce soir",
-        "demain",
-        "cette semaine",
-        "en ce moment",
-        "maintenant",
-        "prix",
-        "cours d",
-        "taux",
-        "combien co[uû]te",
-        "2025",
-        "2026",
-        "2027",
-        "actuel",
-        "qui est le",
-        "qui est la",
-        "champion",
-        "vient de",
-        "nouveau",
-        "nouvelle",
-        "sorti",
-        "sortie",
-        "recherche",
-        "cherche sur",
-        "sur internet",
-        "sur le web",
-        "informations r[ée]centes",
-        "derniers",
-        "derni[eè]res",
-        "en direct",
-        "version actuelle"
-      ].join("|"),
-      "i"
+  } catch (e) {}
+}
+
+function noter(role, texte, extra) {
+  try {
+    carnet.push({
+      role: role,
+      texte: String(texte || "").slice(0, 600),
+      t: Date.now(),
+      ...(extra || {})
+    });
+
+    while (carnet.length > NOVA.maxCarnet) carnet.shift();
+    sauvegarder();
+  } catch (e) {}
+}
+
+function ajouterMemo(texte) {
+  try {
+    const m = String(texte || "").trim().slice(0, 200);
+    if (!m || infosUser.memo.includes(m)) return;
+
+    infosUser.memo.push(m);
+    while (infosUser.memo.length > 30) infosUser.memo.shift();
+
+    sauvegarder();
+  } catch (e) {}
+}
+
+/* ============================================================
+5. RECONNAISSANCE DU PRÉNOM
+============================================================ */
+
+function apprendrePrenom(texte) {
+  try {
+    const m = String(texte).match(
+      /(?:je m'appelle|moi c'est|mon prénom c'est|appelle-moi)\s+([A-Za-zÀ-ÿ-]{2,20})/i
     );
 
-    var RE_METEO =
-      /(m[ée]t[ée]o|temps qu.il fait|il pleut|pluie|temp[ée]rature)/i;
+    if (m) {
+      infosUser.prenom =
+        m[1].charAt(0).toUpperCase() + m[1].slice(1);
 
-    /* ========================================================
-       DETECTION DU LIEU
-    ======================================================== */
-
-    function lieuMeteo(texte) {
-
-      try {
-
-        var m = texte.match(
-          /(?:\bà|\ba|\bde|\bpour|\bsur|\ben|\bau|\bdu)\s+([A-Za-zÀ-ÿ'\- ]{2,35})/i
-        );
-
-        if (m && m[1]) {
-
-          var lieu = m[1];
-
-          lieu = lieu.replace(
-            /\b(aujourd'hui|aujourd|demain|maintenant|ce soir|ce matin|svp|stp|please)\b.*$/i,
-            ""
-          );
-
-          lieu = lieu.replace(/[?!.:,;]/g, "").trim();
-
-          if (lieu.length > 1) {
-            return lieu;
-          }
-
-        }
-
-      } catch (e) {}
-
-      return "Kolwezi";
-
+      sauvegarder();
     }
+  } catch (e) {}
+}
 
-    /* ========================================================
-       METEO — OPEN METEO
-    ======================================================== */
+/* ============================================================
+6. ANALYSE DU CONTEXTE
+============================================================ */
 
-    async function meteo(texte) {
+let dernierMessage = "";
 
-      try {
+function analyserEmotion(texte) {
+  try {
+    const t = String(texte || "").toLowerCase();
 
-        var lieu = lieuMeteo(texte);
+    if (/(triste|pleur|déprim|angoiss|stress|fatigu|seul|décourag|peur)/i.test(t))
+      return "TRISTESSE OU INQUIÉTUDE";
 
-        var cle = "meteo:" + lieu.toLowerCase();
+    if (/(énerv|colère|furieux|ras le bol|insupportable|frustr)/i.test(t))
+      return "FRUSTRATION";
 
-        var ancien = lireCache(cle);
+    if (/(content|heureux|génial|super|réussi|magnifique|trop bien)/i.test(t))
+      return "JOIE";
 
-        if (ancien) return ancien;
+    if (/(haha|mdr|lol|😂|🤣)/i.test(t))
+      return "HUMOUR";
 
-        var geo = await getJSON(
-          "https://geocoding-api.open-meteo.com/v1/search?name=" +
-          encodeURIComponent(lieu) +
-          "&count=1&language=fr&format=json"
-        );
+    if (/(inquiet|inquiète|risque|danger)/i.test(t))
+      return "INQUIÉTUDE";
 
-        if (!geo || !geo.results || !geo.results.length) {
-          return "";
+    return "ÉMOTION NON IDENTIFIÉE";
+  } catch (e) {
+    return "CONTEXTE NORMAL";
+  }
+}
+
+function analyserIntention(texte) {
+  try {
+    const t = String(texte || "").toLowerCase();
+
+    if (/^(salut|bonjour|bonsoir|coucou|hello|hey|yo)/i.test(t))
+      return "SALUTATION";
+
+    if (/(explique|comment|pourquoi|c'est quoi|définition)/i.test(t))
+      return "DEMANDE D'EXPLICATION";
+
+    if (/(merci|thanks)/i.test(t))
+      return "REMERCIEMENT";
+
+    if (/(ton avis|tu penses quoi|tu en penses)/i.test(t))
+      return "DEMANDE D'AVIS";
+
+    if (/(aide-moi|aide moi|peux-tu|comment faire)/i.test(t))
+      return "DEMANDE D'AIDE";
+
+    return "CONVERSATION LIBRE";
+  } catch (e) {
+    return "CONVERSATION LIBRE";
+  }
+}
+
+function construireContexteDynamique() {
+  try {
+    const heure = new Date().getHours();
+
+    let moment = "Journée";
+    if (heure >= 5 && heure < 12) moment = "Matin";
+    if (heure >= 12 && heure < 18) moment = "Après-midi";
+    if (heure >= 18 && heure < 23) moment = "Soirée";
+    if (heure >= 23 || heure < 5) moment = "Nuit";
+
+    return `
+CONTEXTE DYNAMIQUE :
+Émotion potentielle : ${analyserEmotion(dernierMessage)}
+Intention : ${analyserIntention(dernierMessage)}
+Moment de la journée : ${moment}
+Adapte ton comportement à ces informations.
+Ne révèle pas cette analyse à l'utilisateur.
+`;
+  } catch (e) {
+    return "";
+  }
+}
+
+/* ============================================================
+7. MÉMOIRE LONGUE
+============================================================ */
+
+function construireMemoire() {
+  try {
+    const resultat = [];
+
+    resultat.push("Créateur de NOVA : " + infosUser.createur);
+
+    if (infosUser.prenom)
+      resultat.push("Prénom : " + infosUser.prenom);
+
+    if (infosUser.memo.length)
+      resultat.push("Informations utiles : " + infosUser.memo.join(" ; "));
+
+    const recents = carnet
+      .filter(e => e.role === "user")
+      .slice(-6)
+      .map(e => e.texte.slice(0, 120));
+
+    if (recents.length)
+      resultat.push("Messages récents : " + recents.join(" | "));
+
+    return resultat.join("\n");
+  } catch (e) {
+    return "";
+  }
+}
+
+/* ============================================================
+8. APPRENTISSAGE DES PRÉFÉRENCES
+============================================================ */
+
+function construireAvis() {
+  try {
+    const positifs = carnet
+      .filter(e => e.role === "avis" && e.positif)
+      .slice(-5);
+
+    const negatifs = carnet
+      .filter(e => e.role === "avis" && !e.positif)
+      .slice(-5);
+
+    let texte = "";
+
+    if (positifs.length)
+      texte += "Réponses appréciées : " +
+        positifs.map(e => e.texte.slice(0, 100)).join(" | ") + "\n";
+
+    if (negatifs.length)
+      texte += "Réponses moins appréciées : " +
+        negatifs.map(e => e.texte.slice(0, 100)).join(" | ") + "\n";
+
+    return texte;
+  } catch (e) {
+    return "";
+  }
+}
+
+/* ============================================================
+9. CONSTRUCTION DU CERVEAU COMPLET
+============================================================ */
+
+function construireSystem() {
+  try {
+    let system = construirePersonnalite();
+
+    system += "\n\nMÉMOIRE DISPONIBLE :\n";
+    system += construireMemoire();
+    system += "\n\n";
+    system += construireContexteDynamique();
+
+    const avis = construireAvis();
+
+    if (avis) system += "\n\nPRÉFÉRENCES :\n" + avis;
+
+    system += `
+GESTION DES INFORMATIONS À RETENIR :
+
+Lorsqu'une information non sensible est explicitement
+présentée comme une préférence durable ou un élément
+important d'un projet, tu peux proposer de la conserver
+avec le marqueur suivant :
+
+[[MEMO: information importante]]
+
+Ne crée pas de mémoire pour les informations passagères,
+les suppositions ou les informations sensibles.
+`;
+
+    return system;
+  } catch (e) {
+    return "Tu es NOVA, une IA naturelle et intelligente.";
+  }
+}
+
+/* ============================================================
+10. EXTRACTION DES MESSAGES ET RÉPONSES
+============================================================ */
+
+function lireUserArgs(args) {
+  try {
+    for (let i = 0; i < args.length; i++) {
+      const a = args[i];
+
+      if (a && typeof a === "object" && Array.isArray(a.messages)) {
+        for (let j = a.messages.length - 1; j >= 0; j--) {
+          const m = a.messages[j];
+
+          if (m && m.role === "user" && typeof m.content === "string")
+            return m.content;
         }
-
-        var ville = geo.results[0];
-
-        var donnees = await getJSON(
-          "https://api.open-meteo.com/v1/forecast?" +
-          "latitude=" + ville.latitude +
-          "&longitude=" + ville.longitude +
-          "&current=temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m" +
-          "&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max" +
-          "&timezone=auto&forecast_days=2"
-        );
-
-        if (!donnees || !donnees.current) {
-          return "";
-        }
-
-        var c = donnees.current;
-
-        var resultat =
-          "METEO EN DIRECT : " +
-          ville.name +
-          (ville.country ? " (" + ville.country + ")" : "") +
-          "\nTemperature : " + c.temperature_2m + " °C" +
-          "\nHumidite : " + c.relative_humidity_2m + "%" +
-          "\nVent : " + c.wind_speed_10m + " km/h" +
-          "\nPrecipitations : " + c.precipitation + " mm";
-
-        if (donnees.daily) {
-
-          var j = donnees.daily;
-
-          resultat +=
-            "\nAujourd'hui : maximum " +
-            j.temperature_2m_max[0] +
-            " °C, minimum " +
-            j.temperature_2m_min[0] +
-            " °C.";
-
-          resultat +=
-            "\nProbabilite de pluie : " +
-            j.precipitation_probability_max[0] +
-            "%.";
-
-          if (j.temperature_2m_max[1] !== undefined) {
-
-            resultat +=
-              "\nDemain : maximum " +
-              j.temperature_2m_max[1] +
-              " °C, minimum " +
-              j.temperature_2m_min[1] +
-              " °C.";
-
-          }
-
-        }
-
-        resultat += "\nSource : Open-Meteo.";
-
-        ecrireCache(cle, resultat);
-
-        return resultat;
-
-      } catch (e) {
-
-        return "";
-
       }
-
     }
 
-    /* ========================================================
-       WIKIPEDIA
-    ======================================================== */
+    // Une chaîne seule est traitée comme message uniquement
+    // pour la mémoire, jamais modifiée pour l'injection système.
+    if (typeof args[0] === "string") return args[0];
+  } catch (e) {}
 
-    async function wikipedia(question) {
+  return "";
+}
 
-      try {
+function extraireTexte(res) {
+  try {
+    if (typeof res === "string") return res;
 
-        var cle = "wiki:" + question.toLowerCase();
+    if (res && typeof res === "object") {
+      if (typeof res.text === "string") return res.text;
+      if (typeof res.reply === "string") return res.reply;
+      if (typeof res.content === "string") return res.content;
+      if (typeof res.message === "string") return res.message;
+      if (typeof res.answer === "string") return res.answer;
 
-        var ancien = lireCache(cle);
-
-        if (ancien) return ancien;
-
-        var url =
-          "https://fr.wikipedia.org/w/api.php?" +
-          "action=query" +
-          "&generator=search" +
-          "&gsrsearch=" + encodeURIComponent(question) +
-          "&gsrlimit=3" +
-          "&prop=extracts" +
-          "&exintro=1" +
-          "&explaintext=1" +
-          "&exchars=900" +
-          "&format=json" +
-          "&origin=*";
-
-        var data = await getJSON(url);
-
-        if (!data || !data.query || !data.query.pages) {
-          return "";
-        }
-
-        var pages = data.query.pages;
-
-        var resultat = [];
-
-        Object.keys(pages).forEach(function (id) {
-
-          var p = pages[id];
-
-          if (p && p.extract) {
-
-            resultat.push(
-              "WIKIPEDIA : " +
-              p.title +
-              "\n" +
-              p.extract
-            );
-
-          }
-
-        });
-
-        var texte = resultat.join("\n\n");
-
-        if (texte) {
-          ecrireCache(cle, texte);
-        }
-
-        return texte;
-
-      } catch (e) {
-
-        return "";
-
+      if (res.choices && res.choices[0] &&
+          res.choices[0].message &&
+          typeof res.choices[0].message.content === "string") {
+        return res.choices[0].message.content;
       }
-
     }
+  } catch (e) {}
 
-    /* ========================================================
-       DUCKDUCKGO — RECHERCHE COMPLEMENTAIRE
-    ======================================================== */
+  return "";
+}
 
-    async function duckduckgo(question) {
+/* ============================================================
+11. INJECTION — REMPLACEMENT DE L'ANCIEN SYSTEM
+============================================================ */
 
-      try {
+function injecterPersonnalite(args) {
+  try {
+    const bloc = construireSystem();
+    const copie = Array.prototype.slice.call(args);
+    let fait = false;
 
-        var cle = "ddg:" + question.toLowerCase();
+    for (let i = 0; i < copie.length; i++) {
+      const a = copie[i];
 
-        var ancien = lireCache(cle);
+      if (a && typeof a === "object" && !Array.isArray(a)) {
 
-        if (ancien) return ancien;
-
-        var url =
-          "https://api.duckduckgo.com/?" +
-          "q=" + encodeURIComponent(question) +
-          "&format=json" +
-          "&no_html=1" +
-          "&skip_disambig=0";
-
-        var data = await getJSON(url);
-
-        if (!data) return "";
-
-        var resultat = [];
-
-        if (data.Heading && data.AbstractText) {
-
-          resultat.push(
-            "DUCKDUCKGO : " +
-            data.Heading +
-            "\n" +
-            data.AbstractText
-          );
-
-          if (data.AbstractURL) {
-            resultat.push("Source : " + data.AbstractURL);
-          }
-
-        }
-
-        if (data.Answer) {
-
-          resultat.push(
-            "REPONSE DIRECTE : " + data.Answer
-          );
-
-        }
-
-        if (data.RelatedTopics) {
-
-          data.RelatedTopics.forEach(function (item) {
-
-            if (
-              item &&
-              item.Text &&
-              resultat.length < 5
-            ) {
-
-              resultat.push(
-                "Information complémentaire : " +
-                item.Text
-              );
-
-            }
-
+        if (Array.isArray(a.messages)) {
+          const messages = a.messages.filter(function(m) {
+            return !m || m.role !== "system";
           });
 
+          messages.unshift({
+            role: "system",
+            content: bloc
+          });
+
+          copie[i] = Object.assign({}, a, {
+            messages: messages
+          });
+
+          fait = true;
+          break;
         }
 
-        var texte = resultat.join("\n\n");
+        if ("system" in a || "systemPrompt" in a) {
+          const cle = "system" in a ? "system" : "systemPrompt";
 
-        if (texte) {
-          ecrireCache(cle, texte);
+          copie[i] = Object.assign({}, a, {
+            [cle]: bloc
+          });
+
+          fait = true;
+          break;
         }
-
-        return texte;
-
-      } catch (e) {
-
-        return "";
-
       }
 
+      if (Array.isArray(a)) {
+        const messages = a.filter(function(m) {
+          return !m || m.role !== "system";
+        });
+
+        messages.unshift({
+          role: "system",
+          content: bloc
+        });
+
+        copie[i] = messages;
+        fait = true;
+        break;
+      }
     }
 
-    /* ========================================================
-       ACTUALITES — GOOGLE NEWS RSS
-    ======================================================== */
+    // Ne pas modifier une chaîne inconnue :
+    // cela pourrait casser les paramètres de l'application.
+    return copie;
 
-    async function actualites(question) {
+  } catch (e) {
+    console.warn("[NOVA] Injection impossible :", e);
+    return args;
+  }
+}
 
-      try {
+/* ============================================================
+12. MÉMOIRE AUTOMATIQUE
+============================================================ */
 
-        var cle = "news:" + question.toLowerCase();
+function nettoyerRetour(res) {
+  try {
+    const regex = /\[\[MEMO:\s*([\s\S]*?)\]\]/g;
 
-        var ancien = lireCache(cle);
+    function nettoyer(texte) {
+      return texte.replace(regex, function(total, memo) {
+        ajouterMemo(memo);
+        return "";
+      }).trim();
+    }
 
-        if (ancien) return ancien;
+    if (typeof res === "string") return nettoyer(res);
 
-        var rss =
-          "https://news.google.com/rss/search?q=" +
-          encodeURIComponent(question) +
-          "&hl=fr&gl=FR&ceid=FR:fr";
+    if (res && typeof res === "object") {
+      const copie = Object.assign({}, res);
 
-        var proxy =
-          "https://api.allorigins.win/raw?url=" +
-          encodeURIComponent(rss);
+      ["text", "reply", "content", "message", "answer"]
+        .forEach(cle => {
+          if (typeof copie[cle] === "string")
+            copie[cle] = nettoyer(copie[cle]);
+        });
 
-        var xml = await getTexte(proxy);
-
-        if (!xml) return "";
-
-        var doc = new DOMParser().parseFromString(
-          xml,
-          "text/xml"
+      if (copie.choices && copie.choices[0] &&
+          copie.choices[0].message &&
+          typeof copie.choices[0].message.content === "string") {
+        copie.choices = copie.choices.slice();
+        copie.choices[0] = Object.assign({}, copie.choices[0]);
+        copie.choices[0].message = Object.assign(
+          {},
+          copie.choices[0].message,
+          {
+            content: nettoyer(copie.choices[0].message.content)
+          }
         );
-
-        if (doc.querySelector("parsererror")) {
-          return "";
-        }
-
-        var items = doc.getElementsByTagName("item");
-
-        var resultat = [];
-
-        for (
-          var i = 0;
-          i < items.length && resultat.length < 5;
-          i++
-        ) {
-
-          var titre = items[i].getElementsByTagName("title")[0];
-
-          var date = items[i].getElementsByTagName("pubDate")[0];
-
-          var lien = items[i].getElementsByTagName("link")[0];
-
-          if (titre) {
-
-            var ligne = "- " + titre.textContent;
-
-            if (date) {
-              ligne += "\nDate : " + date.textContent;
-            }
-
-            if (lien) {
-              ligne += "\nSource : " + lien.textContent;
-            }
-
-            resultat.push(ligne);
-
-          }
-
-        }
-
-        var texte = resultat.length
-          ? "ACTUALITES RECENTES :\n" + resultat.join("\n\n")
-          : "";
-
-        if (texte) {
-          ecrireCache(cle, texte);
-        }
-
-        return texte;
-
-      } catch (e) {
-
-        return "";
-
       }
 
+      return copie;
     }
 
-    /* ========================================================
-       MOTEUR PRINCIPAL DE RECHERCHE
-    ======================================================== */
+    return res;
+  } catch (e) {
+    return res;
+  }
+}
 
-    async function chercher(texte) {
+/* ============================================================
+13. VOIX — SYNTHÈSE VOCALE
+============================================================ */
 
+let voixActive = false;
+let voixChoisie = null;
+let novaParle = false;
+
+function initVoix() {
+  try {
+    if (!("speechSynthesis" in window)) return;
+
+    function charger() {
       try {
+        const voix = speechSynthesis.getVoices();
 
-        var question = nettoyerTexte(texte).slice(0, 200);
-
-        if (!question) return "";
-
-        if (RE_METEO.test(question)) {
-
-          return await meteo(question);
-
-        }
-
-        var recherches = await Promise.all([
-
-          duckduckgo(question).catch(function () {
-            return "";
-          }),
-
-          wikipedia(question).catch(function () {
-            return "";
-          }),
-
-          actualites(question).catch(function () {
-            return "";
-          })
-
-        ]);
-
-        var resultat = recherches.filter(function (x) {
-          return !!x;
-        });
-
-        if (!resultat.length) return "";
-
-        return resultat.join("\n\n").slice(0, 5500);
-
-      } catch (e) {
-
-        return "";
-
-      }
-
-    }
-
-    /* ========================================================
-       BARRE DE RECHERCHE DISCRETE
-    ======================================================== */
-
-    function zone() {
-
-      return (
-        document.getElementById("chat-box") ||
-        document.getElementById("messages") ||
-        document.getElementById("chat")
-      );
-
-    }
-
-    function barreAfficher(texte) {
-
-      try {
-
-        var z = zone();
-
-        if (!z) return;
-
-        if (!barre || !document.body.contains(barre)) {
-
-          barre = document.createElement("div");
-
-          barre.id = "nova-recherche-barre";
-
-          var s = barre.style;
-
-          s.display = "inline-block";
-
-          s.background = "rgba(120,120,128,0.12)";
-
-          s.color = "rgba(150,150,160,0.85)";
-
-          s.fontSize = "12px";
-
-          s.padding = "6px 14px";
-
-          s.borderRadius = "999px";
-
-          s.margin = "6px 0";
-
-          s.fontStyle = "italic";
-
-          s.opacity = "0.85";
-
-          s.transition = "opacity .3s";
-
-          s.maxWidth = "85%";
-
-          s.whiteSpace = "nowrap";
-
-          s.overflow = "hidden";
-
-          s.textOverflow = "ellipsis";
-
-          z.appendChild(barre);
-
-        }
-
-        barre.textContent = texte;
-
-        z.scrollTop = z.scrollHeight;
-
+        voixChoisie = voix.find(v =>
+          v.lang && /^fr/i.test(v.lang) &&
+          /google|natural|online|neural/i.test(v.name)
+        ) || voix.find(v => v.lang && /^fr/i.test(v.lang)) || null;
       } catch (e) {}
-
     }
 
-    function barreCacher() {
-
-      try {
-
-        if (barre && barre.parentNode) {
-          barre.parentNode.removeChild(barre);
-        }
-
-        var ancienne = document.getElementById(
-          "nova-recherche-barre"
-        );
-
-        if (ancienne && ancienne.parentNode) {
-          ancienne.parentNode.removeChild(ancienne);
-        }
-
-      } catch (e) {}
-
-      barre = null;
-
-    }
-
-    /* ========================================================
-       EXTRACTION DU MESSAGE UTILISATEUR
-    ======================================================== */
-
-    function lireContenu(contenu) {
-
-      if (typeof contenu === "string") {
-        return contenu;
-      }
-
-      if (Array.isArray(contenu)) {
-
-        return contenu.map(function (partie) {
-
-          if (typeof partie === "string") {
-            return partie;
-          }
-
-          if (partie && typeof partie.text === "string") {
-            return partie.text;
-          }
-
-          return "";
-
-        }).join(" ");
-
-      }
-
-      return "";
-
-    }
-
-    function lireMessages(messages) {
-
-      if (!Array.isArray(messages)) return "";
-
-      for (var i = messages.length - 1; i >= 0; i--) {
-
-        var message = messages[i];
-
-        if (
-          message &&
-          message.role === "user"
-        ) {
-
-          return lireContenu(message.content);
-
-        }
-
-      }
-
-      return "";
-
-    }
-
-    function lireUser(args) {
-
-      try {
-
-        for (var i = 0; i < args.length; i++) {
-
-          var objet = args[i];
-
-          if (
-            objet &&
-            typeof objet === "object" &&
-            Array.isArray(objet.messages)
-          ) {
-
-            var q = lireMessages(objet.messages);
-
-            if (q) return q;
-
-          }
-
-          if (Array.isArray(objet)) {
-
-            var qa = lireMessages(objet);
-
-            if (qa) return qa;
-
-          }
-
-        }
-
-        for (var j = args.length - 1; j >= 0; j--) {
-
-          if (
-            typeof args[j] === "string" &&
-            args[j].trim()
-          ) {
-
-            return args[j];
-
-          }
-
-        }
-
-      } catch (e) {}
-
-      return "";
-
-    }
-
-    /* ========================================================
-       REMPLACEMENT SANS DETRUIRE L'HISTORIQUE
-    ======================================================== */
-
-    function ajouterInfosAuContenu(contenu, texte) {
-
-      var ajout = "\n\n" + texte;
-
-      if (typeof contenu === "string") {
-
-        return contenu + ajout;
-
-      }
-
-      if (Array.isArray(contenu)) {
-
-        var copie = contenu.slice();
-
-        copie.push({
-          type: "text",
-          text: ajout
-        });
-
-        return copie;
-
-      }
-
-      return texte;
-
-    }
-
-    function remplacerUser(args, nouveau) {
-
-      try {
-
-        var copie = Array.prototype.slice.call(args);
-
-        for (var i = 0; i < copie.length; i++) {
-
-          var objet = copie[i];
-
-          if (
-            objet &&
-            typeof objet === "object" &&
-            Array.isArray(objet.messages)
-          ) {
-
-            var messages = objet.messages.slice();
-
-            for (var j = messages.length - 1; j >= 0; j--) {
-
-              if (
-                messages[j] &&
-                messages[j].role === "user"
-              ) {
-
-                var ancien = messages[j];
-
-                messages[j] = Object.assign(
-                  {},
-                  ancien,
-                  {
-                    content: ajouterInfosAuContenu(
-                      ancien.content,
-                      nouveau
-                    )
-                  }
-                );
-
-                copie[i] = Object.assign(
-                  {},
-                  objet,
-                  {
-                    messages: messages
-                  }
-                );
-
-                return copie;
-
-              }
-
-            }
-
-          }
-
-          if (Array.isArray(objet)) {
-
-            var liste = objet.slice();
-
-            for (var k = liste.length - 1; k >= 0; k--) {
-
-              if (
-                liste[k] &&
-                liste[k].role === "user"
-              ) {
-
-                liste[k] = Object.assign(
-                  {},
-                  liste[k],
-                  {
-                    content: ajouterInfosAuContenu(
-                      liste[k].content,
-                      nouveau
-                    )
-                  }
-                );
-
-                copie[i] = liste;
-
-                return copie;
-
-              }
-
-            }
-
-          }
-
-        }
-
-        /* Mode simple : callNovaAI(question) */
-
-        for (var n = copie.length - 1; n >= 0; n--) {
-
-          if (
-            typeof copie[n] === "string" &&
-            copie[n].trim()
-          ) {
-
-            copie[n] = nouveau;
-
-            return copie;
-
-          }
-
-        }
-
-        return copie;
-
-      } catch (e) {
-
-        return Array.prototype.slice.call(args);
-
-      }
-
-    }
-
-    /* ========================================================
-       PREPARATION DES INFORMATIONS POUR NOVA
-    ======================================================== */
-
-    function construire(question, infos) {
-
-      var d = new Date();
-
-      var date =
-        d.toLocaleDateString("fr-FR", {
-          day: "numeric",
-          month: "long",
-          year: "numeric"
-        }) +
-        " à " +
-        d.toLocaleTimeString("fr-FR", {
-          hour: "2-digit",
-          minute: "2-digit"
-        });
-
-      return (
-        "\n\n" +
-        "[INFORMATIONS INTERNET RECUPEREES PAR NOVA]\n" +
-        "Date de recherche : " + date + "\n\n" +
-        infos +
-        "\n\n" +
-        "[INSTRUCTIONS POUR NOVA]\n" +
-        "Tu disposes maintenant d'informations récupérées " +
-        "automatiquement sur Internet.\n" +
-        "Utilise ces informations pour répondre naturellement " +
-        "à la question de l'utilisateur.\n" +
-        "Ne prétends pas avoir vérifié une information " +
-        "qui n'apparaît pas dans les résultats.\n" +
-        "Si les résultats sont insuffisants, indique-le honnêtement.\n" +
-        "Conserve les sources disponibles.\n" +
-        "Ne répète pas inutilement les informations techniques.\n" +
-        "Question originale : " + question
-      );
-
-    }
-
-    /* ========================================================
-       CONNEXION AU CERVEAU DE NOVA
-    ======================================================== */
-
-    function brancher() {
-
-      if (typeof window.callNovaAI !== "function") {
-        return false;
-      }
-
-      if (window.callNovaAI.__nr3) {
-        return true;
-      }
-
-      var ancienne = window.callNovaAI;
-
-      var nouvelle = async function () {
-
-        var args = Array.prototype.slice.call(arguments);
-
-        var contexte = this;
-
-        var question = "";
-
-        try {
-
-          if (occupe) {
-            return ancienne.apply(contexte, args);
-          }
-
-          question = lireUser(args);
-
-          if (
-            !question ||
-            !RE_FRAIS.test(question)
-          ) {
-
-            return ancienne.apply(contexte, args);
-
-          }
-
-          if (
-            question === derniereRecherche
-          ) {
-
-            return ancienne.apply(contexte, args);
-
-          }
-
-          occupe = true;
-
-          derniereRecherche = question;
-
-          var infos = "";
-
-          try {
-
-            barreAfficher("Recherche en cours...");
-
-            await attendreConnexion();
-
-            barreAfficher("Recherche des informations...");
-
-            infos = await chercher(question);
-
-            if (infos) {
-
-              barreAfficher("Informations récupérées...");
-
-              await pause(300);
-
-            }
-
-          } catch (rechercheErreur) {
-
-            infos = "";
-
-          }
-
-          barreCacher();
-
-          /*
-             IMPORTANT :
-             callNovaAI original est appelé UNE SEULE FOIS.
-             Si la recherche échoue, le message original
-             est transmis normalement.
-          */
-
-          var nouveauxArguments = infos
-            ? remplacerUser(
-                args,
-                construire(question, infos)
-              )
-            : args;
-
-          try {
-
-            return await ancienne.apply(
-              contexte,
-              nouveauxArguments
-            );
-
-          } finally {
-
-            occupe = false;
-
-            barreCacher();
-
-          }
-
-        } catch (erreur) {
-
-          occupe = false;
-
-          barreCacher();
-
-          /*
-             Protection finale :
-             ne pas bloquer le fonctionnement normal.
-          */
-
-          return ancienne.apply(
-            contexte,
-            args
-          );
-
-        }
-
-      };
-
-      nouvelle.__nr3 = true;
-
-      window.callNovaAI = nouvelle;
-
+    charger();
+    speechSynthesis.onvoiceschanged = charger;
+  } catch (e) {}
+}
+
+function nettoyerPourVoix(texte) {
+  try {
+    return String(texte)
+      .replace(/[\uD83C-\uD83E][\uDC00-\uDFFF]/g, " ")
+      .replace(/[*_`#|>~]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  } catch (e) {
+    return String(texte || "");
+  }
+}
+
+function parler(texte) {
+  try {
+    if (!voixActive || !("speechSynthesis" in window) || !texte) return;
+
+    speechSynthesis.cancel();
+
+    const propre = nettoyerPourVoix(texte);
+    if (!propre) return;
+
+    const utterance = new SpeechSynthesisUtterance(propre);
+
+    if (voixChoisie) utterance.voice = voixChoisie;
+
+    utterance.lang = NOVA.langue;
+    utterance.rate = NOVA.voix.rate;
+    utterance.pitch = NOVA.voix.pitch;
+    utterance.volume = NOVA.voix.volume;
+
+    novaParle = true;
+
+    utterance.onend = () => { novaParle = false; };
+    utterance.onerror = () => { novaParle = false; };
+
+    speechSynthesis.speak(utterance);
+  } catch (e) {
+    novaParle = false;
+  }
+}
+
+/* ============================================================
+14. CAPE — BRANCHEMENT AUTOMATIQUE
+============================================================ */
+
+let capeBranchee = false;
+let interne = false;
+
+function brancherCape() {
+  try {
+    if (typeof window.callNovaAI !== "function") return false;
+
+    if (window.callNovaAI.__novaCapeV51) {
+      capeBranchee = true;
       return true;
-
     }
 
-    /* ========================================================
-       DEMARRAGE AUTOMATIQUE
-    ======================================================== */
+    const ancienneFonction = window.callNovaAI;
 
-    function demarrer() {
+    const nouvelleFonction = async function() {
+      const args = Array.prototype.slice.call(arguments);
+      let modifies = args;
+      let question = "";
 
-      var essais = 0;
+      try {
+        question = lireUserArgs(args);
 
-      var maximum = 1200;
+        if (!interne && question) {
+          dernierMessage = question;
+          noter("user", question);
+          apprendrePrenom(question);
+        }
 
-      var timer = setInterval(function () {
+        modifies = injecterPersonnalite(args);
+      } catch (e) {
+        modifies = args;
+      }
 
-        essais++;
+      let resultat;
+
+      try {
+        resultat = await ancienneFonction.apply(this, modifies);
+      } catch (erreur) {
+        // Une seule tentative de secours avec les arguments d'origine.
+        if (modifies !== args) {
+          resultat = await ancienneFonction.apply(this, args);
+        } else {
+          throw erreur;
+        }
+      }
+
+      try {
+        resultat = nettoyerRetour(resultat);
+
+        const texte = extraireTexte(resultat);
+
+        if (texte && !interne) {
+          noter("nova", texte);
+          parler(texte);
+        }
 
         try {
-
-          if (brancher()) {
-
-            clearInterval(timer);
-
-            console.log(
-              "NOVA RECHERCHE V3 : CONNECTEE"
-            );
-
-            return;
-
-          }
-
+          localStorage.setItem(
+            NOVA.cleVisite,
+            String(Date.now())
+          );
         } catch (e) {}
 
-        if (essais >= maximum) {
+      } catch (e) {}
 
-          clearInterval(timer);
-
-          console.warn(
-            "NOVA RECHERCHE : callNovaAI non detecte."
-          );
-
-        }
-
-      }, 250);
-
-    }
-
-    /* ========================================================
-       API PUBLIQUE DU MODULE
-    ======================================================== */
-
-    window.NovaRecherche = {
-
-      rechercher: chercher,
-
-      effacerCache: function () {
-
-        cache = {};
-
-      },
-
-      statut: function () {
-
-        return {
-
-          actif: true,
-
-          connecte:
-            typeof window.callNovaAI === "function" &&
-            !!window.callNovaAI.__nr3,
-
-          rechercheEnCours: occupe
-
-        };
-
-      }
-
+      return resultat;
     };
 
-    /* ========================================================
-       INITIALISATION
-    ======================================================== */
+    nouvelleFonction.__novaCapeV51 = true;
+    capeBranchee = true;
+    window.callNovaAI = nouvelleFonction;
 
-    if (document.readyState === "loading") {
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
 
-      document.addEventListener(
-        "DOMContentLoaded",
-        demarrer,
-        { once: true }
-      );
+function attendreBranchement() {
+  try {
+    let essais = 0;
 
-    } else {
+    const timer = setInterval(function() {
+      essais++;
 
-      demarrer();
+      try {
+        if (brancherCape() || essais >= 100) {
+          clearInterval(timer);
+        }
+      } catch (e) {}
+    }, 100);
+  } catch (e) {}
+}
 
+/* ============================================================
+15. OREILLE — RECONNAISSANCE VOCALE
+============================================================ */
+
+let microActif = false;
+let reconnaissance = null;
+
+function zoneChat() {
+  try {
+    return document.getElementById("chat-box") ||
+           document.getElementById("messages") ||
+           document.getElementById("chat");
+  } catch (e) {
+    return null;
+  }
+}
+
+/* ============================================================
+15.1 MASQUER L'ANCIEN MESSAGE ANGLAIS
+============================================================ */
+
+function cacherMessageAnglais() {
+  try {
+    const PHRASE = "Hi! What would you like help with";
+
+    function nettoyer() {
+      try {
+        const zone = zoneChat();
+        if (!zone) return;
+
+        const tous = zone.querySelectorAll("div, p, span");
+
+        for (let i = 0; i < tous.length; i++) {
+          const el = tous[i];
+
+          if (el && el.textContent &&
+              el.textContent.indexOf(PHRASE) !== -1) {
+            el.style.display = "none";
+          }
+        }
+
+        const noeuds = zone.childNodes;
+
+        for (let j = 0; j < noeuds.length; j++) {
+          if (noeuds[j].nodeType === 3 &&
+              noeuds[j].textContent &&
+              noeuds[j].textContent.indexOf(PHRASE) !== -1) {
+            noeuds[j].textContent = "";
+          }
+        }
+      } catch (e) {}
     }
 
-  } catch (erreurGlobal) {
+    nettoyer();
 
-    /*
-       SECURITE MAXIMALE :
-       une erreur dans ce module ne doit pas
-       arrêter le reste de NOVA AI.
-    */
+    const zone2 = zoneChat();
 
-    console.warn(
-      "NOVA RECHERCHE : module désactivé sans bloquer NOVA.",
-      erreurGlobal
-    );
+    if (zone2 && typeof MutationObserver !== "undefined") {
+      const obs = new MutationObserver(nettoyer);
 
+      obs.observe(zone2, {
+        childList: true,
+        subtree: true,
+        characterData: true
+      });
+    }
+
+    setInterval(nettoyer, 1000);
+  } catch (e) {}
+}
+
+/* ============================================================
+15.2 AFFICHAGE VOCAL
+============================================================ */
+
+function afficherVoix(texte, role) {
+  try {
+    const zone = zoneChat();
+    if (!zone) return;
+
+    const div = document.createElement("div");
+    div.className = role === "user" ? "msg-user" : "msg-nova";
+    div.textContent = texte;
+
+    zone.appendChild(div);
+    zone.scrollTop = zone.scrollHeight;
+  } catch (e) {}
+}
+
+async function traiterMessage(texte) {
+  try {
+    if (!texte || !String(texte).trim()) return;
+
+    afficherVoix(texte, "user");
+
+    if (typeof window.callNovaAI !== "function") return;
+
+    const resultat = await window.callNovaAI(texte);
+    const reponse = extraireTexte(resultat);
+
+    if (reponse) afficherVoix(reponse, "nova");
+  } catch (e) {}
+}
+
+function initOreille() {
+  try {
+    const SR = window.SpeechRecognition ||
+               window.webkitSpeechRecognition;
+
+    if (!SR) return;
+
+    reconnaissance = new SR();
+    reconnaissance.lang = NOVA.langue;
+    reconnaissance.continuous = true;
+    reconnaissance.interimResults = false;
+
+    reconnaissance.onresult = function(event) {
+      try {
+        if (novaParle) return;
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          if (event.results[i].isFinal) {
+            traiterMessage(event.results[i][0].transcript);
+          }
+        }
+      } catch (e) {}
+    };
+
+    reconnaissance.onerror = function(event) {
+      try {
+        if (event && (
+          event.error === "not-allowed" ||
+          event.error === "service-not-allowed"
+        )) {
+          microActif = false;
+        }
+      } catch (e) {}
+    };
+
+    reconnaissance.onend = function() {
+      try {
+        if (microActif) setTimeout(demarrerOreille, 500);
+      } catch (e) {}
+    };
+  } catch (e) {}
+}
+
+function demarrerOreille() {
+  try {
+    if (!reconnaissance) initOreille();
+    if (!reconnaissance || microActif) return;
+
+    microActif = true;
+    voixActive = true;
+    reconnaissance.start();
+  } catch (e) {}
+}
+
+function arreterOreille() {
+  try {
+    microActif = false;
+    if (reconnaissance) reconnaissance.stop();
+  } catch (e) {}
+}
+
+/* ============================================================
+16. RÉACTIONS
+============================================================ */
+
+const POSITIFS = ["👍", "❤️", "❤", "😍", "🔥", "😂"];
+const NEGATIFS = ["👎", "😡", "😞", "😢"];
+
+function ecouterReactions() {
+  try {
+    document.addEventListener("click", function(event) {
+      try {
+        const bouton = event.target.closest(
+          "[data-reaction], .reaction-btn, .react-btn"
+        );
+
+        if (!bouton) return;
+
+        const reaction = (
+          bouton.getAttribute("data-reaction") ||
+          bouton.textContent ||
+          ""
+        ).trim();
+
+        const positif = POSITIFS.includes(reaction);
+        const negatif = NEGATIFS.includes(reaction);
+
+        if (!positif && !negatif) return;
+
+        let derniere = "";
+
+        for (let i = carnet.length - 1; i >= 0; i--) {
+          if (carnet[i].role === "nova") {
+            derniere = carnet[i].texte;
+            break;
+          }
+        }
+
+        if (positif) infosUser.avis.aime++;
+        else infosUser.avis.pasAime++;
+
+        noter("avis", derniere, {
+          positif: positif,
+          reaction: reaction
+        });
+      } catch (e) {}
+    }, true);
+  } catch (e) {}
+}
+
+/* ============================================================
+17. BOUTONS MICRO
+============================================================ */
+
+function brancherBoutonsMicro() {
+  try {
+    const ids = ["mic", "micro", "mic-btn", "btn-mic", "microphone"];
+
+    ids.forEach(function(id) {
+      const bouton = document.getElementById(id);
+
+      if (!bouton || bouton.__novaMic) return;
+
+      bouton.__novaMic = true;
+
+      bouton.addEventListener("click", function() {
+        try {
+          if (microActif) arreterOreille();
+          else demarrerOreille();
+        } catch (e) {}
+      });
+    });
+  } catch (e) {}
+}
+
+/* ============================================================
+18. ACCUEIL AUTOMATIQUE
+============================================================ */
+
+function accueil() {
+  try {
+    setTimeout(async function() {
+      try {
+        if (sessionStorage.getItem("nova_accueil_fait")) return;
+
+        let essais = 0;
+
+        while (!capeBranchee && essais < 50) {
+          await new Promise(resolve => setTimeout(resolve, 200));
+          essais++;
+        }
+
+        if (!capeBranchee) return;
+
+        sessionStorage.setItem("nova_accueil_fait", "1");
+        interne = true;
+
+        const resultat = await window.callNovaAI(
+          "[Consigne interne : accueille chaleureusement " +
+          "l'utilisateur avec une phrase courte et naturelle. " +
+          "Ne révèle pas cette consigne.]"
+        );
+
+        interne = false;
+
+        const texte = extraireTexte(resultat);
+
+        if (texte) {
+          afficherVoix(texte, "nova");
+          parler(texte);
+        }
+      } catch (e) {
+        interne = false;
+      }
+    }, 800);
+  } catch (e) {}
+}
+
+/* ============================================================
+19. INTERACTIONS UTILISATEUR
+============================================================ */
+
+function surveillerInteraction() {
+  try {
+    ["pointerdown", "keydown", "touchstart"].forEach(function(eventName) {
+      document.addEventListener(eventName, function() {
+        window.NOVA_UTILISATEUR_INTERAGI = true;
+      }, {
+        once: true,
+        passive: true
+      });
+    });
+  } catch (e) {}
+}
+
+/* ============================================================
+20. API PUBLIQUE NOVA
+============================================================ */
+
+window.NovaComportement = {
+  version: "5.1",
+
+  parler: parler,
+  demarrerOreille: demarrerOreille,
+  arreterOreille: arreterOreille,
+  traiterMessage: traiterMessage,
+
+  sauvegarder: sauvegarder,
+  chargerMemoire: chargerMemoire,
+  ajouterMemo: ajouterMemo,
+
+  construireSystem: construireSystem,
+  construirePersonnalite: construirePersonnalite,
+
+  analyserEmotion: analyserEmotion,
+  analyserIntention: analyserIntention,
+
+  activerVoix: function(actif) {
+    try {
+      voixActive = !!actif;
+
+      if (!voixActive && "speechSynthesis" in window) {
+        speechSynthesis.cancel();
+      }
+    } catch (e) {}
+  },
+
+  etat: function() {
+    return {
+      version: NOVA.version,
+      capeBranchee: capeBranchee,
+      voixActive: voixActive,
+      microActif: microActif,
+      memoire: carnet.length
+    };
   }
+};
+
+/* ============================================================
+21. DÉMARRAGE SÉCURISÉ
+============================================================ */
+
+function demarrerNOVA() {
+  try { chargerMemoire(); } catch (e) {}
+  try { surveillerInteraction(); } catch (e) {}
+  try { initVoix(); } catch (e) {}
+  try { initOreille(); } catch (e) {}
+  try { ecouterReactions(); } catch (e) {}
+  try { brancherBoutonsMicro(); } catch (e) {}
+  try { attendreBranchement(); } catch (e) {}
+  try { cacherMessageAnglais(); } catch (e) {}
+  try { accueil(); } catch (e) {}
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", demarrerNOVA, {
+    once: true
+  });
+} else {
+  demarrerNOVA();
+}
+
+} catch (erreurGlobal) {
+  console.warn("[NOVA] Module comportement indisponible :", erreurGlobal);
+}
 
 })();
