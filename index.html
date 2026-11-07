@@ -2164,8 +2164,7 @@ await new Promise((resolve)=>{
     if(distFin < 120){ boxFin.scrollTop = boxFin.scrollHeight; }
   }
   }
-  }
-
+  
   if(settings.notif&&document.hidden&&"Notification" in window&&Notification.permission==="granted"){
     try{new Notification("Nova AI",{body:"Nouvelle réponse"});}catch(e){}
   }
