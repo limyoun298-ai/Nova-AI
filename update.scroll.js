@@ -1,32 +1,35 @@
 /* ============================================================
    NOVA AI — UPDATE.SCROLL.JS
-   VERSION 3.0 — SCROLL STABLE + PYTHON
-   CORRECTIONS :
-   1. Un seul système de défilement.
-   2. Remontée libre pendant la génération.
-   3. Flèche visible uniquement après remontée.
-   4. Aucun scroll forcé de la fenêtre.
-   5. Clavier : aucune position forcée du compositeur.
-   6. Python : Voir / Copier / Fermer conservés.
-   7. Protection try/catch.
+   VERSION 4.0 — MÉTHODE META AI + PLAN NOVA
+   ------------------------------------------------------------
+   1. Détection de zone façon Meta AI.
+   2. Un seul observateur des messages.
+   3. Remontée libre pendant la génération.
+   4. Flèche grise uniquement après remontée.
+   5. Trois points pendant le streaming.
+   6. Aucun scroll forcé de la fenêtre.
+   7. Clavier Android avec visualViewport.
+   8. Python : Voir / Copier / Fermer.
+   9. Protection try/catch.
    ============================================================ */
 
 (function () {
 "use strict";
 
 try {
-  if (window.NOVA_SCROLL_V3) return;
-  window.NOVA_SCROLL_V3 = true;
+  if (window.NOVA_SCROLL_V4) return;
+  window.NOVA_SCROLL_V4 = true;
 } catch(e) { return; }
 
+let zoneActive = null;
 let utilisateurEstRemonte = false;
 let suivreConversation = true;
-let zoneActive = null;
 let dernierScroll = 0;
-let observerPython = null;
-let observerMessages = null;
+let generationActive = false;
+let dernierChangement = 0;
+let timerGeneration = null;
+let observerPrincipal = null;
 let animationScroll = null;
-let temporisateurFin = null;
 
 /* ============================================================
    OUTILS
@@ -76,37 +79,34 @@ function estMessageIA(el) {
 }
 
 /* ============================================================
-   IDENTIFICATION PRUDENTE DE LA CONVERSATION
-   Ne choisit plus automatiquement MAIN ou la fenêtre.
+   ZONE DE DISCUSSION — MÉTHODE META AI
    ============================================================ */
 
 function trouverZoneDiscussion() {
   try {
     const selecteurs = [
+      "#chat-box",
+      "#messages",
+      "#chat",
+      "#chat-messages",
       '[data-role="discussion"]',
       '[data-role="messages"]',
-      '#messages',
-      '#chat-messages',
-      '.chat-messages',
-      '.messages-container',
-      '.conversation',
-      '.chat-history',
-      '.message-list'
+      ".chat-messages",
+      ".messages-container",
+      ".conversation",
+      ".chat-history",
+      ".message-list"
     ];
 
     for (const selecteur of selecteurs) {
       const el = document.querySelector(selecteur);
 
-      if (
-        elementValide(el) &&
-        el.scrollHeight > el.clientHeight + 30 &&
-        getComputedStyle(el).overflowY !== "visible"
-      ) {
+      if (elementValide(el)) {
         return el;
       }
     }
 
-    /* Recherche du parent réellement défilant des messages IA. */
+    /* Recherche du véritable parent défilant. */
     const message = document.querySelector(
       '[data-role="assistant"],.assistant-message,.ai-message,.bot-message,.message-assistant'
     );
@@ -140,13 +140,11 @@ function estEnBas(zone, tolerance) {
   try {
     if (!elementValide(zone)) return true;
 
-    const marge = tolerance || 100;
-
     return (
       zone.scrollHeight -
       zone.scrollTop -
       zone.clientHeight
-    ) <= marge;
+    ) < (tolerance || 100);
   } catch(e) {
     return true;
   }
@@ -158,10 +156,10 @@ function estEnBas(zone, tolerance) {
 
 function installerStyles() {
   try {
-    if (document.getElementById("nova-scroll-v3-style")) return;
+    if (document.getElementById("nova-scroll-v4-style")) return;
 
     const style = document.createElement("style");
-    style.id = "nova-scroll-v3-style";
+    style.id = "nova-scroll-v4-style";
 
     style.textContent = `
       [data-role="assistant"],
@@ -200,6 +198,46 @@ function installerStyles() {
 
       #nova-bouton-bas:active {
         transform: translateX(-50%) scale(.92);
+      }
+
+      #nova-points-generation {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: calc(145px + env(safe-area-inset-bottom));
+        z-index: 9997;
+        display: none;
+        align-items: center;
+        gap: 5px;
+        padding: 9px 13px;
+        border-radius: 20px;
+        background: #202631;
+        border: 1px solid #343d4b;
+      }
+
+      #nova-points-generation.nova-visible {
+        display: flex !important;
+      }
+
+      #nova-points-generation span {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #aeb7c5;
+        animation: novaPoint 1s infinite ease-in-out;
+      }
+
+      #nova-points-generation span:nth-child(2) {
+        animation-delay: .15s;
+      }
+
+      #nova-points-generation span:nth-child(3) {
+        animation-delay: .3s;
+      }
+
+      @keyframes novaPoint {
+        0%, 60%, 100% { opacity: .35; transform: translateY(0); }
+        30% { opacity: 1; transform: translateY(-4px); }
       }
 
       .nova-code-conteneur {
@@ -625,7 +663,6 @@ function transformerBlocPython(element) {
         if (!estPython) return;
 
         const original = codeEl.textContent;
-
         const conteneur = document.createElement("div");
         conteneur.className = "nova-code-conteneur";
 
@@ -696,7 +733,6 @@ function transformerBlocPython(element) {
           if (avant) fragment.appendChild(document.createTextNode(avant));
 
           const original = match[1];
-
           const conteneur = document.createElement("div");
           conteneur.className = "nova-code-conteneur";
 
@@ -714,8 +750,8 @@ function transformerBlocPython(element) {
           conteneur.appendChild(zoneScroll);
 
           creerBarrePython(conteneur, original);
-
           fragment.appendChild(conteneur);
+
           dernierIndex = regex.lastIndex;
         }
 
@@ -734,13 +770,12 @@ function transformerBlocPython(element) {
 }
 
 /* ============================================================
-   FLÈCHE — APPARAÎT UNIQUEMENT APRÈS REMONTÉE
+   FLÈCHE ET TROIS POINTS
    ============================================================ */
 
 function creerBoutonDescendre() {
   try {
     let btn = document.getElementById("nova-bouton-bas");
-
     if (btn) return btn;
 
     btn = document.createElement("button");
@@ -756,18 +791,18 @@ function creerBoutonDescendre() {
         e.preventDefault();
         e.stopPropagation();
 
-        const zone = trouverZoneDiscussion();
-        if (!zone) return;
+        connecterZoneDiscussion();
+        if (!zoneActive) return;
 
         utilisateurEstRemonte = false;
         suivreConversation = true;
 
-        zone.scrollTo({
-          top: zone.scrollHeight,
+        zoneActive.scrollTo({
+          top: zoneActive.scrollHeight,
           behavior: "smooth"
         });
 
-        cacherBoutonBas();
+        mettreAJourAffichage();
       } catch(e) {}
     });
 
@@ -778,45 +813,76 @@ function creerBoutonDescendre() {
   }
 }
 
-function montrerBoutonBas() {
+function creerPointsGeneration() {
+  try {
+    let points = document.getElementById("nova-points-generation");
+    if (points) return points;
+
+    points = document.createElement("div");
+    points.id = "nova-points-generation";
+    points.setAttribute("aria-label", "NOVA écrit");
+
+    points.innerHTML = "<span></span><span></span><span></span>";
+
+    document.body.appendChild(points);
+    return points;
+  } catch(e) {
+    return null;
+  }
+}
+
+function mettreAJourAffichage() {
   try {
     const btn = creerBoutonDescendre();
-    if (btn) btn.classList.add("nova-visible");
-  } catch(e) {}
-}
+    const points = creerPointsGeneration();
 
-function cacherBoutonBas() {
-  try {
-    const btn = document.getElementById("nova-bouton-bas");
-    if (btn) btn.classList.remove("nova-visible");
-  } catch(e) {}
-}
+    const enBas = !zoneActive || estEnBas(zoneActive, 90);
 
-function mettreAJourBoutonBas() {
-  try {
-    if (!zoneActive || !elementValide(zoneActive)) {
-      cacherBoutonBas();
-      return;
-    }
-
-    if (estEnBas(zoneActive, 90)) {
+    if (enBas) {
       utilisateurEstRemonte = false;
       suivreConversation = true;
-      cacherBoutonBas();
-      return;
     }
 
-    if (utilisateurEstRemonte) {
-      montrerBoutonBas();
-    } else {
-      cacherBoutonBas();
+    if (btn) {
+      btn.classList.toggle(
+        "nova-visible",
+        !!zoneActive && utilisateurEstRemonte && !enBas
+      );
+    }
+
+    if (points) {
+      points.classList.toggle(
+        "nova-visible",
+        generationActive
+      );
     }
   } catch(e) {}
 }
 
 /* ============================================================
-   UN SEUL ÉCOUTEUR DE SCROLL
+   GESTION DU SCROLL — MÉTHODE META AI
    ============================================================ */
+
+function gererScrollUtilisateur() {
+  try {
+    if (!zoneActive || !elementValide(zoneActive)) return;
+
+    const top = zoneActive.scrollTop || 0;
+
+    if (top < dernierScroll - 3) {
+      utilisateurEstRemonte = true;
+      suivreConversation = false;
+    }
+
+    if (estEnBas(zoneActive, 90)) {
+      utilisateurEstRemonte = false;
+      suivreConversation = true;
+    }
+
+    dernierScroll = top;
+    mettreAJourAffichage();
+  } catch(e) {}
+}
 
 function connecterZoneDiscussion() {
   try {
@@ -824,7 +890,7 @@ function connecterZoneDiscussion() {
 
     if (!nouvelleZone) {
       zoneActive = null;
-      cacherBoutonBas();
+      mettreAJourAffichage();
       return;
     }
 
@@ -845,92 +911,122 @@ function connecterZoneDiscussion() {
       { passive: true }
     );
 
-    mettreAJourBoutonBas();
-  } catch(e) {}
-}
-
-function gererScrollUtilisateur() {
-  try {
-    if (!zoneActive || !elementValide(zoneActive)) return;
-
-    const top = zoneActive.scrollTop || 0;
-
-    if (top < dernierScroll - 4) {
-      utilisateurEstRemonte = true;
-      suivreConversation = false;
-    }
-
-    if (estEnBas(zoneActive, 90)) {
-      utilisateurEstRemonte = false;
-      suivreConversation = true;
-    }
-
-    dernierScroll = top;
-    mettreAJourBoutonBas();
+    mettreAJourAffichage();
   } catch(e) {}
 }
 
 /* ============================================================
-   STREAMING — NE FORCE PLUS LE SCROLL
+   STREAMING — DÉTECTION DES CHANGEMENTS
    ============================================================ */
 
-function gererStreaming() {
+function signalerGeneration() {
   try {
-    if (observerPython) return;
+    generationActive = true;
+    dernierChangement = Date.now();
 
-    observerPython = new MutationObserver(function(mutations) {
+    mettreAJourAffichage();
+
+    clearTimeout(timerGeneration);
+
+    timerGeneration = setTimeout(function() {
+      try {
+        /*
+         * Si aucun nouveau contenu n'arrive pendant 1,5 seconde,
+         * on considère que la génération est terminée.
+         */
+        if (Date.now() - dernierChangement >= 1450) {
+          generationActive = false;
+          mettreAJourAffichage();
+        }
+      } catch(e) {}
+    }, 1550);
+  } catch(e) {}
+}
+
+function traiterNoeudMessage(node) {
+  try {
+    if (!node || node.nodeType !== 1) return;
+
+    if (estMessageIA(node)) {
+      transformerBlocPython(node);
+      signalerGeneration();
+      return;
+    }
+
+    if (!node.querySelectorAll) return;
+
+    const messages = node.querySelectorAll(
+      '[data-role="assistant"],.assistant-message,.ai-message,.bot-message,.message-assistant'
+    );
+
+    messages.forEach(function(message) {
+      transformerBlocPython(message);
+      signalerGeneration();
+    });
+  } catch(e) {}
+}
+
+function observerConversation() {
+  try {
+    if (observerPrincipal || !document.body) return;
+
+    observerPrincipal = new MutationObserver(function(mutations) {
       try {
         let changementMessage = false;
 
-        for (const mutation of mutations) {
-          if (mutation.type === "characterData") {
-            const parent = mutation.target.parentElement;
-
-            if (parent && parent.closest(".nova-code-conteneur")) {
-              continue;
-            }
-
-            changementMessage = true;
-            continue;
-          }
-
-          mutation.addedNodes.forEach(function(node) {
-            try {
-              if (node.nodeType !== 1) return;
+        mutations.forEach(function(mutation) {
+          try {
+            if (mutation.type === "characterData") {
+              const parent = mutation.target.parentElement;
 
               if (
-                node.closest &&
-                node.closest(
-                  ".nova-code-conteneur,.nova-code-modal,#nova-bouton-bas"
+                parent &&
+                parent.closest(
+                  ".nova-code-conteneur,.nova-code-modal"
                 )
               ) return;
 
-              if (estMessageIA(node)) {
+              const message = parent && parent.closest(
+                '[data-role="assistant"],.assistant-message,.ai-message,.bot-message,.message-assistant'
+              );
+
+              if (message) {
                 changementMessage = true;
-                transformerBlocPython(node);
-                return;
+                signalerGeneration();
               }
 
-              const enfants = node.querySelectorAll
-                ? node.querySelectorAll(
-                    '[data-role="assistant"],.assistant-message,.ai-message,.bot-message,.message-assistant'
-                  )
-                : [];
+              return;
+            }
 
-              enfants.forEach(function(enfant) {
-                changementMessage = true;
-                transformerBlocPython(enfant);
-              });
-            } catch(e) {}
-          });
-        }
+            mutation.addedNodes.forEach(function(node) {
+              try {
+                if (node.nodeType !== 1) return;
+
+                if (
+                  node.closest &&
+                  node.closest(
+                    ".nova-code-conteneur,.nova-code-modal,#nova-bouton-bas,#nova-points-generation"
+                  )
+                ) return;
+
+                const avant = generationActive;
+
+                traiterNoeudMessage(node);
+
+                if (generationActive !== avant) {
+                  changementMessage = true;
+                }
+              } catch(e) {}
+            });
+          } catch(e) {}
+        });
 
         if (changementMessage) {
           connecterZoneDiscussion();
 
           /*
-           * Suivi uniquement si l'utilisateur était déjà en bas.
-           * Aucun déplacement si l'utilisateur a remonté.
+           * On suit les nouveaux messages seulement si
+           * l'utilisateur était déjà en bas.
            */
           if (
             suivreConversation &&
@@ -951,27 +1047,18 @@ function gererStreaming() {
                   elementValide(zoneActive)
                 ) {
                   zoneActive.scrollTop = zoneActive.scrollHeight;
+                  dernierScroll = zoneActive.scrollTop;
                 }
               } catch(e) {}
             });
           }
 
-          clearTimeout(temporisateurFin);
-
-          temporisateurFin = setTimeout(function() {
-            try {
-              mettreAJourBoutonBas();
-            } catch(e) {}
-          }, 1800);
+          mettreAJourAffichage();
         }
       } catch(e) {}
     });
 
-    /*
-     * Observation limitée aux changements de contenu.
-     * Les modifications du bouton et des styles sont ignorées.
-     */
-    observerPython.observe(document.body, {
+    observerPrincipal.observe(document.body, {
       childList: true,
       subtree: true,
       characterData: true
@@ -981,29 +1068,49 @@ function gererStreaming() {
 
 /* ============================================================
    CLAVIER ANDROID
-   Ne fixe plus le compositeur et ne fait plus scrollIntoView.
-   Laisse le WebView et le CSS existant gérer le clavier.
    ============================================================ */
 
 function gererClavier() {
   try {
-    if (window.__NOVA_CLAVIER_V3) return;
-    window.__NOVA_CLAVIER_V3 = true;
+    if (window.__NOVA_CLAVIER_V4) return;
+    window.__NOVA_CLAVIER_V4 = true;
 
-    const actualiserHauteur = function() {
+    let derniereHauteur = 0;
+
+    function actualiserHauteur() {
       try {
-        if (!window.visualViewport) return;
+        const viewport = window.visualViewport;
+        if (!viewport) return;
 
-        const hauteur = window.visualViewport.height;
+        const hauteurVisible = viewport.height;
+        const hauteurEcran = window.innerHeight;
+        const hauteurClavier = Math.max(
+          0,
+          hauteurEcran - hauteurVisible
+        );
 
-        if (hauteur > 0) {
+        if (hauteurVisible > 0) {
           document.documentElement.style.setProperty(
             "--nova-hauteur-visible",
-            hauteur + "px"
+            hauteurVisible + "px"
           );
         }
+
+        if (hauteurClavier > 80) {
+          document.documentElement.style.setProperty(
+            "--kb",
+            hauteurClavier + "px"
+          );
+        } else {
+          document.documentElement.style.setProperty(
+            "--kb",
+            "0px"
+          );
+        }
+
+        derniereHauteur = hauteurVisible;
       } catch(e) {}
-    };
+    }
 
     if (window.visualViewport) {
       window.visualViewport.addEventListener(
@@ -1025,12 +1132,24 @@ function gererClavier() {
       { passive: true }
     );
 
+    /* Secours pour certains WebView Android. */
+    setInterval(function() {
+      try {
+        if (
+          window.visualViewport &&
+          window.visualViewport.height !== derniereHauteur
+        ) {
+          actualiserHauteur();
+        }
+      } catch(e) {}
+    }, 300);
+
     actualiserHauteur();
   } catch(e) {}
 }
 
 /* ============================================================
-   TRAITEMENT DES MESSAGES
+   TRAITEMENT DES MESSAGES EXISTANTS
    ============================================================ */
 
 function traiterMessages() {
@@ -1048,74 +1167,17 @@ function traiterMessages() {
 }
 
 /* ============================================================
-   OBSERVATION DES NOUVEAUX MESSAGES
-   ============================================================ */
-
-function observerDiscussion() {
-  try {
-    if (observerMessages || !document.body) return;
-
-    observerMessages = new MutationObserver(function(mutations) {
-      try {
-        let nouveauMessage = false;
-
-        mutations.forEach(function(mutation) {
-          mutation.addedNodes.forEach(function(node) {
-            try {
-              if (node.nodeType !== 1) return;
-
-              if (
-                node.closest &&
-                node.closest(
-                  ".nova-code-conteneur,.nova-code-modal,#nova-bouton-bas"
-                )
-              ) return;
-
-              if (estMessageIA(node)) {
-                transformerBlocPython(node);
-                nouveauMessage = true;
-                return;
-              }
-
-              if (!node.querySelectorAll) return;
-
-              const enfants = node.querySelectorAll(
-                '[data-role="assistant"],.assistant-message,.ai-message,.bot-message,.message-assistant'
-              );
-
-              enfants.forEach(function(enfant) {
-                transformerBlocPython(enfant);
-                nouveauMessage = true;
-              });
-            } catch(e) {}
-          });
-        });
-
-        if (nouveauMessage) {
-          connecterZoneDiscussion();
-        }
-      } catch(e) {}
-    });
-
-    observerMessages.observe(document.body, {
-      childList: true,
-      subtree: true
-    });
-  } catch(e) {}
-}
-
-/* ============================================================
    INITIALISATION
    ============================================================ */
 
 function init() {
   try { installerStyles(); } catch(e) {}
   try { creerBoutonDescendre(); } catch(e) {}
+  try { creerPointsGeneration(); } catch(e) {}
   try { connecterZoneDiscussion(); } catch(e) {}
-  try { gererStreaming(); } catch(e) {}
   try { gererClavier(); } catch(e) {}
   try { traiterMessages(); } catch(e) {}
-  try { observerDiscussion(); } catch(e) {}
+  try { observerConversation(); } catch(e) {}
 }
 
 if (document.readyState === "loading") {
@@ -1124,17 +1186,20 @@ if (document.readyState === "loading") {
   init();
 }
 
-/* Vérification légère : retrouve la zone si l'interface est recréée. */
-if (!window.__NOVA_SCROLL_V3_SECOURS) {
-  window.__NOVA_SCROLL_V3_SECOURS = setInterval(function() {
+/* Vérification légère de la zone de discussion. */
+if (!window.__NOVA_SCROLL_V4_SECOURS) {
+  window.__NOVA_SCROLL_V4_SECOURS = setInterval(function() {
     try {
       connecterZoneDiscussion();
-      mettreAJourBoutonBas();
+      mettreAJourAffichage();
     } catch(e) {}
-  }, 1200);
+  }, 1000);
 }
 
-/* API publique */
+/* ============================================================
+   API PUBLIQUE
+   ============================================================ */
+
 window.NOVA_SCROLL = {
   descendreEnBas: function() {
     try {
@@ -1150,20 +1215,20 @@ window.NOVA_SCROLL = {
         behavior: "smooth"
       });
 
-      cacherBoutonBas();
+      mettreAJourAffichage();
     } catch(e) {}
   },
 
   actualiser: function() {
     try {
       connecterZoneDiscussion();
-      mettreAJourBoutonBas();
+      mettreAJourAffichage();
       traiterMessages();
     } catch(e) {}
   },
 
   estEnCours: function() {
-    return !!temporisateurFin;
+    return generationActive;
   }
 };
 
