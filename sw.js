@@ -1,5 +1,5 @@
 // sw.js - V9 - SANS COMPTEUR
-const VERSION = "v9";
+const VERSION = "v10";
 const CACHE_NAME = "nova-" + VERSION + "-offline";
 
 self.addEventListener('install', (e) => {
