@@ -3272,11 +3272,360 @@ if("serviceWorker" in navigator){
 <script src="update.scroll.js"></script>
 <script src="update.bridge.js"></script>
 <script src="./update.render.js"></script>
+<!-- ===== NOVA-LOADER v1.0 : ne plus jamais toucher à index.html ===== -->
+<script>
+(function () {
+  "use strict";
+  try {
+    if (window.NOVA_LOADER) return;
+    window.NOVA_LOADER = true;
+
+    var VERSION = "1.0";
+    var DEFAUT = [
+      "update.comportement.js",
+      "update.voix.js",
+      "update.tableaux.js",
+      "update.recherche.js",
+      "update.scroll.js",
+      "update.bridge.js",
+      "update.render.js"
+    ];
+    var MANIFESTE = "nova-modules.json";
+    var seau = Math.floor(Date.now() / 600000);
+    var etat = { charges: [], echecs: [], erreurs: [], cerveau: false, bouche: false, pret: false };
+    var modules = [];
+    var base = null;
+
+    function log(ou, e) {
+      try {
+        etat.erreurs.push(ou + ": " + (e && e.message ? e.message : e));
+        if (etat.erreurs.length > 50) etat.erreurs.shift();
+        console.warn("[NOVA-LOADER]", ou, e);
+      } catch (_) {}
+    }
+
+    function attendre(test, fait, essais, echec) {
+      var n = 0;
+      (function boucle() {
+        try { if (test()) { fait(); return; } } catch (e) { log("attendre", e); }
+        if (++n < (essais || 600)) setTimeout(boucle, 100);
+        else if (echec) { try { echec(); } catch (e) { log("echec", e); } }
+      })();
+    }
+
+    /* ---------- VOIX ---------- */
+    var voixFr = null;
+    function choisirVoix() {
+      try {
+        var v = speechSynthesis.getVoices();
+        voixFr = v.find(function (x) { return x.lang && /^fr/i.test(x.lang); }) || null;
+      } catch (e) {}
+    }
+    try {
+      if ("speechSynthesis" in window) {
+        choisirVoix();
+        speechSynthesis.addEventListener("voiceschanged", choisirVoix);
+      }
+    } catch (e) {}
+
+    function parler(texte) {
+      try {
+        if (!("speechSynthesis" in window) || !texte) return false;
+        var propre = String(texte).replace(/```[\s\S]*?```/g, " ").replace(/[*_`#|>~]/g, " ").replace(/\s+/g, " ").trim();
+        if (!propre) return false;
+        speechSynthesis.cancel();
+        var u = new SpeechSynthesisUtterance(propre);
+        if (voixFr) u.voice = voixFr;
+        u.lang = "fr-FR";
+        speechSynthesis.speak(u);
+        return true;
+      } catch (e) { log("parler", e); return false; }
+    }
+    function taire() { try { speechSynthesis.cancel(); } catch (e) {} }
+
+    /* ---------- MICRO ---------- */
+    var reco = null;
+    function demarrerMicro(cb) {
+      try {
+        var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SR) return false;
+        arreterMicro();
+        reco = new SR();
+        reco.lang = "fr-FR";
+        reco.continuous = false;
+        reco.interimResults = false;
+        reco.onresult = function (ev) {
+          try {
+            var t = ev.results[ev.results.length - 1][0].transcript;
+            if (typeof cb === "function") cb(t);
+          } catch (e) { log("micro", e); }
+        };
+        reco.start();
+        return true;
+      } catch (e) { log("micro", e); return false; }
+    }
+    function arreterMicro() { try { if (reco) reco.stop(); } catch (e) {} reco = null; }
+
+    /* ---------- BOUCHE : écrire un message dans le chat ---------- */
+    function dire(texte, role) {
+      try {
+        if (typeof currentConversation !== "function") return null;
+        var c = currentConversation();
+        if (!c) return null;
+        var m = {
+          id: uid(),
+          role: role === "user" ? "user" : "assistant",
+          text: String(texte || ""),
+          timestamp: Date.now()
+        };
+        c.messages.push(m);
+        saveData();
+        if (currentPage === "homePage") showPage("chatPage");
+        renderMessage(m);
+        return m;
+      } catch (e) { log("dire", e); return null; }
+    }
+
+    /* ---------- API DONNÉE AUX MODULES ---------- */
+    var api = {
+      version: VERSION,
+      cerveau: {
+        appeler: function (messages) {
+          return base ? base(messages) : Promise.reject(new Error("cerveau indisponible"));
+        }
+      },
+      bouche: { dire: dire, zone: function () { return document.getElementById("messages"); } },
+      voix: { disponible: ("speechSynthesis" in window), parler: parler, arreter: taire },
+      micro: {
+        disponible: !!(window.SpeechRecognition || window.webkitSpeechRecognition),
+        demarrer: demarrerMicro,
+        arreter: arreterMicro
+      },
+      log: log
+    };
+
+    /* ---------- REGISTRE DES MODULES ---------- */
+    function enregistrer(m) {
+      try {
+        if (typeof m === "function") {
+          var r = m(api);
+          if (r && typeof r === "object") m = r; else return;
+        }
+        if (!m || typeof m !== "object") return;
+        if (modules.indexOf(m) !== -1) return;
+        modules.push(m);
+        if (typeof m.init === "function") {
+          try { m.init(api); } catch (e) { log("init " + (m.name || "?"), e); }
+        }
+      } catch (e) { log("enregistrer", e); }
+    }
+
+    function emettre(evenement, a, b) {
+      modules.slice().forEach(function (m) {
+        try {
+          if (typeof m[evenement] === "function") m[evenement](a, b, api);
+        } catch (e) { log(evenement + " " + (m.name || "?"), e); }
+      });
+    }
+
+    function lancer(nom, valeur, ctx, type) {
+      modules.slice().forEach(function (m) {
+        try {
+          if (typeof m[nom] !== "function") return;
+          var r = m[nom](valeur, ctx, api);
+          if (type === "array" && Array.isArray(r)) valeur = r;
+          if (type === "string" && typeof r === "string") valeur = r;
+        } catch (e) { log(nom + " " + (m.name || "?"), e); }
+      });
+      return valeur;
+    }
+
+    var liste = Array.isArray(window.NOVA_MODULES) ? window.NOVA_MODULES : [];
+    var pousser = Array.prototype.push;
+    liste.push = function () {
+      var r = pousser.apply(liste, arguments);
+      for (var i = 0; i < arguments.length; i++) enregistrer(arguments[i]);
+      return r;
+    };
+    window.NOVA_MODULES = liste;
+    liste.slice().forEach(enregistrer);
+
+    /* ---------- CERVEAU : callNovaAI ---------- */
+    function versMessages(a) {
+      if (Array.isArray(a)) return a;
+      if (typeof a === "string") return [{ role: "user", content: a }];
+      if (a && typeof a === "object" && Array.isArray(a.messages)) return a.messages;
+      return a;
+    }
+
+    /* Les pages Projet / Analyse / Fichier gardent leurs propres consignes */
+    function estOutil(msgs) {
+      try {
+        var s = msgs && msgs[0];
+        return !!(s && s.role === "system" && typeof s.content === "string" &&
+          /expert en (gestion de projets|analyse de code)|Crée le fichier demandé/.test(s.content));
+      } catch (e) { return false; }
+    }
+
+    function installerBase() {
+      var brut = window.callNovaAI;
+      if (brut.__novaBase) { base = brut; return; }
+      base = function (a) { return brut.call(this, versMessages(a)); };
+      base.__novaBase = true;
+      window.callNovaAI = base;
+    }
+
+    function installerCerveau() {
+      try {
+        var interieur = window.callNovaAI;
+        if (typeof interieur !== "function" || interieur.__novaLoader) return;
+        var externe = async function (a) {
+          var msgs = versMessages(a);
+          if (estOutil(msgs)) return base.call(this, msgs);
+          var ctx = { date: Date.now() };
+          var avant = msgs;
+          try { avant = lancer("before", msgs, ctx, "array"); } catch (e) { log("before", e); }
+          var res = await interieur.call(this, avant);
+          if (typeof res === "string") {
+            try { return lancer("after", res, ctx, "string"); } catch (e) { log("after", e); }
+          }
+          return res;
+        };
+        externe.__novaLoader = true;
+        window.callNovaAI = externe;
+        etat.cerveau = true;
+      } catch (e) { log("installerCerveau", e); }
+    }
+
+    /* ---------- BOUCHE : observer l'affichage ---------- */
+    function installerBouche() {
+      try {
+        if (typeof window.typeAssistantMessage === "function" && !window.typeAssistantMessage.__nl) {
+          var o1 = window.typeAssistantMessage;
+          var n1 = async function () {
+            var m = await o1.apply(this, arguments);
+            try { if (m) emettre("onMessage", m, { source: "ecrit" }); } catch (e) {}
+            return m;
+          };
+          n1.__nl = true;
+          window.typeAssistantMessage = n1;
+        }
+        if (typeof window.renderMessage === "function" && !window.renderMessage.__nl) {
+          var o2 = window.renderMessage;
+          var n2 = function () {
+            var row = o2.apply(this, arguments);
+            try { if (arguments[0]) emettre("onMessage", arguments[0], { source: "affiche" }); } catch (e) {}
+            return row;
+          };
+          n2.__nl = true;
+          window.renderMessage = n2;
+        }
+        etat.bouche = true;
+      } catch (e) { log("installerBouche", e); }
+    }
+
+    /* ---------- CHARGEMENT DES FICHIERS update.*.js ---------- */
+    function valide(f) {
+      return typeof f === "string" && /^[\w.\-\/]+\.js$/.test(f) && f.indexOf("..") === -1;
+    }
+
+    function lireManifeste() {
+      return new Promise(function (resolve) {
+        var fini = false;
+        function fin(v) { if (!fini) { fini = true; resolve(v); } }
+        setTimeout(function () { fin([]); }, 3000);
+        try {
+          fetch(MANIFESTE + "?v=" + seau)
+            .then(function (r) { return r.ok ? r.json() : []; })
+            .then(function (j) {
+              var l = Array.isArray(j) ? j : (j && Array.isArray(j.fichiers) ? j.fichiers : []);
+              fin(l.filter(valide));
+            })
+            .catch(function () { fin([]); });
+        } catch (e) { fin([]); }
+      });
+    }
+
+    function charger(fichier) {
+      return new Promise(function (resolve) {
+        try {
+          var deja = 0;
+          (function essayer(url) {
+            var s = document.createElement("script");
+            s.src = url;
+            s.async = false;
+            s.onload = function () { etat.charges.push(fichier); resolve(true); };
+            s.onerror = function () {
+              try { s.remove(); } catch (_) {}
+              if (!deja) { deja = 1; essayer(fichier); }
+              else { etat.echecs.push(fichier); resolve(false); }
+            };
+            document.head.appendChild(s);
+          })(fichier + "?v=" + seau);
+        } catch (e) { log("charger " + fichier, e); resolve(false); }
+      });
+    }
+
+    function chargerTout() {
+      return lireManifeste().then(function (extra) {
+        var tous = DEFAUT.concat(extra.filter(function (f) { return DEFAUT.indexOf(f) === -1; }));
+        return tous.reduce(function (p, f) {
+          return p.then(function () { return charger(f); });
+        }, Promise.resolve());
+      });
+    }
+
+    /* ---------- API PUBLIQUE ---------- */
+    window.NovaLoader = {
+      version: VERSION,
+      api: api,
+      modules: function () { return modules.map(function (m) { return m.name || "(sans nom)"; }); },
+      statut: function () {
+        return {
+          version: VERSION,
+          cerveau: etat.cerveau,
+          bouche: etat.bouche,
+          pret: etat.pret,
+          charges: etat.charges.slice(),
+          echecs: etat.echecs.slice(),
+          modules: window.NovaLoader.modules(),
+          anciens: ["NovaComportement", "NovaRecherche", "NovaBridge", "NovaRender"].filter(function (k) { return !!window[k]; }),
+          erreurs: etat.erreurs.slice()
+        };
+      }
+    };
+
+    /* ---------- DÉMARRAGE ---------- */
+    function terminer() {
+      installerCerveau();
+      etat.pret = true;
+      emettre("onPret");
+    }
+
+    function lancerChargement() {
+      chargerTout().then(terminer).catch(function (e) { log("chargerTout", e); terminer(); });
+    }
+
+    attendre(function () { return typeof window.renderMessage === "function"; }, installerBouche, 100);
+
+    attendre(
+      function () { return typeof window.callNovaAI === "function"; },
+      function () { installerBase(); lancerChargement(); },
+      600,
+      lancerChargement
+    );
+
+  } catch (erreurGlobale) {
+    console.warn("[NOVA-LOADER] indisponible, Nova continue :", erreurGlobale);
+  }
+})();
+</script>
+
 <script>
 // ANTI-POPUP - 1 SEULE FOIS, NE RIEN SUPPRIMER
 try{ localStorage.removeItem("nova_plan_v4"); }catch(e){}
 function planState(){ return "full"; }
 function requireFull(){ return true; }
-</script>
+  </script>
 </body>
   </html>
