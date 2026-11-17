@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="utf-8">
@@ -205,19 +205,19 @@ check:'<path d="M20 6L9 17l-5-5"/>'
 };
 const ic=(n,s=22)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${P[n]}</svg>`;
 
-/* ===================== LANGUES (hors ligne : tout est dans ce fichier) ===================== */
+/* ===================== LANGUES ===================== */
 const T={
-fr:{ph:"Discutez avec Nova.",writing:"Nova AI écrit…",settings:"Paramètres",appearance:"Apparence",light:"Mode clair",dark:"Mode sombre",themes:"Thèmes",perso:"Personnalisation",fontsize:"Taille de police",big:"Grande",mid:"Moyenne",small:"Petite",sendicon:"Icône d'envoi",sendcolor:"Couleur de l'icône d'envoi",plane:"Avion en papier",arrow:"Flèche vers le haut",langs:"Langues",gallery:"Galerie",about:"À propos",aboutText:"Nova AI est une nouvelle lumière. Nova vient du latin Novus, nouveau départ. Nova AI aide à écrire, à réfléchir, à générer des images, à chercher sur le Web, à coder.",brain:"Cerveau",project:"Projet",genimg:"Générer une image",edit:"Modifier",copy:"Copier",share:"Partager",retry:"Réessayer",sending:"Envoi…",sent:"Envoyé",read:"Lu",failed:"Échec",themeMsg:"Je prépare ton thème…",langMsg:"Je charge la langue…",offline:"Une connexion est nécessaire pour que Nova réponde.",emptyGal:"Aucun média pour le moment.",imgDone:"Voici ton image",i1:"Je réfléchis à ton image…",i2:"Je dessine…",i3:"Je corrige…",w1:"Je cherche…",w2:"Je lis les sources…",w3:"Je prépare…",noteImg:"L'analyse d'image n'est pas encore prise en charge par le backend.",hello:"Bonjour, je suis Nova.",offThm:"hors ligne",needMsg:"Ajoute un message avec ton image.",copied:"Copié",editing:"Modification du message",imgMode:"Image"},
-en:{ph:"Chat with Nova.",writing:"Nova AI is typing…",settings:"Settings",appearance:"Appearance",light:"Light mode",dark:"Dark mode",themes:"Themes",perso:"Personalization",fontsize:"Font size",big:"Large",mid:"Medium",small:"Small",sendicon:"Send icon",sendcolor:"Send icon color",plane:"Paper plane",arrow:"Up arrow",langs:"Languages",gallery:"Gallery",about:"About",aboutText:"Nova AI is a new light. Nova comes from the Latin Novus, a new beginning. Nova AI helps you write, think, generate images, search the web and code.",brain:"Brain",project:"Project",genimg:"Generate an image",edit:"Edit",copy:"Copy",share:"Share",retry:"Retry",sending:"Sending…",sent:"Sent",read:"Read",failed:"Failed",themeMsg:"Preparing your theme…",langMsg:"Loading the language…",offline:"A connection is needed for Nova to reply.",emptyGal:"No media yet.",imgDone:"Here is your image",i1:"Thinking about your image…",i2:"Drawing…",i3:"Refining…",w1:"Searching…",w2:"Reading sources…",w3:"Preparing…",noteImg:"Image analysis is not supported by the backend yet.",hello:"Hi, I'm Nova.",offThm:"offline",needMsg:"Add a message with your image.",copied:"Copied",editing:"Editing message",imgMode:"Image"},
+fr:{ph:"Discutez avec Nova.",writing:"Nova AI écrit…",settings:"Paramètres",appearance:"Apparence",light:"Mode clair",dark:"Mode sombre",themes:"Thèmes",perso:"Personnalisation",fontsize:"Taille de police",big:"Grande",mid:"Moyenne",small:"Petite",sendicon:"Icône d'envoi",sendcolor:"Couleur de l'icône d'envoi",plane:"Avion en papier",arrow:"Flèche vers le haut",langs:"Langues",gallery:"Galerie",about:"À propos",aboutText:"Nova AI est une nouvelle lumière. Nova vient du latin Novus, nouveau départ. Nova AI aide à écrire, à réfléchir, à générer des images, à chercher sur le Web, à coder.",brain:"Cerveau",project:"Projet",genimg:"Générer une image",edit:"Modifier",copy:"Copier",share:"Partager",retry:"Réessayer",sending:"Envoi…",sent:"Envoyé",read:"Lu",failed:"Échec",themeMsg:"Je prépare ton thème…",langMsg:"Je charge la langue…",offline:"Une connexion est nécessaire pour que Nova réponde.",emptyGal:"Aucun média pour le moment.",imgDone:"Voici ton image",i1:"Je réfléchis à ton image…",i2:"Je dessine…",i3:"Je corrige…",w1:"Je cherche…",w2:"Je lis les sources…",w3:"Je prépare…",hello:"Bonjour, je suis Nova.",offThm:"hors ligne",needMsg:"Ajoute un message avec ton image.",copied:"Copié",editing:"Modification du message",imgMode:"Image",noteImg:"Image jointe au message."},
+en:{ph:"Chat with Nova.",writing:"Nova AI is typing…",settings:"Settings",appearance:"Appearance",light:"Light mode",dark:"Dark mode",themes:"Themes",perso:"Personalization",fontsize:"Font size",big:"Large",mid:"Medium",small:"Small",sendicon:"Send icon",sendcolor:"Send icon color",plane:"Paper plane",arrow:"Up arrow",langs:"Languages",gallery:"Gallery",about:"About",aboutText:"Nova AI is a new light. Nova comes from the Latin Novus, a new beginning. Nova AI helps you write, think, generate images, search the web and code.",brain:"Brain",project:"Project",genimg:"Generate an image",edit:"Edit",copy:"Copy",share:"Share",retry:"Retry",sending:"Sending…",sent:"Sent",read:"Read",failed:"Failed",themeMsg:"Preparing your theme…",langMsg:"Loading the language…",offline:"A connection is needed for Nova to reply.",emptyGal:"No media yet.",imgDone:"Here is your image",i1:"Thinking about your image…",i2:"Drawing…",i3:"Refining…",w1:"Searching…",w2:"Reading sources…",w3:"Preparing…",hello:"Hi, I'm Nova.",offThm:"offline",needMsg:"Add a message with your image.",copied:"Copied",editing:"Editing message",imgMode:"Image",noteImg:"Image attached to this message."},
 zh:{ph:"和 Nova 聊天。",writing:"Nova AI 正在输入…",settings:"设置",appearance:"外观",light:"浅色模式",dark:"深色模式",themes:"主题",perso:"个性化",fontsize:"字体大小",big:"大",mid:"中",small:"小",sendicon:"发送图标",sendcolor:"发送图标颜色",plane:"纸飞机",arrow:"向上箭头",langs:"语言",gallery:"相册",about:"关于",aboutText:"Nova AI 是一束新的光。Nova 源自拉丁语 Novus，意为新的开始。Nova AI 可以帮助你写作、思考、生成图片、搜索网络和编程。",brain:"大脑",project:"项目",genimg:"生成图片",edit:"编辑",copy:"复制",share:"分享",retry:"重试",sending:"发送中…",sent:"已发送",read:"已读",failed:"失败",themeMsg:"正在准备主题…",langMsg:"正在加载语言…",offline:"需要网络连接 Nova 才能回复。",emptyGal:"暂无媒体。",imgDone:"这是你的图片"},
 it:{ph:"Parla con Nova.",writing:"Nova AI sta scrivendo…",settings:"Impostazioni",appearance:"Aspetto",light:"Modalità chiara",dark:"Modalità scura",themes:"Temi",perso:"Personalizzazione",fontsize:"Dimensione del testo",big:"Grande",mid:"Media",small:"Piccola",sendicon:"Icona di invio",sendcolor:"Colore dell'icona di invio",plane:"Aeroplano di carta",arrow:"Freccia in su",langs:"Lingue",gallery:"Galleria",about:"Informazioni",aboutText:"Nova AI è una nuova luce. Nova viene dal latino Novus, nuovo inizio. Nova AI aiuta a scrivere, riflettere, generare immagini, cercare sul Web e programmare.",brain:"Cervello",project:"Progetto",genimg:"Genera un'immagine",edit:"Modifica",copy:"Copia",share:"Condividi",retry:"Riprova",sending:"Invio…",sent:"Inviato",read:"Letto",failed:"Errore",themeMsg:"Preparo il tuo tema…",langMsg:"Carico la lingua…",offline:"Serve una connessione perché Nova risponda.",emptyGal:"Nessun media per ora.",imgDone:"Ecco la tua immagine"},
-es:{ph:"Habla con Nova.",writing:"Nova AI está escribiendo…",settings:"Ajustes",appearance:"Apariencia",light:"Modo claro",dark:"Modo oscuro",themes:"Temas",perso:"Personalización",fontsize:"Tamaño de fuente",big:"Grande",mid:"Mediana",small:"Pequeña",sendicon:"Icono de envío",sendcolor:"Color del icono de envío",plane:"Avión de papel",arrow:"Flecha hacia arriba",langs:"Idiomas",gallery:"Galería",about:"Acerca de",aboutText:"Nova AI es una nueva luz. Nova viene del latín Novus, nuevo comienzo. Nova AI ayuda a escribir, pensar, generar imágenes, buscar en la Web y programar.",brain:"Cerebro",project:"Proyecto",genimg:"Generar una imagen",edit:"Editar",copy:"Copiar",share:"Compartir",retry:"Reintentar",sending:"Enviando…",sent:"Enviado",read:"Leído",failed:"Error",themeMsg:"Preparando tu tema…",langMsg:"Cargando el idioma…",offline:"Se necesita conexión para que Nova responda.",emptyGal:"Aún no hay medios.",imgDone:"Aquí tienes tu imagen"},
+es:{ph:"Habla con Nova.",writing:"Nova AI está escribiendo…",settings:"Ajustes",appearance:"Apariencia",light:"Modo claro",dark:"Modo oscuro",themes:"Temas",perso:"Personalización",fontsize:"Tamaño de fuente",big:"Grande",mid:"Mediana",small:"Pequeña",sendicon:"Icono de envío",sendcolor:"Color del icono de envío",plane:"Avión de papel",arrow:"Flecha hacia arriba",langs:"Idiomas",gallery:"Galería",about:"Acerca de",aboutText:"Nova AI es una nueva luz. Nova viene del latín Novus, nuevo comienzo. Nova AI ayuda a escribir, pensar, generar imágenes, buscar en la Web y programar.",brain:"Cerebro",project:"Proyecto",genimg:"Generar una imagen",edit:"Editar",copy:"Copiar",share:"Compartir",retry:"Reintentar",sending:"Enviando…",sent:"Enviado",read:"Leído",failed:"Fallido",themeMsg:"Preparando tu tema…",langMsg:"Cargando el idioma…",offline:"Se necesita conexión para que Nova responda.",emptyGal:"Aún no hay medios.",imgDone:"Aquí tienes tu imagen"},
 sw:{ph:"Zungumza na Nova.",writing:"Nova AI inaandika…",settings:"Mipangilio",appearance:"Mwonekano",light:"Hali ya mwanga",dark:"Hali ya giza",themes:"Mandhari",perso:"Ubinafsishaji",fontsize:"Ukubwa wa herufi",big:"Kubwa",mid:"Wastani",small:"Ndogo",sendicon:"Aikoni ya kutuma",sendcolor:"Rangi ya aikoni ya kutuma",plane:"Ndege ya karatasi",arrow:"Mshale wa juu",langs:"Lugha",gallery:"Matunzio",about:"Kuhusu",aboutText:"Nova AI ni mwanga mpya. Nova linatokana na Kilatini Novus, mwanzo mpya. Nova AI husaidia kuandika, kufikiri, kutengeneza picha, kutafuta mtandaoni na kuandika msimbo.",brain:"Ubongo",project:"Mradi",genimg:"Tengeneza picha",edit:"Hariri",copy:"Nakili",share:"Shiriki",retry:"Jaribu tena",sending:"Inatuma…",sent:"Imetumwa",read:"Imesomwa",failed:"Imeshindwa",themeMsg:"Naandaa mandhari yako…",langMsg:"Napakia lugha…",offline:"Unahitaji mtandao ili Nova ijibu.",emptyGal:"Hakuna media bado.",imgDone:"Hii hapa picha yako"}
 };
 const LANGS=[["fr","Français","🇫🇷"],["en","English","🇬🇧"],["zh","中文","🇨🇳"],["it","Italiano","🇮🇹"],["es","Español","🇪🇸"],["sw","Kiswahili","🇹🇿"]];
 const t=k=>(T[cfg.lang]&&T[cfg.lang][k])||T.en[k]||T.fr[k]||k;
 
-/* ===================== THÈMES (18, embarqués = disponibles hors ligne) ===================== */
+/* ===================== THÈMES ===================== */
 const THEMES=[
 ["Aurore","#7C3AED","#0f0b1e","#f5f3ff"],["Océan","#0EA5E9","#08141f","#effaff"],["Forêt","#16A34A","#09150e","#f0fdf4"],
 ["Couchant","#F97316","#1c0f08","#fff7ed"],["Rose","#EC4899","#1d0a14","#fdf2f8"],["Minuit","#6366F1","#090a1c","#eef2ff"],
@@ -237,7 +237,7 @@ const imgCache=new Map();
 const saveCfg=()=>put("nova_cfg",cfg);
 const saveMsgs=()=>{put("nova_conv",store.conv.slice(-200));put("nova_project",store.project)};
 
-/* ===================== INDEXEDDB (galerie / images) ===================== */
+/* ===================== INDEXEDDB ===================== */
 const dbp=new Promise((res,rej)=>{try{const r=indexedDB.open("nova",1);r.onupgradeneeded=()=>r.result.createObjectStore("imgs",{keyPath:"key"});r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}catch(e){rej(e)}});
 const idbPut=o=>dbp.then(d=>new Promise((res,rej)=>{const x=d.transaction("imgs","readwrite");x.objectStore("imgs").put(o);x.oncomplete=res;x.onerror=()=>rej(x.error)})).catch(()=>{});
 const idbGet=k=>dbp.then(d=>new Promise(res=>{const q=d.transaction("imgs").objectStore("imgs").get(k);q.onsuccess=()=>res(q.result);q.onerror=()=>res(null)})).catch(()=>null);
@@ -253,7 +253,7 @@ function fit(){const h=window.visualViewport?window.visualViewport.height:window
 if(window.visualViewport){visualViewport.addEventListener("resize",fit);visualViewport.addEventListener("scroll",()=>window.scrollTo(0,0))}
 window.addEventListener("resize",fit);
 
-/* ===================== COMPORTEMENT (comportement.js) ===================== */
+/* ===================== COMPORTEMENT ===================== */
 function modeName(){return cfg.brain?"brain":(cfg.project?"project":"normal")}
 function behaviorText(){
   let b="";
@@ -264,7 +264,9 @@ function behaviorText(){
       if(typeof r==="string")b=r;
       else if(r&&typeof r==="object")b=String(r.prompt||r.behavior||r.text||"");
     }
-  }catch(e){}
+  }catch(e){
+    console.warn("NOVA comportement.js :",e);
+  }
   if(cfg.project){
     const first=store.project.find(m=>m.role==="user");
     b+="\n\nCONTEXTE PROJET : conversation de projet persistante ("+store.project.length+" messages enregistrés)."+(first?" Sujet initial : "+first.text.slice(0,200):"")+" Préserve les décisions déjà prises.";
@@ -424,7 +426,10 @@ function historyFor(m){
   const list=cur();const idx=list.findIndex(x=>x.id===m.id);
   return list.slice(0,idx<0?list.length:idx).filter(x=>x.type!=="image"&&x.text).map(x=>({role:x.role,content:x.text})).slice(-20);
 }
-function outText(m){return m.imgKey?m.text+"\n\n[Note : l'utilisateur a joint une image que tu ne peux pas voir. Ne prétends pas l'avoir analysée.]":m.text}
+
+/* Le texte est transmis normalement. L'image est envoyée séparément au backend. */
+function outText(m){return m.text||""}
+
 async function ackRead(m,ty){
   setSt(m.id,"sent");await sleep(250);setSt(m.id,"read");await sleep(250);setSt(m.id,"");
   if(ty)ty.remove();
@@ -439,10 +444,33 @@ async function deliverText(m,ty,answer,sources){
   if(am.sources.length){row.querySelector(".bubble").insertAdjacentHTML("beforeend",srcsHtml(am.sources))}
   scrollDown();
 }
+
+/* ===================== CHAT AVEC IMAGE JOINTE ===================== */
 async function doChat(m,ty,msgText,sources){
-  const d=await api({action:"chat",message:msgText||outText(m),history:historyFor(m),mode:modeName(),behavior:behaviorText(),cerveauActif:!!cfg.brain});
+  const image=m.imgKey?await getImg(m.imgKey):null;
+
+  if(m.imgKey&&!image){
+    throw new Error("Impossible de récupérer l'image jointe. Réessaie de l'ajouter.");
+  }
+
+  const payload={
+    action:"chat",
+    message:msgText!==undefined?msgText:outText(m),
+    history:historyFor(m),
+    mode:modeName(),
+    behavior:behaviorText(),
+    cerveauActif:!!cfg.brain
+  };
+
+  /* Envoi de l'image au backend sous forme de Data URL JPEG. */
+  if(image){
+    payload.image=image;
+  }
+
+  const d=await api(payload);
   await deliverText(m,ty,d.answer||"",sources||d.sources||[]);
 }
+
 async function doWeb(m,ty){
   const q=m.text.replace(/^\s*(cherche|recherche|search|\/web)\s*(sur\s+(le\s+)?(web|internet)|web)?\s*[:\-]?\s*/i,"").trim()||m.text;
   ty.setLabel(t("w1"));ty.extra.innerHTML='<div class="pbar"></div>';
@@ -460,7 +488,7 @@ async function doWeb(m,ty){
 }
 async function genImage(prompt){
   try{return await api({action:"image",prompt},100000)}
-  catch(e){await sleep(800);return await api({action:"image",prompt},100000)} // une seule nouvelle tentative
+  catch(e){await sleep(800);return await api({action:"image",prompt},100000)}
 }
 async function doImage(m,ty){
   ty.setLabel(t("i1"));
@@ -470,6 +498,7 @@ async function doImage(m,ty){
   const prompt=(prev&&m.text.length<40?"Contexte : "+prev.text.slice(0,200)+". Demande : ":"")+m.text;
   let d;
   try{d=await genImage(prompt)}finally{clearTimeout(t2)}
+  if(!d||!d.image)throw new Error("Le serveur n'a pas retourné d'image.");
   ty.setLabel(t("i3"));await sleep(700);
   const key=uid();imgCache.set(key,d.image);
   idbPut({key,src:d.image,ts:Date.now(),kind:"generated"});
@@ -546,6 +575,7 @@ menuE.addEventListener("click",e=>{
 });
 $("#file").addEventListener("change",e=>{
   const f=e.target.files&&e.target.files[0];e.target.value="";if(!f)return;
+  if(!f.type.startsWith("image/")){toast("Choisis un fichier image.");return}
   const rd=new FileReader();
   rd.onload=()=>{
     const im=new Image();
@@ -557,8 +587,10 @@ $("#file").addEventListener("change",e=>{
       imgCache.set(key,src);idbPut({key,src,ts:Date.now(),kind:"upload"});
       pending={key};renderChips();inp.focus();
     };
+    im.onerror=()=>toast("Impossible de lire cette image.");
     im.src=rd.result;
   };
+  rd.onerror=()=>toast("Impossible de charger cette image.");
   rd.readAsDataURL(f);
 });
 
@@ -613,7 +645,7 @@ $("#sheet").addEventListener("click",e=>{
   if(b.dataset.s==="edit"){if(busy)return;editingId=id;inp.value=m.text;autosize();inp.focus();renderChips()}
 });
 
-/* ===================== PARAMÈTRES (pages) ===================== */
+/* ===================== PARAMÈTRES ===================== */
 function applyAll(){
   const th=THEMES[cfg.theme]||THEMES[0],r=document.documentElement;
   r.dataset.mode=cfg.dark?"dark":"light";
@@ -701,7 +733,7 @@ inp.addEventListener("focus",()=>setTimeout(()=>{fit();scrollDown()},300));
 applyAll();fit();updSend();
 setTimeout(()=>{
   $("#app").classList.add("on");fit();
-  try{renderAll();renderChips()}catch(e){console.error(e)}   // un échec ici ne bloque jamais la conversation
+  try{renderAll();renderChips()}catch(e){console.error(e)}
   $("#splash").classList.add("off");
   setTimeout(()=>$("#splash").remove(),600);
 },3000);
