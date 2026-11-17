@@ -137,33 +137,20 @@ th{background:rgba(127,127,127,.2)}
   border-bottom:1px solid rgba(255,255,255,.12);
   background:#111;
 }
-.codev-title{
-  font-size:14px;
-  font-weight:600;
-  color:#fff;
-}
+.codev-title{font-size:14px;font-weight:600;color:#fff}
 .codev-actions{display:flex;align-items:center;gap:9px}
 .codev-actions button{
-  width:38px;
-  height:38px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#fff;
-  background:rgba(255,255,255,.09);
+  width:38px;height:38px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;background:rgba(255,255,255,.09);
 }
 .codev-actions button:active{background:rgba(255,255,255,.2)}
 #codeViewer pre{
-  flex:1;
-  min-height:0;
-  overflow:auto;
-  margin:0;
+  flex:1;min-height:0;overflow:auto;margin:0;
   padding:18px 15px calc(24px + env(safe-area-inset-bottom));
   color:#e6edf3;
   font:13px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;
-  white-space:pre;
-  tab-size:2;
+  white-space:pre;tab-size:2;
 }
 #codeViewer code{font:inherit;color:inherit}
 
@@ -203,14 +190,9 @@ th{background:rgba(127,127,127,.2)}
 textarea{flex:1;background:none;border:0;outline:0;color:var(--txt);resize:none;font:inherit;caret-color:#3B82F6;max-height:140px;padding:10px 4px;line-height:1.4}
 textarea::placeholder{color:var(--mut)}
 .circ{
-  width:42px;
-  height:42px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  flex:none;
-  border:1px solid var(--bd);
+  width:42px;height:42px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  flex:none;border:1px solid var(--bd);
   background:rgba(127,127,127,.12);
   transition:background .18s,transform .18s;
 }
@@ -225,13 +207,8 @@ textarea::placeholder{color:var(--mut)}
 
 /* TROIS POINTS FIXES AU-DESSUS DE LA SAISIE */
 #typingStatus{
-  display:none;
-  min-height:27px;
-  align-items:center;
-  gap:9px;
-  padding:3px 12px 6px;
-  color:var(--mut);
-  font-size:12px;
+  display:none;min-height:27px;align-items:center;gap:9px;
+  padding:3px 12px 6px;color:var(--mut);font-size:12px;
 }
 #typingStatus.on{display:flex}
 #typingStatus .dots{margin:0;gap:4px}
@@ -251,28 +228,14 @@ textarea::placeholder{color:var(--mut)}
 #page header b{font-size:17px}
 #pb{flex:1;overflow-y:auto;padding:18px 16px}
 .rowbtn{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  width:calc(100% - 12px);
-  max-width:520px;
-  min-height:64px;
-  padding:14px 18px;
-  margin:10px auto;
-  background:var(--surf);
-  border:1px solid var(--bd);
-  border-radius:17px;
-  text-align:left;
+  display:flex;justify-content:space-between;align-items:center;
+  width:calc(100% - 12px);max-width:520px;min-height:64px;
+  padding:14px 18px;margin:10px auto;
+  background:var(--surf);border:1px solid var(--bd);
+  border-radius:17px;text-align:left;
   transition:background .2s,transform .15s;
 }
-.rowleft{
-  display:flex;
-  align-items:center;
-  gap:14px;
-  color:#fff;
-  font-size:15px;
-  font-weight:500;
-}
+.rowleft{display:flex;align-items:center;gap:14px;color:#fff;font-size:15px;font-weight:500}
 .rowleft svg{width:22px;height:22px;color:#fff;flex:none}
 .rowbtn>svg{color:#9ca3af}
 .rowbtn:active{background:var(--bd);transform:scale(.99)}
@@ -290,19 +253,12 @@ textarea::placeholder{color:var(--mut)}
 
 /* FLÈCHE POUR REVENIR EN BAS */
 #jumpBottom{
-  position:absolute;
-  left:50%;
+  position:absolute;left:50%;
   bottom:calc(var(--composer-h,82px) + env(safe-area-inset-bottom) + 15px);
   transform:translateX(-50%);
-  z-index:15;
-  width:43px;
-  height:43px;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  border-radius:50%;
-  color:#a1a1aa;
-  background:rgba(45,45,45,.96);
+  z-index:15;width:43px;height:43px;display:none;
+  align-items:center;justify-content:center;border-radius:50%;
+  color:#a1a1aa;background:rgba(45,45,45,.96);
   border:1px solid rgba(255,255,255,.15);
   box-shadow:0 4px 16px rgba(0,0,0,.4);
 }
@@ -325,6 +281,20 @@ textarea::placeholder{color:var(--mut)}
 #viewer .vb button{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;color:#fff}
 #toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 16px;border-radius:20px;font-size:14px;z-index:90;opacity:0;pointer-events:none;transition:opacity .25s;max-width:86vw;text-align:center}
 #toast.on{opacity:1}
+
+/* MESSAGE DE SECOURS SI LE SCRIPT PRINCIPAL ÉCHOUE */
+#bootError{
+  display:none;
+  margin:20px;
+  padding:14px;
+  border:1px solid rgba(248,113,113,.4);
+  border-radius:14px;
+  background:#211313;
+  color:#fecaca;
+  font-size:13px;
+  text-align:center;
+}
+#bootError.on{display:block}
 </style>
 </head>
 <body>
@@ -413,8 +383,39 @@ textarea::placeholder{color:var(--mut)}
 </div>
 
 <div id="toast"></div>
+<div id="bootError">NOVA AI a rencontré une erreur pendant son initialisation. Recharge l’application et vérifie la console JavaScript.</div>
 
-<!-- Personnalité de Nova : doit être chargée AVANT toute utilisation de getBehavior() -->
+<!-- GARDE-FOU INDÉPENDANT DU SCRIPT PRINCIPAL -->
+<script>
+(function(){
+  "use strict";
+  window.setTimeout(function(){
+    if(document.body.dataset.novaReady==="1")return;
+
+    const app=document.getElementById("app");
+    const splash=document.getElementById("splash");
+    const chat=document.getElementById("chat");
+    const error=document.getElementById("bootError");
+
+    if(app)app.classList.add("on");
+    if(chat&&!chat.children.length&&error){
+      chat.appendChild(error);
+      error.classList.add("on");
+    }
+
+    if(splash){
+      splash.classList.add("off");
+      window.setTimeout(function(){
+        if(splash.parentNode)splash.remove();
+      },650);
+    }
+
+    console.error("NOVA AI : le démarrage principal n'a pas terminé correctement.");
+  },7000);
+})();
+</script>
+
+<!-- Personnalité de Nova -->
 <script src="comportement.js"></script>
 
 <script>
@@ -473,7 +474,7 @@ spark:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>',
 chev:'<path d="M9 18l6-6-6-6"/>',
 check:'<path d="M20 6L9 17l-5-5"/>'
 };
-const ic=(n,s=22)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${P[n]}</svg>`;
+const ic=(n,s=22)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${P[n]||""}</svg>`;
 
 /* ===================== LANGUES ===================== */
 const T={
@@ -496,15 +497,41 @@ const THEMES=[
 ["Prune","#C026D3","#180719","#fdf4ff"],["Sable","#D4A373","#17120c","#faf5ee"],["Graphite","#9CA3AF","#0c0c0d","#f3f4f6"]
 ];
 
-/* ===================== ÉTAT ===================== */
-let cfg=Object.assign({dark:true,theme:0,fs:"mid",sendColor:"#7C3AED",icon:"plane",lang:"fr",brain:false,project:false,themesDl:[0]},load("nova_cfg",{}));
-let store={conv:load("nova_conv",[]),project:load("nova_project",[])};
-[store.conv,store.project].forEach(a=>a.forEach(m=>{if(m.status==="sending")m.status="failed"}));
+/* ===================== ÉTAT SÉCURISÉ ===================== */
+const savedConfig=load("nova_cfg",{});
+const cfg=Object.assign({
+  dark:true,theme:0,fs:"mid",sendColor:"#7C3AED",
+  icon:"plane",lang:"fr",brain:false,project:false,themesDl:[0]
+},savedConfig&&typeof savedConfig==="object"?savedConfig:{});
+
+if(!Number.isInteger(cfg.theme)||cfg.theme<0||cfg.theme>=THEMES.length)cfg.theme=0;
+if(!["big","mid","small"].includes(cfg.fs))cfg.fs="mid";
+if(!["plane","arrow"].includes(cfg.icon))cfg.icon="plane";
+if(!T[cfg.lang])cfg.lang="fr";
+if(!Array.isArray(cfg.themesDl))cfg.themesDl=[0];
+
+const savedConv=load("nova_conv",[]);
+const savedProject=load("nova_project",[]);
+
+const store={
+  conv:Array.isArray(savedConv)?savedConv.filter(m=>m&&typeof m==="object"):[],
+  project:Array.isArray(savedProject)?savedProject.filter(m=>m&&typeof m==="object"):[]
+};
+
+[store.conv,store.project].forEach(list=>{
+  list.forEach(m=>{
+    if(m.status==="sending")m.status="failed";
+  });
+});
+
 const cur=()=>cfg.project?store.project:store.conv;
 let busy=false,imageMode=false,pending=null,editingId=null,pageStack=[];
 const imgCache=new Map();
 const saveCfg=()=>put("nova_cfg",cfg);
-const saveMsgs=()=>{put("nova_conv",store.conv.slice(-200));put("nova_project",store.project)};
+const saveMsgs=()=>{
+  put("nova_conv",store.conv.slice(-200));
+  put("nova_project",store.project);
+};
 const t=k=>(T[cfg.lang]&&T[cfg.lang][k])||T.en[k]||T.fr[k]||k;
 
 /* ===================== INDEXEDDB ===================== */
@@ -516,28 +543,33 @@ const dbp=new Promise((res,rej)=>{
     r.onerror=()=>rej(r.error);
   }catch(e){rej(e)}
 });
+
 const idbPut=o=>dbp.then(d=>new Promise((res,rej)=>{
   const x=d.transaction("imgs","readwrite");
   x.objectStore("imgs").put(o);
   x.oncomplete=res;
   x.onerror=()=>rej(x.error);
-})).catch(()=>{});
+})).catch(e=>console.warn("NOVA IndexedDB put:",e));
+
 const idbGet=k=>dbp.then(d=>new Promise(res=>{
   const q=d.transaction("imgs").objectStore("imgs").get(k);
   q.onsuccess=()=>res(q.result);
   q.onerror=()=>res(null);
 })).catch(()=>null);
+
 const idbAll=()=>dbp.then(d=>new Promise(res=>{
   const q=d.transaction("imgs").objectStore("imgs").getAll();
   q.onsuccess=()=>res(q.result||[]);
   q.onerror=()=>res([]);
 })).catch(()=>[]);
+
 async function getImg(k){
   if(imgCache.has(k))return imgCache.get(k);
   const o=await idbGet(k);
   if(o){imgCache.set(k,o.src);return o.src}
   return null;
 }
+
 function fillImgs(root){
   root.querySelectorAll("img[data-key]").forEach(i=>{
     getImg(i.dataset.key).then(s=>{if(s)i.src=s});
@@ -545,13 +577,19 @@ function fillImgs(root){
 }
 
 /* ===================== DOM ET DÉFILEMENT ===================== */
-const chat=$("#chat"),inp=$("#inp"),sendB=$("#send"),chipsE=$("#chips"),menuE=$("#menu");
-const typingStatus=$("#typingStatus"),jumpBottom=$("#jumpBottom");
+const chat=$("#chat");
+const inp=$("#inp");
+const sendB=$("#send");
+const chipsE=$("#chips");
+const menuE=$("#menu");
+const typingStatus=$("#typingStatus");
+const jumpBottom=$("#jumpBottom");
 
 let followBottom=true;
 
 const toast=m=>{
   const e=$("#toast");
+  if(!e)return;
   e.textContent=m;
   e.classList.add("on");
   clearTimeout(toast.t);
@@ -568,9 +606,7 @@ function updateChatControls(){
 }
 
 const scrollDown=(force=false)=>{
-  if(force||followBottom){
-    chat.scrollTop=chat.scrollHeight;
-  }
+  if(force||followBottom)chat.scrollTop=chat.scrollHeight;
   updateChatControls();
 };
 
@@ -591,10 +627,7 @@ jumpBottom.addEventListener("click",()=>{
 function updateComposerOffset(){
   const c=document.querySelector(".composer");
   if(c){
-    document.documentElement.style.setProperty(
-      "--composer-h",
-      (c.offsetHeight+8)+"px"
-    );
+    document.documentElement.style.setProperty("--composer-h",(c.offsetHeight+8)+"px");
   }
 }
 
@@ -606,8 +639,12 @@ function fit(){
 }
 
 if(window.ResizeObserver){
-  const composerObserver=new ResizeObserver(updateComposerOffset);
-  composerObserver.observe(document.querySelector(".composer"));
+  try{
+    const composerObserver=new ResizeObserver(updateComposerOffset);
+    composerObserver.observe(document.querySelector(".composer"));
+  }catch(e){
+    console.warn("NOVA ResizeObserver:",e);
+  }
 }
 
 if(window.visualViewport){
@@ -636,7 +673,7 @@ function behaviorText(){
 
   if(cfg.project){
     const first=store.project.find(m=>m.role==="user");
-    b+="\n\nCONTEXTE PROJET : conversation de projet persistante ("+store.project.length+" messages enregistrés)."+(first?" Sujet initial : "+first.text.slice(0,200):"")+" Préserve les décisions déjà prises.";
+    b+="\n\nCONTEXTE PROJET : conversation de projet persistante ("+store.project.length+" messages enregistrés)."+(first?" Sujet initial : "+String(first.text||"").slice(0,200):"")+" Préserve les décisions déjà prises.";
   }
 
   b+="\n\nRÈGLE DE CONVERSATION PRIORITAIRE : Ne termine pas automatiquement les conversations. N'utilise pas de formules répétitives comme « Si tu veux pousser plus loin, je suis là », « N'hésite pas à me demander » ou « Je suis là si tu as besoin ». Ne propose pas systématiquement de continuer. Réponds naturellement et laisse la conversation se poursuivre sans conclusion artificielle.";
@@ -677,6 +714,7 @@ function inline(s){
 function textBlock(src){
   const L=src.split("\n"),out=[];
   let i=0,para=[];
+
   const flush=()=>{
     if(para.length){
       out.push("<p>"+para.map(inline).join("<br>")+"</p>");
@@ -776,7 +814,6 @@ function md(src){
   }
 
   if(last<src.length)parts.push(["t",src.slice(last)]);
-
   return parts.map(p=>p[0]==="c"?codeCard(p[1],p[2]):textBlock(p[1])).join("");
 }
 
@@ -796,9 +833,7 @@ $("#codeViewerClose").addEventListener("click",()=>{
 });
 
 $("#codeViewer").addEventListener("click",e=>{
-  if(e.target.id==="codeViewer"){
-    $("#codeViewer").classList.remove("on");
-  }
+  if(e.target.id==="codeViewer")$("#codeViewer").classList.remove("on");
 });
 
 /* ===================== PRESSE-PAPIERS / PARTAGE ===================== */
@@ -940,21 +975,17 @@ function typeInto(target,text){
       target.innerHTML=md(text.slice(0,i));
       scrollDown();
 
-      if(i<text.length){
-        setTimeout(tick,18);
-      }else{
-        res();
-      }
+      if(i<text.length)setTimeout(tick,18);
+      else res();
     })();
   });
 }
 
 function addTyping(){
   const r=el("div","row bot typing");
-
   r.innerHTML='<div class="bubble"><div class="lbl"></div><div class="dots"><i></i><i></i><i></i></div><div class="extra"></div></div>';
-
   chat.appendChild(r);
+
   const lbl=r.querySelector(".lbl");
 
   function showStatus(s){
@@ -990,7 +1021,6 @@ function historyFor(m){
   return list.slice(0,idx<0?list.length:idx).filter(x=>x.type!=="image"&&x.text).map(x=>({role:x.role,content:x.text})).slice(-20);
 }
 
-/* Le texte est transmis normalement. L'image est envoyée séparément au backend. */
 function outText(m){
   return m.text||"";
 }
@@ -1041,9 +1071,7 @@ async function doChat(m,ty,msgText,sources){
     cerveauActif:!!cfg.brain
   };
 
-  if(image){
-    payload.image=image;
-  }
+  if(image)payload.image=image;
 
   const d=await api(payload);
   await deliverText(m,ty,d.answer||"",sources||d.sources||[]);
@@ -1320,9 +1348,7 @@ $("#file").addEventListener("change",e=>{
       c.height=Math.round(im.height*sc);
       c.getContext("2d").drawImage(im,0,0,c.width,c.height);
 
-      const src=c.toDataURL("image/jpeg",.82);
-      const key=uid();
-
+      const src=c.toDataURL("image/jpeg",.82),key=uid();
       imgCache.set(key,src);
       idbPut({key,src,ts:Date.now(),kind:"upload"});
       pending={key};
@@ -1470,7 +1496,7 @@ function applyAll(){
   r.style.setProperty("--acc",th[1]);
   r.style.setProperty("--bg",cfg.dark?th[2]:th[3]);
   r.style.setProperty("--fs",{big:"18px",mid:"16px",small:"14px"}[cfg.fs]||"16px");
-  r.style.setProperty("--send",cfg.sendColor);
+  r.style.setProperty("--send",cfg.sendColor||"#7C3AED");
 
   sendB.innerHTML=ic(cfg.icon==="arrow"?"arrow":"plane",24);
   $("#plus").innerHTML=ic("plus",24);
@@ -1488,7 +1514,7 @@ function withLoader(msg,fn){
   $("#ld").classList.add("on");
 
   setTimeout(()=>{
-    fn();
+    try{fn()}catch(e){console.error("NOVA loader:",e)}
     $("#ld").classList.remove("on");
     renderPage();
     renderAll();
@@ -1713,25 +1739,48 @@ inp.addEventListener("focus",()=>{
   },300);
 });
 
-/* ===================== DÉMARRAGE ===================== */
-applyAll();
-fit();
-updSend();
+/* ===================== DÉMARRAGE SÉCURISÉ ===================== */
+function startNova(){
+  const app=$("#app");
+  const splash=$("#splash");
 
-setTimeout(()=>{
-  $("#app").classList.add("on");
-  fit();
-
-  try{
-    renderAll();
-    renderChips();
-  }catch(e){
-    console.error(e);
+  if(!app||!splash){
+    console.error("NOVA : éléments de démarrage introuvables.");
+    return;
   }
 
-  $("#splash").classList.add("off");
-  setTimeout(()=>$("#splash").remove(),600);
-},3000);
+  /* Afficher l'application avant les opérations non essentielles. */
+  app.classList.add("on");
+
+  const safeStep=(label,fn)=>{
+    try{
+      fn();
+    }catch(e){
+      console.error("NOVA démarrage - "+label+":",e);
+    }
+  };
+
+  safeStep("apparence",applyAll);
+  safeStep("taille écran",fit);
+  safeStep("bouton envoyer",updSend);
+  safeStep("messages",renderAll);
+  safeStep("modules",renderChips);
+
+  /* Signaler que le démarrage a atteint sa fin. */
+  document.body.dataset.novaReady="1";
+
+  /* Toujours fermer l'écran de démarrage. */
+  splash.classList.add("off");
+
+  setTimeout(()=>{
+    if(splash.parentNode)splash.remove();
+  },650);
+
+  console.log("NOVA AI : initialisation terminée.");
+}
+
+/* Ne pas exécuter applyAll() et fit() avant cette fonction. */
+window.setTimeout(startNova,300);
 
 })();
 </script>
@@ -1739,10 +1788,12 @@ setTimeout(()=>{
 <script>
 if("serviceWorker" in navigator){
   window.addEventListener("load",function(){
-    navigator.serviceWorker.register("sw.js").catch(function(){});
+    navigator.serviceWorker.register("sw.js").catch(function(e){
+      console.warn("NOVA Service Worker:",e);
+    });
   });
 }
 </script>
 
 </body>
- </html>
+  </html>
