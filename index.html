@@ -7,35 +7,36 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#212121">
 <style>
-:root{--bg:#212121;--side:#181818;--surf:#2f2f2f;--txt:#f5f5f5;--mut:#a3a3a3;--ic:#c8c8c8;--acc:#4C8DF6;--usr:#303030;--usrt:#f5f5f5;--send:#fff;--sendi:#000;--fs:16px;--bd:rgba(255,255,255,.09);--lnk:#6AA3FF}
+:root{--bg:#000000;--side:#111111;--surf:#1e1e1e;--txt:#f5f5f5;--mut:#a3a3a3;--ic:#c8c8c8;--acc:#4C8DF6;--usr:#303030;--usrt:#f5f5f5;--send:#fff;--sendi:#000;--fs:16px;--bd:rgba(255,255,255,.10);--lnk:#6AA3FF}
 [data-mode=light]{--bg:#fff;--side:#f7f7f8;--surf:#f1f1f1;--txt:#111;--mut:#6b7280;--ic:#555;--bd:rgba(0,0,0,.1);--lnk:#2563EB}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font:var(--fs)/1.55 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden;-webkit-font-smoothing:antialiased}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
 svg{display:block}
 input,select{font:inherit;color:var(--txt)}
-#splash{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:#212121}
+#splash{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:#000}
 #splash .lg{width:84px;height:84px;color:rgba(255,255,255,.86);animation:fin .7s ease both}
 @keyframes fin{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
 #app{display:none;flex-direction:column;height:100dvh;position:relative}
 #app.on{display:flex}
 #offb{display:none;background:#7f1d1d;color:#fff;text-align:center;font-size:13px;padding:5px}
 #offb.on{display:block}
-header{display:flex;align-items:center;gap:6px;padding:6px 8px;padding-top:max(6px,env(safe-area-inset-top))}
+header{display:flex;align-items:center;gap:10px;padding:14px 16px;padding-top:max(14px,env(safe-area-inset-top));min-height:88px}
 header b{font-size:17px;font-weight:600;flex:1;text-align:center;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.ib0{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--ic);flex:none;transition:background .15s}
+.ib0{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--ic);flex:none;transition:background .15s}
 .ib0:active{background:var(--bd)}
 .ib0.sm{width:34px;height:34px}
+#offers{height:64px;padding:0 22px;border-radius:34px;background:#303a43;color:#58a9ff;font-weight:650;font-size:16px;white-space:nowrap;flex:none}#htitle{display:none!important}
 #cw{flex:1;position:relative;min-height:0;display:flex;flex-direction:column}
 #chat{flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:18px;overscroll-behavior:contain}
 #down{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);width:38px;height:38px;border-radius:50%;background:var(--surf);border:1px solid var(--bd);display:none;align-items:center;justify-content:center;color:var(--txt);box-shadow:0 3px 10px rgba(0,0,0,.4);z-index:5}
 #down.on{display:flex}
-.home{margin:auto;width:100%;max-width:560px;display:flex;flex-direction:column;align-items:center;animation:rise .35s ease both}
+.home{margin:auto auto 8px;width:100%;max-width:560px;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-end;animation:rise .35s ease both;padding:0 18px 8px}
 @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
-.card{background:var(--surf);border:1px solid var(--bd);border-radius:18px;padding:14px;text-align:left;transition:transform .12s,opacity .12s}
-.card .ci0{color:var(--acc);margin-bottom:10px}
-.card b{display:block;font-size:.95em;font-weight:600}.card small{color:var(--mut);line-height:1.35;display:block;margin-top:2px}
+.cards{display:flex;flex-direction:column;gap:24px;width:100%;padding:0 10px 12px}
+.card{background:transparent;border:0;border-radius:12px;padding:4px 2px;display:flex;align-items:center;gap:18px;text-align:left;min-height:38px;transition:opacity .12s}
+.card .ci0{color:#c8c8c8;margin:0;flex:none}
+.card b{display:block;font-size:1em;font-weight:500}.card small{display:none}
 .card:active{opacity:.7;transform:scale(.98)}
 .row{display:flex;flex-direction:column;max-width:88%}
 .row.user{align-self:flex-end;align-items:flex-end}
@@ -88,7 +89,7 @@ th{background:rgba(127,127,127,.2)}
 .skel{width:min(70vw,300px);aspect-ratio:1/1;border-radius:14px;margin-top:8px;background:linear-gradient(110deg,rgba(127,127,127,.2) 30%,rgba(255,255,255,.25) 50%,rgba(127,127,127,.2) 70%);background-size:200% 100%;animation:sh 1.6s infinite}
 @keyframes sh{to{background-position:-200% 0}}
 .err .bubble{color:#f87171}
-.composer{margin:4px 10px calc(8px + env(safe-area-inset-bottom));background:var(--surf);border:1px solid var(--bd);border-radius:28px;padding:6px;position:relative}
+.composer{margin:4px 16px calc(8px + env(safe-area-inset-bottom));background:#1e1e1e;border:1px solid rgba(255,255,255,.12);border-radius:32px;padding:6px;position:relative}
 #chips{display:flex;flex-wrap:wrap;gap:6px;padding:4px 8px}
 #chips:empty{display:none}
 .chip{display:flex;align-items:center;gap:5px;font-size:12px;padding:3px 8px;border-radius:14px;background:rgba(76,141,246,.18);color:var(--lnk)}
@@ -97,7 +98,7 @@ th{background:rgba(127,127,127,.2)}
 .chip.th img{width:56px;height:56px;border-radius:10px;object-fit:cover;background:rgba(127,127,127,.3)}
 .chip.th button{position:absolute;top:-4px;right:-4px;width:20px;height:20px;border-radius:50%;background:#000;color:#fff;align-items:center;justify-content:center;border:1px solid #555}
 .inrow{display:flex;align-items:flex-end;gap:2px}
-textarea#inp{flex:1;background:none;border:0;outline:0;color:var(--txt);resize:none;font:inherit;caret-color:#0084FF;max-height:140px;padding:10px 4px;line-height:1.4}
+textarea#inp{flex:1;background:none;border:0;outline:0;color:var(--txt);resize:none;font:inherit;caret-color:#0084FF;max-height:140px;padding:10px 6px;line-height:1.4}
 textarea#inp::placeholder{color:var(--mut)}
 .circ{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none}
 #plus,#mic{color:var(--txt)}
@@ -200,7 +201,7 @@ textarea.inp2{min-height:110px;resize:vertical;font:inherit;caret-color:#0084FF}
 #viewer img{max-width:94vw;max-height:72vh;border-radius:10px}
 #viewer .vb{display:flex;gap:16px}
 #viewer .vb button{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;color:#fff}
-#pause{position:fixed;inset:0;z-index:95;background:#212121;color:#fff;display:none;align-items:center;justify-content:center;padding:28px}
+#pause{position:fixed;inset:0;z-index:95;background:#000;color:#fff;display:none;align-items:center;justify-content:center;padding:28px}
 #pause.on{display:flex}
 #pause .pb{width:100%;max-width:380px;text-align:center}
 #pause .pi{width:84px;height:84px;margin:0 auto 18px;color:#fff}
@@ -222,7 +223,8 @@ textarea.inp2{min-height:110px;resize:vertical;font:inherit;caret-color:#0084FF}
   <div id="offb">Connexion interrompue</div>
   <header>
     <button class="ib0" id="btnMenu" aria-label="Menu"></button>
-    <b id="htitle"></b>
+    <button id="offers" type="button">✦&nbsp; Voir les offres</button>
+    <b id="htitle" aria-hidden="true"></b>
     <button class="ib0" id="btnNew" aria-label="Nouvelle conversation"></button>
   </header>
   <div id="cw"><main id="chat"></main><button id="down" aria-label="Dernier message"></button></div>
@@ -603,16 +605,20 @@ function refreshActions(){
     r.appendChild(el("div","acts",`<button data-a="up" class="${m.fb==="up"?"on":""}" aria-label="J'aime">${ic("up",18)}</button><button data-a="down" class="${m.fb==="down"?"on":""}" aria-label="Je n'aime pas">${ic("down",18)}</button><button data-a="copy" aria-label="Copier">${ic("copy",18)}</button>${last?`<button data-a="regen" aria-label="Régénérer">${ic("refresh",18)}</button>`:""}`));
   });
 }
-/* Accueil minimaliste : uniquement les cartes d'accès (aucun logo, aucun message, aucun historique) */
+/* Accueil NOVA — disposition minimaliste inspirée de la capture de référence */
 function homeEl(){
-  const cards=[["edit",L("Écriture","Writing"),L("Rédiger un texte","Draft a text"),L("Aide-moi à écrire un e-mail professionnel pour ","Help me write a professional email about ")],
-  ["book",L("Apprentissage","Learning"),L("Comprendre un sujet","Understand a topic"),L("Explique-moi simplement ","Explain to me simply ")],
-  ["bulb",L("Idées","Ideas"),L("Trouver l'inspiration","Find inspiration"),L("Donne-moi 10 idées originales pour ","Give me 10 original ideas for ")],
-  ["code",L("Programmation","Coding"),L("Écrire ou corriger du code","Write or fix code"),L("Écris un code pour ","Write code to ")]];
-  const d=el("div","home",`<div class="cards">${cards.map((c,i)=>`<button class="card" data-card="${i}"><span class="ci0">${ic(c[0],22)}</span><b>${esc(c[1])}</b><small>${esc(c[2])}</small></button>`).join("")}</div>`);
+  const cards=[
+    ["img",L("Créer une image","Create an image"),"", "image"],
+    ["edit",L("Écrire ou modifier","Write or edit"),"", "write"],
+    ["web",L("Rechercher sur le Web","Search the Web"),"", "web"]
+  ];
+  const d=el("div","home",`<div class="cards">${cards.map((c,i)=>`<button class="card" data-card="${i}"><span class="ci0">${ic(c[0],26)}</span><b>${esc(c[1])}</b></button>`).join("")}</div>`);
   d.addEventListener("click",e=>{
-    const c=e.target.closest("[data-card]");
-    if(c){inp.value=cards[+c.dataset.card][3];autosize();updSend();inp.focus()}
+    const c=e.target.closest("[data-card]");if(!c)return;
+    const action=cards[+c.dataset.card][3];
+    if(action==="image"){imageMode=true;renderChips();inp.focus();}
+    else if(action==="write"){inp.value="Aide-moi à écrire ou modifier : ";autosize();updSend();inp.focus();}
+    else{inp.value="Recherche sur le Web : ";autosize();updSend();inp.focus();}
   });
   return d;
 }
@@ -1051,6 +1057,7 @@ $("#dpanel").addEventListener("click",async e=>{
 $("#dscrim").addEventListener("click",()=>backOv(drawerClose));
 $("#btnMenu").addEventListener("click",openDrawer);
 $("#btnNew").addEventListener("click",newChat);
+$("#offers").addEventListener("click",()=>toast(L("Les offres NOVA seront bientôt disponibles.","NOVA offers will be available soon.")));
 
 /* ===================== PARAMÈTRES (pages) ===================== */
 function applyAll(){
@@ -1353,37 +1360,15 @@ sendB.addEventListener("click",()=>{busy?stopGen():handleSend()});
 inp.addEventListener("input",()=>{autosize();updSend()});
 inp.addEventListener("focus",()=>setTimeout(()=>{fit();scrollDown()},300));
 
-/* ===================== DÉMARRAGE SÉCURISÉ ===================== */
-// L'ouverture d'IndexedDB ne doit jamais bloquer l'affichage de NOVA.
-(function bootNova(){
-  let finished=false;
-  const reveal=()=>{
-    if(finished)return;
-    finished=true;
-    try{$("#app").classList.add("on");}catch(e){}
-    try{fit();}catch(e){}
-    try{renderAll();}catch(e){console.error("NOVA renderAll:",e);}
-    try{renderChips();}catch(e){}
-    try{updSend();}catch(e){}
-    try{$("#splash").remove();}catch(e){}
-  };
-  // Filet de sécurité : l'interface s'ouvre même si une base locale ne répond pas.
-  const failsafe=setTimeout(reveal,1800);
-  try{
-    try{applyAll();}catch(e){console.error("NOVA applyAll:",e);}
-    try{fit();}catch(e){}
-    try{netState();}catch(e){}
-    // IndexedDB continue de s'initialiser en arrière-plan, sans bloquer l'écran.
-    Promise.resolve(dbp).catch(e=>console.warn("IndexedDB indisponible:",e));
-    setTimeout(()=>{
-      clearTimeout(failsafe);
-      reveal();
-    },250);
-  }catch(e){
-    console.error("NOVA démarrage:",e);
-    clearTimeout(failsafe);
-    reveal();
-  }
+/* ===================== DÉMARRAGE ===================== */
+applyAll();fit();netState();
+(async function start(){
+  const t0=Date.now();
+  try{await dbp}catch(e){}
+  await sleep(Math.max(0,900-(Date.now()-t0)));
+  $("#app").classList.add("on");fit();
+  try{renderAll();renderChips();updSend()}catch(e){console.error(e)}
+  $("#splash").remove();
 })();
 
 })();
