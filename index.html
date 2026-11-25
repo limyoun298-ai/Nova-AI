@@ -331,4 +331,7 @@ window.addEventListener("error",e=>{console.warn(e.message)});window.addEventLis
 if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 api({action:"health"},8000).catch(()=>{});
 setTimeout(()=>{const s=$("#splash");s.style.opacity=0;setTimeout(()=>s.remove(),400)},900);
-</script></body></html>
+</script>
+<script src="./update.sauvegarde.js"></script>
+</body>
+</html>
